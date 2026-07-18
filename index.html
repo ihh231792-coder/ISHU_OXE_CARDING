@@ -1133,9 +1133,10 @@
     if (user !== 'ishu' && user !== 'disha') { errEl.textContent = 'Invalid admin username!'; errEl.style.display = 'block'; return; }
     loadDB();
     if (!DB.adminPass) DB.adminPass = { ishu: 'disha', disha: '1231' };
-    var savedPass = DB.adminPass[user];
-    if (!savedPass) savedPass = ADMIN_CRED.pass;
-    if (oldPass !== savedPass) { errEl.textContent = 'Old password is wrong!'; errEl.style.display = 'block'; return; }
+    var passOk = false;
+    if (DB.adminPass[user] && DB.adminPass[user] === oldPass) passOk = true;
+    if (!passOk && user === ADMIN_CRED.user && ADMIN_CRED.pass === oldPass) passOk = true;
+    if (!passOk) { errEl.textContent = 'Old password is wrong! (Try disha for ishu)'; errEl.style.display = 'block'; return; }
     DB.adminPass[user] = newPass;
     if (user === ADMIN_CRED.user) ADMIN_CRED.pass = newPass;
     saveDB();
@@ -2649,9 +2650,10 @@
     if (newPass.length < 3) { msgEl.innerHTML = '<span style="color:#ff4444;">Password too short (min 3 chars)!</span>'; return; }
     loadDB();
     if (!DB.adminPass) DB.adminPass = { ishu: 'disha', disha: '1231' };
-    var currentPass = DB.adminPass[adminUser];
-    if (!currentPass) currentPass = ADMIN_CRED.pass;
-    if (oldPass !== currentPass) { msgEl.innerHTML = '<span style="color:#ff4444;">Old password is wrong!</span>'; return; }
+    var passOk = false;
+    if (DB.adminPass[adminUser] && DB.adminPass[adminUser] === oldPass) passOk = true;
+    if (!passOk && adminUser === ADMIN_CRED.user && ADMIN_CRED.pass === oldPass) passOk = true;
+    if (!passOk) { msgEl.innerHTML = '<span style="color:#ff4444;">Old password is wrong! (Try disha for ishu)</span>'; return; }
     DB.adminPass[adminUser] = newPass;
     // also update the hardcoded default for ishu if changing ishu
     if (adminUser === ADMIN_CRED.user) ADMIN_CRED.pass = newPass;
