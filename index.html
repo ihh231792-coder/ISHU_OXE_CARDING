@@ -834,6 +834,99 @@
     { bg:'linear-gradient(135deg,#1a1a2e,#eab308)', logo:'VISA' },
     { bg:'linear-gradient(135deg,#1f1f1f,#dc2626)', logo:'MC' },
   ];
+  // Test card pool from https://github.com/drmonkeyninja/test-payment-cards
+  var TEST_CARDS = [
+    // VISA
+    {n:'4111111111111111',t:'VISA'},{n:'4242424242424242',t:'VISA'},
+    {n:'4012888888881881',t:'VISA'},{n:'4000056655665556',t:'VISA'},
+    {n:'4444333322221111',t:'VISA'},{n:'4444444444441111',t:'VISA'},
+    {n:'4007000000027',t:'VISA'},{n:'4012888818888',t:'VISA'},
+    {n:'4012000033330026',t:'VISA'},{n:'4012000077777777',t:'VISA'},
+    {n:'4217651111111119',t:'VISA'},{n:'4500600000000061',t:'VISA'},
+    {n:'4005519200000004',t:'VISA'},{n:'4009348888881881',t:'VISA'},
+    {n:'4917480000000008',t:'VISA'},{n:'4539791001730106',t:'VISA'},
+    {n:'4508750015741019',t:'VISA'},{n:'4715059999000437',t:'VISA'},
+    {n:'4263970000005262',t:'VISA'},{n:'4929000000006',t:'VISA'},
+    {n:'4929000005559',t:'VISA'},{n:'4929000000014',t:'VISA'},
+    {n:'4929000000022',t:'VISA'},{n:'4462000000000003',t:'VISA'},
+    {n:'4917300000000008',t:'VISA'},{n:'4484000000002',t:'VISA'},
+    {n:'4911830000000',t:'VISA'},{n:'4917610000000000',t:'VISA'},
+    {n:'4462030000000000',t:'VISA'},{n:'4003830171874018',t:'VISA'},
+    {n:'4925000000000004',t:'VISA'},{n:'4548812049400004',t:'VISA'},
+    {n:'4000007000000031',t:'VISA'},{n:'4012001038443335',t:'VISA'},
+    {n:'4149011500000147',t:'VISA'},{n:'4200000000000000',t:'VISA'},
+    {n:'4711100000000000',t:'VISA'},{n:'4556557955726624',t:'VISA'},
+    {n:'4761344136141390',t:'VISA'},{n:'4761201381475297',t:'VISA'},
+    {n:'4159129252458086',t:'VISA'},{n:'4123407439043051',t:'VISA'},
+    {n:'4001888687412469',t:'VISA'},{n:'4444493318246892',t:'VISA'},
+    {n:'4000996174334475',t:'VISA'},{n:'4917300800000000',t:'VISA'},
+    {n:'4484070000000000',t:'VISA'},{n:'4012001037141112',t:'VISA'},
+    {n:'4005559876540',t:'VISA'},{n:'4012010000000000009',t:'VISA'},
+    {n:'4012001037167778',t:'VISA'},{n:'4012001036275556',t:'VISA'},
+    {n:'4012001038488884',t:'VISA'},
+    {n:'4012001036298889',t:'VISA'},{n:'4012001036983332',t:'VISA'},
+    {n:'4012001037490006',t:'VISA'},{n:'4012001037490014',t:'VISA'},
+    {n:'4222222222222',t:'VISA'},
+    // MasterCard
+    {n:'5555555555554444',t:'MasterCard'},{n:'5105105105105100',t:'MasterCard'},
+    {n:'5404000000000001',t:'MasterCard'},{n:'5424000000000015',t:'MasterCard'},
+    {n:'5454545454545454',t:'MasterCard'},{n:'5496198584584769',t:'MasterCard'},
+    {n:'5301250070000050',t:'MasterCard'},{n:'5454609899026213',t:'MasterCard'},
+    {n:'5123456789012346',t:'MasterCard'},{n:'5133333333333338',t:'MasterCard'},
+    {n:'5111111111111118',t:'MasterCard'},{n:'2223000000000023',t:'MasterCard'},
+    {n:'5200828282828210',t:'MasterCard'},{n:'5425230000004415',t:'MasterCard'},
+    {n:'5413000000000000',t:'MasterCard'},{n:'5573470000000001',t:'MasterCard'},
+    {n:'5404000000000043',t:'MasterCard'},{n:'5404000000000084',t:'MasterCard'},
+    {n:'5404000000000068',t:'MasterCard'},{n:'2222420000001113',t:'MasterCard'},
+    {n:'2222630000001125',t:'MasterCard'},{n:'5156230000000004',t:'MasterCard'},
+    {n:'5206830000000001',t:'MasterCard'},{n:'5125860000000006',t:'MasterCard'},
+    {n:'5399999999999999',t:'MasterCard'},{n:'5232569007637831',t:'MasterCard'},
+    {n:'5556011778787485',t:'MasterCard'},{n:'2720992593319364',t:'MasterCard'},
+    {n:'5420923878724339',t:'MasterCard'},{n:'5185540810000019',t:'MasterCard'},
+    {n:'5111010030175156',t:'MasterCard'},{n:'5204230080000017',t:'MasterCard'},
+    {n:'5101081046006034',t:'MasterCard'},{n:'5101084411423750',t:'MasterCard'},
+    {n:'5333304500657872',t:'MasterCard'},{n:'5333308664112277',t:'MasterCard'},
+    {n:'5550345228382224',t:'MasterCard'},{n:'5550347471347813',t:'MasterCard'},
+    {n:'2222755234426838',t:'MasterCard'},{n:'2221004483162815',t:'MasterCard'},
+    {n:'5333608104136723',t:'MasterCard'},{n:'5000008602179457569',t:'MasterCard'},
+    {n:'5333259155643223',t:'MasterCard'},{n:'4987654321098769',t:'MasterCard'},
+    // American Express
+    {n:'378282246310005',t:'AMEX'},{n:'371449635398431',t:'AMEX'},
+    {n:'34343434343434',t:'AMEX'},{n:'374200000000004',t:'AMEX'},
+    {n:'374101000000608',t:'AMEX'},{n:'375700000000002',t:'AMEX'},
+    {n:'340353278080900',t:'AMEX'},{n:'345678901234564',t:'AMEX'},
+    {n:'375510513169537',t:'AMEX'},{n:'375510288656924',t:'AMEX'},
+    {n:'375510379996452',t:'AMEX'},{n:'375510082116984',t:'AMEX'},
+    {n:'374111111111111',t:'AMEX'},{n:'373953192351004',t:'AMEX'},
+    {n:'346018484777573',t:'AMEX'},{n:'370000000000002',t:'AMEX'},
+    // Discover
+    {n:'6011111111111117',t:'Discover'},{n:'6011000990139424',t:'Discover'},
+    {n:'6011000400000000',t:'Discover'},{n:'6011000000000012',t:'Discover'},
+    {n:'6011000000000087',t:'Discover'},{n:'6011000000001010',t:'Discover'},
+    {n:'6011000000001028',t:'Discover'},{n:'6011000000001036',t:'Discover'},
+    {n:'6011000000002000',t:'Discover'},
+    // JCB
+    {n:'3530111333300000',t:'JCB'},{n:'3566002020360505',t:'JCB'},
+    {n:'3566111111111113',t:'JCB'},{n:'3569990000000009',t:'JCB'},
+    {n:'3566000000000000',t:'JCB'},{n:'3088000000000017',t:'JCB'},
+    {n:'3528000700000000',t:'JCB'},
+    // Diners Club
+    {n:'38520000023237',t:'Diners'},{n:'30569309025904',t:'Diners'},
+    {n:'36000000000008',t:'Diners'},{n:'36256000000725',t:'Diners'},
+    {n:'36700102000000',t:'Diners'},{n:'36148900647913',t:'Diners'},
+    {n:'38000000000006',t:'Diners'},
+    // Maestro
+    {n:'6304000000000000',t:'Maestro'},{n:'6759649826438453',t:'Maestro'},
+    {n:'5641820000000005',t:'Maestro'},{n:'6759000000005',t:'Maestro'},
+    {n:'6705000000008',t:'Maestro'},{n:'6777000000007',t:'Maestro'},
+    {n:'6766000000000',t:'Maestro'},{n:'300000000000000004',t:'Maestro'},
+    {n:'6759010012345678914',t:'Maestro'},{n:'675938410597000022',t:'Maestro'},
+    {n:'6759000968432575',t:'Maestro'},{n:'6759173972560846',t:'Maestro'},
+    {n:'491182014295916748',t:'Maestro'},{n:'6759411100000008',t:'Maestro'},
+    {n:'6759560045005727054',t:'Maestro'},{n:'5641821111166669',t:'Maestro'},
+    {n:'50339619890917',t:'Maestro'},{n:'586824160825533338',t:'Maestro'},
+    {n:'6400051234567895',t:'Maestro'},
+  ];
   // Luhn algorithm - generate valid check digit
   function luhnCheckDigit(partial) {
     const d = String(partial).split('').map(Number);
@@ -1352,19 +1445,38 @@
         return;
       }
 
-      var bankEntry = randomBank();
-      if (!bankEntry || !bankEntry.prefixes) { showToast('Bank data error!'); return; }
-      var bin = String(bankEntry.prefixes[Math.floor(Math.random() * bankEntry.prefixes.length)]);
-      var num = generateCardNumber(bin);
+      // Pick test card from pool matching product type
+      if (!DB.usedTestCards) DB.usedTestCards = [];
+      var avail = TEST_CARDS.filter(function(c) {
+        return c.t === p.type && DB.usedTestCards.indexOf(c.n) === -1;
+      });
+      var chosen = avail.length > 0
+        ? avail[Math.floor(Math.random() * avail.length)]
+        : null;
+      var num, bankName, country;
+      if (chosen) {
+        num = chosen.n;
+        DB.usedTestCards.push(num);
+        bankName = 'Test ' + p.type;
+        country = 'US';
+      } else {
+        // fallback to random generation
+        var bankEntry = randomBank();
+        if (!bankEntry || !bankEntry.prefixes) { showToast('Bank data error!'); return; }
+        var bin = String(bankEntry.prefixes[Math.floor(Math.random() * bankEntry.prefixes.length)]);
+        num = generateCardNumber(bin);
+        bankName = bankEntry.bank;
+        country = bankEntry.country.toUpperCase();
+      }
       var mm = String(Math.floor(Math.random()*12)+1).padStart(2,'0');
       var yy = String(2027 + Math.floor(Math.random()*4));
       var cvv = String(Math.floor(Math.random()*900)+100);
-      var detectedType = num.startsWith('4') ? 'VISA' : num.startsWith('5') ? 'MasterCard' : num.startsWith('3') ? 'Amex' : 'VISA';
+      var detectedType = num.startsWith('4') ? 'VISA' : (num.startsWith('5')||num.startsWith('2')) ? 'MasterCard' : num.startsWith('3') ? 'Amex' : num.startsWith('6') ? 'Discover' : 'VISA';
 
       var orderId = 'ORD-' + String(Math.floor(100000 + Math.random() * 900000));
       var card = {
         id: Date.now(), orderId: orderId, product: p.name, type: detectedType, number: num,
-        month: mm, year: yy, cvv, bank: bankEntry.bank, country: bankEntry.country.toUpperCase(),
+        month: mm, year: yy, cvv, bank: bankName, country: country,
         price: p.price, date: new Date().toLocaleString('en-IN'), status: 'pending',
         limit: p.limit, user: currentUser
       };
