@@ -1,0 +1,2724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISHU_OXE CARDING — Admin Panel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background: #0a1628; color: #fff; min-height: 100vh; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0a1628; }
+    ::-webkit-scrollbar-thumb { background: #1a3a6a; border-radius: 3px; }
+
+    /* ===== LOGIN ===== */
+    #loginPage {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #0a1628 0%, #1a3a6a 50%, #0d2137 100%);
+      display: flex; align-items: center; justify-content: center; z-index: 9999;
+    }
+    #loginPage.hidden { display: none; }
+    .login-box {
+      background: rgba(16, 36, 66, 0.95); border-radius: 16px; padding: 40px;
+      width: 400px; max-width: 92%; border: 1px solid rgba(52, 120, 246, 0.3);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5); text-align: center;
+    }
+    .login-box h1 { font-size: 26px; margin-bottom: 4px; }
+    .login-box h1 .hl { color: #4a8af4; }
+    .login-box .sub { color: #8899bb; font-size: 13px; margin-bottom: 6px; }
+    .login-box .user-type { font-size: 12px; color: #4a8af4; margin-bottom: 20px; }
+    .login-box input {
+      width: 100%; padding: 12px 16px; margin-bottom: 14px; border-radius: 8px;
+      border: 1px solid #1a3a6a; background: #0d1f3a; color: #fff; font-size: 14px;
+      outline: none; transition: 0.3s;
+    }
+    .login-box input:focus { border-color: #4a8af4; }
+    .login-box button {
+      width: 100%; padding: 12px; border: none; border-radius: 8px;
+      background: linear-gradient(135deg, #2563eb, #1a4fa0); color: #fff;
+      font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s;
+    }
+    .login-box button:hover { background: linear-gradient(135deg, #3b72f0, #2563eb); }
+    .login-box .links { margin-top: 14px; font-size: 13px; color: #8899bb; }
+    .login-box .links a { color: #4a8af4; text-decoration: none; cursor: pointer; }
+    .login-box .links a:hover { text-decoration: underline; }
+    .login-error { color: #ff4444; font-size: 13px; margin-bottom: 10px; display: none; }
+    .login-selector {
+      display: flex; gap: 0; margin: 16px 0 20px; border-radius: 8px; overflow: hidden; border: 1px solid #1a3a6a;
+    }
+    .login-selector div {
+      flex: 1; padding: 10px; cursor: pointer; text-align: center; font-size: 13px;
+      background: #0d1f3a; transition: 0.3s; color: #8899bb;
+    }
+    .login-selector div.active { background: #2563eb; color: #fff; }
+
+    /* ===== TOPBAR ===== */
+    .topbar {
+      background: rgba(10, 22, 40, 0.98); padding: 12px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #1a3a6a; position: sticky; top: 0; z-index: 100;
+    }
+    .topbar .logo { font-size: 18px; font-weight: bold; }
+    .topbar .logo .hl { color: #4a8af4; }
+    .topbar .right { display: flex; align-items: center; gap: 14px; font-size: 13px; }
+    .topbar .right .role { color: #ffd700; font-size: 11px; background: rgba(255,215,0,0.1); padding: 3px 10px; border-radius: 4px; }
+    .topbar .logout-btn {
+      background: transparent; border: 1px solid #ff4444; color: #ff4444;
+      padding: 5px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.3s;
+    }
+    .topbar .logout-btn:hover { background: #ff4444; color: #fff; }
+
+    /* ===== NAV ===== */
+    .nav {
+      display: flex; background: rgba(16, 36, 66, 0.9); border-bottom: 1px solid #1a3a6a;
+      overflow-x: auto; padding: 0 8px;
+    }
+    .nav::-webkit-scrollbar { height: 0; }
+    .nav-item {
+      padding: 10px 16px; font-size: 12px; color: #8899bb; cursor: pointer;
+      border-bottom: 2px solid transparent; transition: 0.3s; white-space: nowrap;
+    }
+    .nav-item:hover { color: #fff; }
+    .nav-item.active { color: #4a8af4; border-bottom-color: #4a8af4; }
+    .nav-item .badge {
+      display: inline-block; background: #ff4444; color: #fff; font-size: 10px;
+      padding: 1px 6px; border-radius: 8px; margin-left: 4px;
+    }
+
+    /* ===== CONTENT ===== */
+    .content { padding: 20px; max-width: 1400px; margin: 0 auto; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ===== ADMIN DASHBOARD ===== */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .stat-card {
+      background: linear-gradient(135deg, #122a4a, #0d1f3a); border-radius: 10px;
+      padding: 18px; border: 1px solid #1a3a6a; text-align: center;
+    }
+    .stat-card .num { font-size: 26px; font-weight: bold; color: #4a8af4; margin: 4px 0; }
+    .stat-card .lbl { font-size: 12px; color: #8899bb; }
+
+    /* ===== TABLE ===== */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+      background: linear-gradient(135deg, #122a4a, #0d1f3a); border-radius: 10px; overflow: hidden;
+    }
+    th { background: #1a3a6a; color: #4a8af4; padding: 10px 12px; text-align: left; font-weight: 600; white-space: nowrap; }
+    td { padding: 9px 12px; border-bottom: 1px solid #0d1f3a; color: #ccc; }
+    tr:hover td { background: rgba(74,138,244,0.05); }
+    .badge-green { color: #22c55e; background: rgba(34,197,94,0.12); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .badge-red { color: #ff4444; background: rgba(255,68,68,0.12); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .badge-blue { color: #4a8af4; background: rgba(74,138,244,0.12); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .action-btn {
+      padding: 4px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;
+      transition: 0.3s; margin: 0 2px;
+    }
+    .btn-danger { background: rgba(255,68,68,0.2); color: #ff4444; }
+    .btn-danger:hover { background: #ff4444; color: #fff; }
+    .btn-success { background: rgba(34,197,94,0.2); color: #22c55e; }
+    .btn-success:hover { background: #22c55e; color: #fff; }
+    .btn-primary { background: rgba(74,138,244,0.2); color: #4a8af4; }
+    .btn-primary:hover { background: #4a8af4; color: #fff; }
+    .empty-msg { text-align: center; color: #8899bb; padding: 40px; font-size: 14px; }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.75); z-index: 500; display: none;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: #122a4a; border-radius: 12px; padding: 24px; max-width: 500px;
+      width: 92%; border: 1px solid #1a3a6a; max-height: 85vh; overflow-y: auto;
+    }
+    .modal-box h2 { margin-bottom: 14px; font-size: 18px; }
+    .modal-box textarea {
+      width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #1a3a6a;
+      background: #0d1f3a; color: #fff; font-size: 13px; outline: none; resize: vertical;
+      min-height: 80px; margin: 8px 0;
+    }
+    .modal-box input {
+      width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #1a3a6a;
+      background: #0d1f3a; color: #fff; font-size: 13px; outline: none; margin: 4px 0;
+    }
+    .modal-box .modal-btn {
+      padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer;
+      font-size: 13px; margin: 4px 4px 0 0; transition: 0.3s;
+    }
+    .modal-box .close-x {
+      float: right; background: none; border: none; color: #8899bb;
+      font-size: 22px; cursor: pointer; padding: 0 4px;
+    }
+    .modal-box .close-x:hover { color: #fff; }
+
+    /* ===== TICKET MESSAGES ===== */
+    .ticket-msg {
+      background: #0d1f3a; border-radius: 8px; padding: 12px; margin: 8px 0; font-size: 13px;
+    }
+    .ticket-msg .meta { color: #8899bb; font-size: 11px; margin-bottom: 4px; }
+    .ticket-msg.admin { border-left: 3px solid #4a8af4; }
+    .ticket-msg.user { border-left: 3px solid #ffd700; }
+
+    /* ===== SEARCH ===== */
+    .search-bar {
+      display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .search-bar input {
+      padding: 8px 14px; border-radius: 6px; border: 1px solid #1a3a6a;
+      background: #0d1f3a; color: #fff; font-size: 13px; outline: none; flex: 1; min-width: 150px;
+    }
+    .search-bar input:focus { border-color: #4a8af4; }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+      background: #122a4a; border: 1px solid #4a8af4; color: #fff;
+      padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 99999;
+      opacity: 0; transition: 0.4s; pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ===== USER PAGE STYLES ===== */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 14px; }
+    .product-card {
+      background: linear-gradient(135deg, #122a4a, #0d1f3a); border-radius: 10px;
+      padding: 18px; border: 1px solid #1a3a6a; transition: 0.3s;
+    }
+    .product-card:hover { border-color: #4a8af4; }
+    .product-card .card-type { font-size: 10px; color: #4a8af4; text-transform: uppercase; letter-spacing: 1px; }
+    .product-card h3 { margin: 6px 0; font-size: 15px; }
+    .product-card .price { font-size: 20px; color: #4a8af4; font-weight: bold; }
+    .product-card .price span { font-size: 13px; color: #8899bb; font-weight: normal; }
+    .product-card .badge { display:inline-block; background:rgba(74,138,244,0.15); color:#4a8af4; padding:3px 8px; border-radius:4px; font-size:10px; margin-top:6px; }
+    .product-card .buy-btn {
+      width:100%; padding:9px; margin-top:10px; border:none; border-radius:6px;
+      background: linear-gradient(135deg,#2563eb,#1a4fa0); color:#fff; font-size:13px; cursor:pointer;
+    }
+    .product-card .buy-btn:hover { background: linear-gradient(135deg,#3b72f0,#2563eb); }
+
+    .my-card {
+      background: linear-gradient(135deg,#122a4a,#0d1f3a); border-radius:10px;
+      padding:18px; border:1px solid #1a3a6a; margin-bottom:12px; font-size:13px;
+    }
+    .my-card .cc-num { font-size:18px; letter-spacing:2px; font-family:'Courier New',monospace; color:#fff; }
+    .my-card .cc-row { display:flex; gap:16px; margin-top:8px; color:#8899bb; }
+    .my-card .cc-row span { color:#fff; }
+    .my-card .status { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; background:rgba(34,197,94,0.15); color:#22c55e; }
+
+    .deposit-box {
+      background: linear-gradient(135deg,#122a4a,#0d1f3a); border-radius:10px;
+      padding:24px; border:1px solid #1a3a6a; max-width:440px; margin:0 auto; text-align:center;
+    }
+    .deposit-box .upi-id { color:#4a8af4; font-size:16px; font-weight:bold; margin:8px 0; }
+    .deposit-box .qr-area { margin:16px auto; width:180px; height:180px; }
+    .deposit-box .qr-area img { width:100%; height:100%; border-radius:6px; }
+    .deposit-box input {
+      width:100%; padding:10px; border-radius:6px; border:1px solid #1a3a6a;
+      background:#0d1f3a; color:#fff; font-size:14px; text-align:center; outline:none; margin-bottom:8px;
+    }
+    .deposit-box input:focus { border-color:#4a8af4; }
+    .deposit-box .submit-btn {
+      width:100%; padding:10px; border:none; border-radius:6px;
+      background: linear-gradient(135deg,#2563eb,#1a4fa0); color:#fff; font-size:14px; cursor:pointer;
+    }
+    .deposit-box .submit-btn:hover { background: linear-gradient(135deg,#3b72f0,#2563eb); }
+    .deposit-box .note { font-size:11px; color:#8899bb; margin-top:8px; }
+
+    /* ===== CARD VISUAL ===== */
+    .card-visual {
+      width:100%; height:130px; border-radius:12px; padding:14px 16px;
+      display:flex; flex-direction:column; justify-content:space-between;
+      position:relative; overflow:hidden; margin-bottom:10px;
+      box-shadow:0 0 20px rgba(74,138,244,0.15), 0 4px 12px rgba(0,0,0,0.3);
+      border:1px solid rgba(255,255,255,0.08);
+      transition:transform 0.3s, box-shadow 0.3s;
+    }
+    .card-visual::before {
+      content:''; position:absolute; top:0; left:0; right:0; bottom:0;
+      background:linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%);
+      pointer-events:none;
+    }
+    .card-visual:hover { transform:translateY(-2px) scale(1.02); box-shadow:0 0 30px rgba(74,138,244,0.25), 0 6px 16px rgba(0,0,0,0.4); }
+    .card-visual .cv-bg-circle1 {
+      position:absolute; top:-30px; right:-20px; width:100px; height:100px;
+      border-radius:50%; background:rgba(255,255,255,0.07);
+    }
+    .card-visual .cv-bg-circle1b {
+      position:absolute; top:-10px; right:10px; width:50px; height:50px;
+      border-radius:50%; background:rgba(255,255,255,0.04);
+    }
+    .card-visual .cv-bg-circle2 {
+      position:absolute; bottom:-20px; left:-15px; width:80px; height:80px;
+      border-radius:50%; background:rgba(255,255,255,0.05);
+    }
+    .card-visual .cv-top { display:flex; justify-content:space-between; align-items:flex-start; position:relative; z-index:1; }
+    .card-visual .cv-chip svg { width:28px; height:22px; display:block; filter:drop-shadow(0 0 4px rgba(255,215,0,0.3)); }
+    .card-visual .cv-type { font-size:14px; font-weight:bold; letter-spacing:2px; color:rgba(255,255,255,0.85); text-shadow:0 1px 3px rgba(0,0,0,0.3); }
+    .card-visual .cv-number { font-size:16px; letter-spacing:3px; font-family:'Courier New',monospace; color:rgba(255,255,255,0.95); position:relative; z-index:1; text-shadow:0 1px 4px rgba(0,0,0,0.3); margin-top:4px; }
+    .card-visual .cv-bottom { display:flex; justify-content:space-between; align-items:center; position:relative; z-index:1; }
+    .card-visual .cv-name { font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.7); text-shadow:0 1px 2px rgba(0,0,0,0.2); }
+    .card-visual .cv-valid { font-size:9px; color:rgba(255,255,255,0.5); }
+    .card-visual .cv-valid span { font-size:12px; color:rgba(255,255,255,0.85); font-weight:bold; }
+
+    /* ===== SCRATCH CARD ===== */
+    .scratch-overlay {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.8); z-index:9999; display:none;
+      align-items:center; justify-content:center;
+    }
+    .scratch-overlay.active { display:flex; }
+    .scratch-card {
+      background:linear-gradient(135deg,#1a1a2e,#16213e); border-radius:16px;
+      padding:30px; text-align:center; border:2px solid #eab308;
+      box-shadow:0 0 60px rgba(234,179,8,0.2); max-width:340px; width:90%;
+      position:relative; overflow:hidden;
+    }
+    .scratch-card .sparkle {
+      position:absolute; width:200%; height:200%; top:-50%; left:-50%;
+      background:radial-gradient(circle at 30% 40%, rgba(234,179,8,0.08) 0%, transparent 60%);
+      animation: scratchGlow 2s ease-in-out infinite;
+    }
+    @keyframes scratchGlow { 0%,100%{opacity:0.5} 50%{opacity:1} }
+    .scratch-card .reward-amount { font-size:48px; font-weight:bold; color:#eab308; margin:10px 0; }
+    .scratch-card .reward-label { color:#8899bb; font-size:13px; }
+    .scratch-card .scratch-hint { color:#eab308; font-size:14px; margin:12px 0; cursor:pointer; }
+    .scratch-card .scratch-hint:hover { text-decoration:underline; }
+    .scratch-card .revealed-box {
+      background:rgba(234,179,8,0.1); border:1px dashed rgba(234,179,8,0.3);
+      border-radius:12px; padding:16px; margin:12px 0;
+    }
+    .scratch-card .claim-btn {
+      padding:10px 30px; border:none; border-radius:8px;
+      background:linear-gradient(135deg,#eab308,#a16207); color:#000;
+      font-size:15px; font-weight:bold; cursor:pointer; transition:0.3s;
+    }
+    .scratch-card .claim-btn:hover { transform:scale(1.05); }
+    .scratch-card .close-scratch {
+      position:absolute; top:8px; right:12px; background:none; border:none;
+      color:#666; font-size:22px; cursor:pointer; z-index:2;
+    }
+
+    /* ===== REWARD WALLET ===== */
+    .rw-box {
+      background:linear-gradient(135deg,#122a4a,#0d1f3a); border-radius:12px;
+      padding:24px; border:1px solid #1a3a6a; max-width:500px; margin:0 auto 16px; text-align:center;
+    }
+    .rw-box .rw-bal { font-size:36px; font-weight:bold; color:#eab308; }
+    .rw-box .rw-lbl { color:#8899bb; font-size:12px; }
+    .rw-box .rw-sub { font-size:12px; color:#8899bb; margin:6px 0 14px; }
+    .rw-box select, .rw-box input {
+      width:100%; padding:10px; border-radius:6px; border:1px solid #1a3a6a;
+      background:#0d1f3a; color:#fff; font-size:13px; outline:none; margin:4px 0;
+    }
+    .rw-box select option { background:#0d1f3a; }
+    .rw-box .rw-btn {
+      width:100%; padding:10px; border:none; border-radius:6px;
+      background:linear-gradient(135deg,#eab308,#a16207); color:#000;
+      font-size:14px; font-weight:bold; cursor:pointer; transition:0.3s;
+    }
+    .rw-box .rw-btn:hover { background:linear-gradient(135deg,#facc15,#eab308); }
+    .rw-hist-item {
+      background:#0d1f3a; border-radius:8px; padding:12px; margin:6px 0;
+      border:1px solid #1a3a6a; font-size:12px;
+    }
+    .rw-hist-item .rw-stat {
+      display:inline-block; padding:2px 6px; border-radius:4px; font-size:10px;
+    }
+    .rw-stat-pending { background:rgba(234,179,8,0.15); color:#eab308; }
+    .rw-stat-success { background:rgba(34,197,94,0.15); color:#22c55e; }
+    .rw-stat-rejected { background:rgba(255,68,68,0.15); color:#ff4444; }
+    .inbox-item { display:flex; gap:12px; background:#0d1f3a; border-radius:8px; padding:12px; margin:6px 0; border:1px solid #1a3a6a; align-items:flex-start; }
+    .inbox-item .inbox-icon { font-size:24px; line-height:1; }
+    .inbox-item .inbox-body { flex:1; min-width:0; }
+    .inbox-item .inbox-from { color:#4a8af4; font-size:12px; font-weight:bold; }
+    .inbox-item .inbox-date { color:#556688; font-size:10px; margin:2px 0 4px; }
+    .inbox-item .inbox-msg { color:#c8d6e5; font-size:13px; line-height:1.4; word-break:break-word; }
+
+    .support-box {
+      background: linear-gradient(135deg,#122a4a,#0d1f3a); border-radius:10px;
+      padding:20px; border:1px solid #1a3a6a; max-width:500px; margin:0 auto;
+    }
+    .support-box textarea {
+      width:100%; padding:10px; border-radius:6px; border:1px solid #1a3a6a;
+      background:#0d1f3a; color:#fff; font-size:13px; outline:none; resize:vertical;
+      min-height:90px; margin:8px 0;
+    }
+    .support-box textarea:focus { border-color:#4a8af4; }
+    .support-box .send-btn {
+      padding:8px 20px; border:none; border-radius:6px;
+      background: linear-gradient(135deg,#2563eb,#1a4fa0); color:#fff; font-size:13px; cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="loginPage">
+  <div class="login-box">
+    <h1><span class="hl">ISHU_OXE</span> CARDING</h1>
+    <div class="sub">Premium Virtual Cards Platform</div>
+
+    <div class="login-selector">
+      <div class="active" data-role="user" onclick="selectLoginRole('user')">User Login</div>
+      <div data-role="admin" onclick="selectLoginRole('admin')">Admin Panel</div>
+    </div>
+
+    <div class="user-type" id="loginRoleLabel">User Login</div>
+    <div class="login-error" id="loginError"></div>
+    <input type="text" id="loginUser" placeholder="Username / Email">
+    <input type="password" id="loginPass" placeholder="Password">
+    <div id="loginCaptchaArea" style="display:none;background:#0d1f3a;border-radius:6px;padding:10px;margin-bottom:14px;text-align:center;">
+      <div style="font-size:13px;color:#eab308;font-weight:bold;" id="loginCaptchaQuestion">5 + 3 = ?</div>
+      <input type="number" id="loginCaptchaInput" placeholder="Your answer" style="width:100%;padding:8px;border-radius:6px;border:1px solid #1a3a6a;background:#0a1628;color:#fff;font-size:13px;text-align:center;outline:none;margin-top:6px;">
+    </div>
+    <button onclick="handleLogin()">Login</button>
+    <div class="links" id="loginLinks">Don't have account? <a onclick="showRegister()">Register</a></div>
+    <div class="links" id="forgotPassLink" style="display:none;margin-top:6px;"><a href="javascript:void(0)" onclick="showForgotPassword()" style="color:#eab308;cursor:pointer;font-size:12px;">Forgot Password?</a></div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal (Admin only) -->
+<div id="forgotPassModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#122a4a;border-radius:12px;padding:24px;max-width:380px;width:92%;border:1px solid #1a3a6a;position:relative;">
+    <button onclick="closeForgotPassword()" style="position:absolute;top:10px;right:14px;background:none;border:none;color:#666;font-size:22px;cursor:pointer;">&times;</button>
+    <h3 style="margin-bottom:6px;">Forgot Password</h3>
+    <p style="color:#8899bb;font-size:12px;margin-bottom:14px;">Enter your details to reset admin password</p>
+    <div id="forgotErrors" style="color:#ff4444;font-size:12px;margin-bottom:8px;display:none;"></div>
+    <input type="text" id="forgotUser" placeholder="Admin username" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0a1628;color:#fff;font-size:13px;margin-bottom:10px;box-sizing:border-box;">
+    <input type="password" id="forgotOldPass" placeholder="Old password" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0a1628;color:#fff;font-size:13px;margin-bottom:10px;box-sizing:border-box;">
+    <input type="password" id="forgotNewPass" placeholder="New password" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0a1628;color:#fff;font-size:13px;margin-bottom:10px;box-sizing:border-box;">
+    <input type="password" id="forgotNewPass2" placeholder="Confirm new password" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0a1628;color:#fff;font-size:13px;margin-bottom:14px;box-sizing:border-box;">
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="closeForgotPassword()" style="padding:8px 20px;border-radius:6px;border:1px solid #555;background:transparent;color:#fff;font-size:13px;cursor:pointer;">Cancel</button>
+      <button onclick="doAdminForgotReset()" style="padding:8px 20px;border-radius:6px;border:none;background:#2563eb;color:#fff;font-size:13px;cursor:pointer;">Reset Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== APP (USER) ===== -->
+<div id="userApp" style="display:none;">
+  <div class="topbar">
+    <div class="logo"><span class="hl">ISHU_OXE</span> CARDING</div>
+    <div class="right">
+      <span id="uDisplayEmail">user</span>
+      <span style="color:#8899bb;font-size:11px;">ID: <span id="uDisplayId" style="color:#4a8af4;">-</span></span>
+      <span style="color:#4a8af4;font-weight:bold;">₹<span id="uBalance">0.00</span></span>
+      <span style="color:#eab308;font-weight:bold;font-size:12px;">🎁 ₹<span id="uRewardBal">0</span></span>
+      <button class="logout-btn" onclick="userLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="nav">
+    <div class="nav-item active" data-upage="home" onclick="switchUserPage('home')">Home</div>
+    <div class="nav-item" data-upage="mycards" onclick="switchUserPage('mycards')">My Cards</div>
+    <div class="nav-item" data-upage="deposit" onclick="switchUserPage('deposit')">Deposit</div>
+    <div class="nav-item" data-upage="reward" onclick="switchUserPage('reward')">Reward Wallet</div>
+    <div class="nav-item" data-upage="buyhistory" onclick="switchUserPage('buyhistory')">Buy History</div>
+    <div class="nav-item" data-upage="inbox" onclick="switchUserPage('inbox')">Inbox <span class="badge" id="inboxBadge" style="display:none;">0</span></div>
+    <div class="nav-item" data-upage="query" onclick="switchUserPage('query')">Payment Query</div>
+    <div class="nav-item" data-upage="history" onclick="switchUserPage('history')">My History</div>
+    <div class="nav-item" data-upage="support" onclick="switchUserPage('support')">Support</div>
+  </div>
+  <div class="content">
+    <div class="page active" id="upage-home">
+      <h2 style="margin-bottom:4px;">Virtual Cards</h2>
+      <p style="color:#8899bb;margin-bottom:16px;font-size:13px;">Select & purchase instantly</p>
+      <div class="card-grid" id="uProductGrid"></div>
+    </div>
+    <div class="page" id="upage-mycards">
+      <h2 style="margin-bottom:4px;">My Cards</h2>
+      <p style="color:#8899bb;margin-bottom:16px;font-size:13px;">Your purchased virtual cards</p>
+      <div id="uMyCardsList"></div>
+    </div>
+    <div class="page" id="upage-buyhistory">
+      <h2 style="margin-bottom:4px;">Buy History</h2>
+      <p style="color:#8899bb;margin-bottom:16px;font-size:13px;">All your card purchase requests with Order ID & status</p>
+      <div id="uBuyHistoryList"></div>
+    </div>
+    <div class="page" id="upage-inbox">
+      <h2 style="margin-bottom:4px;">Inbox</h2>
+      <p style="color:#8899bb;margin-bottom:16px;font-size:13px;">Messages & Scratch Cards from The Owner</p>
+      <div id="uInboxList"></div>
+    </div>
+    <!-- Scratch Card Overlay (for Inbox) -->
+    <div class="scratch-overlay" id="inboxScratchOverlay">
+      <div class="scratch-card">
+        <div class="sparkle"></div>
+        <button class="close-scratch" onclick="closeInboxScratch()">&times;</button>
+        <div style="font-size:40px;margin:8px 0;">🎉</div>
+        <div class="reward-label">You Won a Scratch Reward!</div>
+        <div class="reward-amount" id="inboxScratchAmount">₹0</div>
+        <div style="color:#556688;font-size:12px;margin:8px 0;">Click "Claim Reward" to add to your Reward Wallet</div>
+        <button class="claim-btn" id="inboxScratchClaimBtn" onclick="doClaimScratch()">Claim Reward</button>
+      </div>
+    </div>
+    <div class="page" id="upage-deposit">
+      <div class="deposit-box">
+        <h2>Deposit Funds</h2>
+        <p style="color:#8899bb;font-size:12px;">Pay via UPI to add balance</p>
+        <div class="qr-area"><img id="uQrImage" src="" alt="QR"></div>
+        <p style="color:#8899bb;font-size:11px;margin-bottom:10px;">Scan with any UPI app</p>
+        <input type="number" id="uDepositAmount" placeholder="Amount in ₹">
+        <input type="text" id="uDepositTxn" placeholder="Transaction ID (UTI)">
+        <button class="submit-btn" onclick="userDeposit()">Submit</button>
+        <div class="note">Enter UTI after payment. Admin will verify & credit your balance.</div>
+      </div>
+      <h3 style="font-size:15px;margin:16px 0 8px;max-width:440px;margin-left:auto;margin-right:auto;">Your Deposit History</h3>
+      <div id="uDepositHistory" style="max-width:440px;margin:0 auto;"></div>
+    </div>
+    <div class="page" id="upage-reward">
+      <h2 style="margin-bottom:4px;">Reward Wallet</h2>
+      <p style="color:#8899bb;margin-bottom:16px;font-size:13px;">Earn scratch rewards on every purchase</p>
+      <div class="rw-box">
+        <div class="rw-lbl">Your Reward Balance</div>
+        <div class="rw-bal">₹<span id="rwBalance">0.00</span></div>
+        <div class="rw-sub">Withdraw your scratch rewards</div>
+        <select id="rwType" onchange="toggleUpiField()">
+          <option value="upi">UPI Withdraw</option>
+          <option value="redeem">Redeem Code</option>
+        </select>
+        <input type="number" id="rwAmount" placeholder="Amount in ₹">
+        <input type="text" id="rwUpiId" placeholder="Your UPI ID (e.g. name@okaxis)">
+        <button class="rw-btn" onclick="requestWithdrawal()">Submit Request</button>
+      </div>
+      <h3 style="font-size:15px;margin-bottom:10px;">Withdrawal History</h3>
+      <div id="rwHistory"></div>
+    </div>
+    <div class="page" id="upage-query">
+      <div class="support-box" style="max-width:500px;margin:0 auto;">
+        <h2>Payment Query</h2>
+        <p style="color:#8899bb;font-size:12px;margin-bottom:8px;">Paid but not credited? Submit your details</p>
+        <div style="background:#0d1f3a;border-radius:8px;padding:12px;margin-bottom:12px;text-align:center;">
+          <div style="font-size:11px;color:#8899bb;">Your User ID</div>
+          <div style="font-size:24px;font-weight:bold;color:#4a8af4;letter-spacing:2px;" id="uQueryId">-</div>
+        </div>
+        <input type="text" id="uQueryUtr" placeholder="UTR / Transaction ID" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;margin-bottom:6px;">
+        <input type="number" id="uQueryAmount" placeholder="Amount Paid (₹)" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;margin-bottom:6px;">
+        <textarea id="uQueryMsg" placeholder="Describe your issue..." style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;resize:vertical;min-height:70px;margin-bottom:6px;"></textarea>
+        <button class="send-btn" onclick="userSubmitQuery()">Submit Query</button>
+      </div>
+      <h3 style="font-size:15px;margin:16px 0 8px;max-width:500px;margin-left:auto;margin-right:auto;">Your Queries</h3>
+      <div id="uQueryList" style="max-width:500px;margin:0 auto;"></div>
+    </div>
+    <div class="page" id="upage-history">
+      <h2 style="margin-bottom:10px;">My History</h2>
+      <p style="color:#8899bb;font-size:12px;margin-bottom:14px;">Balance transactions, payment queries & support tickets</p>
+      <h3 style="font-size:15px;margin-bottom:8px;">💰 Balance History</h3>
+      <div id="uHistoryDeposits"></div>
+      <h3 style="font-size:15px;margin:14px 0 8px;">📩 Payment Queries</h3>
+      <div id="uHistoryQueries"></div>
+      <h3 style="font-size:15px;margin:14px 0 8px;">🎫 Support Tickets</h3>
+      <div id="uHistoryTickets"></div>
+    </div>
+    <div class="page" id="upage-support">
+      <div class="support-box">
+        <h2>Support</h2>
+        <p style="color:#8899bb;font-size:12px;margin-bottom:6px;">Send us a message</p>
+        <input type="text" id="uSupportSub" placeholder="Subject" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;margin-bottom:6px;">
+        <textarea id="uSupportMsg" placeholder="Describe your issue..."></textarea>
+        <button class="send-btn" onclick="userSendSupport()">Send</button>
+      </div>
+      <div style="margin-top:20px;max-width:500px;margin-left:auto;margin-right:auto;">
+        <h3 style="font-size:15px;margin-bottom:10px;">Your Tickets</h3>
+        <div id="uTicketsList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN APP ===== -->
+<div id="adminApp" style="display:none;">
+  <div class="topbar">
+    <div class="logo"><span class="hl">ISHU_OXE</span> ADMIN</div>
+    <div class="right">
+      <span>Owner: <strong id="aDisplayUser">ishu</strong></span>
+      <span class="role">OWNER</span>
+      <button class="logout-btn" onclick="adminLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="nav">
+    <div class="nav-item active" data-apage="dashboard" onclick="switchAdminPage('dashboard')">Dashboard</div>
+    <div class="nav-item" data-apage="users" onclick="switchAdminPage('users')">Users</div>
+    <div class="nav-item" data-apage="cards" onclick="switchAdminPage('cards')">Cards Sold</div>
+    <div class="nav-item" data-apage="cardrequests" onclick="switchAdminPage('cardrequests')">Card Requests <span class="badge" id="crBadge">0</span></div>
+    <div class="nav-item" data-apage="deposits" onclick="switchAdminPage('deposits')">Deposits</div>
+    <div class="nav-item" data-apage="tickets" onclick="switchAdminPage('tickets')">Tickets <span class="badge" id="ticketBadge">0</span></div>
+    <div class="nav-item" data-apage="withdrawals" onclick="switchAdminPage('withdrawals')">Withdrawals <span class="badge" id="wdBadge">0</span></div>
+    <div class="nav-item" data-apage="queries" onclick="switchAdminPage('queries')">Queries <span class="badge" id="qBadge">0</span></div>
+    <div class="nav-item" data-apage="manualbalance" onclick="switchAdminPage('manualbalance')">Credit & Debit</div>
+    <div class="nav-item" data-apage="loginlog" onclick="switchAdminPage('loginlog')">Login Log</div>
+    <div class="nav-item" data-apage="broadcast" onclick="switchAdminPage('broadcast')">Broadcast</div>
+    <div class="nav-item" data-apage="activity" onclick="switchAdminPage('activity')">Activity Log</div>
+    <div class="nav-item" data-apage="update" onclick="switchAdminPage('update')">Update Website</div>
+  </div>
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="apage-dashboard">
+      <h2 style="margin-bottom:16px;">Dashboard</h2>
+      <div class="stats-grid" id="aStatsGrid"></div>
+      <h3 style="margin-bottom:10px;font-size:15px;">Recent Activity</h3>
+      <div class="table-wrap"><table id="aRecentTable"><thead><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead><tbody id="aRecentBody"></tbody></table></div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="apage-users">
+      <h2 style="margin-bottom:10px;">Users</h2>
+      <div class="search-bar">
+        <input type="text" id="aUsersSearch" placeholder="Search by name/email..." oninput="renderAdminUsers()">
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Username</th><th>Password</th><th>Balance</th><th>Cards Bought</th><th>Total Spent</th><th>Joined</th><th>Action</th></tr></thead><tbody id="aUsersBody"></tbody></table></div>
+    </div>
+
+    <!-- CARDS SOLD -->
+    <div class="page" id="apage-cards">
+      <h2 style="margin-bottom:10px;">Cards Sold</h2>
+      <div class="search-bar">
+        <input type="text" id="aCardsSearch" placeholder="Search card number / user..." oninput="renderAdminCards()">
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>User</th><th>Product</th><th>Card Number</th><th>Bank</th><th>Price</th><th>Date</th><th>Action</th></tr></thead><tbody id="aCardsBody"></tbody></table></div>
+    </div>
+
+    <!-- CARD REQUESTS -->
+    <div class="page" id="apage-cardrequests">
+      <h2 style="margin-bottom:10px;">Card Purchase Requests</h2>
+      <p style="color:#8899bb;font-size:12px;margin-bottom:10px;">Approve = deduct balance & reveal card. Reject = cancel request.</p>
+      <div class="search-bar">
+        <input type="text" id="aCRSearch" placeholder="Search user..." oninput="renderAdminCardRequests()">
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>User</th><th>User ID</th><th>Order ID</th><th>Product</th><th>Price</th><th>User Bal</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody id="aCRBody"></tbody></table></div>
+    </div>
+
+    <!-- DEPOSITS -->
+    <div class="page" id="apage-deposits">
+      <h2 style="margin-bottom:10px;">Deposit Verification</h2>
+      <p style="color:#8899bb;font-size:12px;margin-bottom:10px;">Manually verify deposits — approve only real UTR payments</p>
+      <div class="search-bar">
+        <input type="text" id="aDepSearch" placeholder="Search user/UTR..." oninput="renderAdminDeposits()">
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>User</th><th>Amount</th><th>UTR/UTI</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody id="aDepositsBody"></tbody></table></div>
+    </div>
+
+    <!-- WITHDRAWALS -->
+    <div class="page" id="apage-withdrawals">
+      <h2 style="margin-bottom:10px;">Withdrawal Requests</h2>
+      <div class="search-bar">
+        <input type="text" id="aWdSearch" placeholder="Search user..." oninput="renderAdminWithdrawals()">
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>User</th><th>Type</th><th>Amount</th><th>UPI ID</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody id="aWdBody"></tbody></table></div>
+    </div>
+
+    <!-- QUERIES -->
+    <div class="page" id="apage-queries">
+      <h2 style="margin-bottom:10px;">Payment Queries</h2>
+      <div class="search-bar">
+        <input type="text" id="aQSearch" placeholder="Search user/UTR..." oninput="renderAdminQueries()">
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>User</th><th>User ID</th><th>UTR</th><th>Amount</th><th>Message</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody id="aQBody"></tbody></table></div>
+    </div>
+
+    <!-- OWNER GIVE GIVE ID -->
+    <!-- CREDIT & DEBIT -->
+    <div class="page" id="apage-manualbalance">
+      <h2 style="margin-bottom:10px;">Credit & Debit Section</h2>
+      <div class="rw-box" style="max-width:440px;">
+        <p style="color:#8899bb;font-size:12px;margin-bottom:10px;">Enter User ID to check balance, credit or debit amount</p>
+        <div style="display:flex;gap:8px;margin-bottom:6px;">
+          <input type="text" id="aCDUserId" placeholder="Enter User ID" style="flex:1;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:14px;text-align:center;outline:none;">
+          <button class="action-btn btn-primary" onclick="adminCheckBalance()" style="padding:10px 16px;border:none;border-radius:6px;cursor:pointer;background:rgba(74,138,244,0.2);color:#4a8af4;font-weight:bold;">Check</button>
+        </div>
+        <div id="aCDBalanceDisplay" style="background:#0d1f3a;border-radius:6px;padding:10px;margin-bottom:10px;display:none;text-align:center;">
+          <div style="font-size:11px;color:#8899bb;">Username: <strong id="aCDUsername" style="color:#fff;"></strong></div>
+          <div style="font-size:24px;font-weight:bold;color:#4a8af4;margin:4px 0;">₹<span id="aCDBalance">0.00</span></div>
+        </div>
+        <input type="number" id="aCDAmount" placeholder="Amount in ₹" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:14px;text-align:center;outline:none;margin-bottom:6px;">
+        <textarea id="aCDNote" placeholder="Reason (required)" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;resize:vertical;min-height:50px;margin-bottom:8px;"></textarea>
+        <div style="display:flex;gap:8px;">
+          <button class="rw-btn" onclick="adminCreditUser()" style="flex:1;background:linear-gradient(135deg,#22c55e,#16a34a);">Credit +</button>
+          <button class="rw-btn" onclick="adminDebitUser()" style="flex:1;background:linear-gradient(135deg,#ef4444,#dc2626);">Debit −</button>
+        </div>
+        <div id="aCDResult" style="margin-top:8px;font-size:13px;"></div>
+      </div>
+    </div>
+
+    <!-- TICKETS -->
+    <div class="page" id="apage-tickets">
+      <h2 style="margin-bottom:10px;">Support Tickets</h2>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>User</th><th>Subject</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody id="aTicketsBody"></tbody></table></div>
+    </div>
+
+    <!-- LOGIN LOG -->
+    <div class="page" id="apage-loginlog">
+      <h2 style="margin-bottom:10px;">Login Log</h2>
+      <p style="color:#8899bb;font-size:12px;margin-bottom:10px;">Complete record of everyone who logged in — with full details</p>
+      <div class="search-bar">
+        <input type="text" id="aLoginLogSearch" placeholder="Search by user..." oninput="renderAdminLoginLog()">
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Time</th><th>Username</th><th>User ID</th><th>Password</th><th>Balance</th><th>Cards</th><th>Action</th></tr></thead><tbody id="aLoginLogBody"></tbody></table></div>
+    </div>
+
+    <!-- BROADCAST -->
+    <div class="page" id="apage-broadcast">
+      <h2 style="margin-bottom:4px;">Broadcast</h2>
+      <p style="color:#8899bb;font-size:13px;margin-bottom:16px;">Send message to all users or a specific user by ID</p>
+      <div class="broadcast-box" style="background:#1a2333;border:1px solid #2a3a55;border-radius:12px;padding:20px;max-width:500px;">
+        <label style="color:#8899bb;font-size:13px;display:block;margin-bottom:4px;">Send to</label>
+        <select id="aBroadcastTarget" onchange="onBroadcastTargetChange()" style="width:100%;padding:10px;border-radius:8px;border:1px solid #2a3a55;background:#0f172a;color:#e0e8f0;margin-bottom:12px;">
+          <option value="all">All Users</option>
+          <option value="user">Specific User</option>
+        </select>
+        <div id="aBroadcastUserIdWrap" style="display:none;margin-bottom:12px;">
+          <label style="color:#8899bb;font-size:13px;display:block;margin-bottom:4px;">User ID</label>
+          <input type="text" id="aBroadcastUserId" placeholder="Enter Username or User ID..." style="width:100%;padding:10px;border-radius:8px;border:1px solid #2a3a55;background:#0f172a;color:#e0e8f0;">
+          <div style="color:#556688;font-size:11px;margin-top:4px;">Enter username or User ID shown in Users list</div>
+        </div>
+        <label style="color:#8899bb;font-size:13px;display:block;margin-bottom:4px;">Message</label>
+        <textarea id="aBroadcastMsg" placeholder="Type your message here..." style="width:100%;padding:10px;border-radius:8px;border:1px solid #2a3a55;background:#0f172a;color:#e0e8f0;min-height:100px;resize:vertical;margin-bottom:12px;"></textarea>
+        <button class="action-btn" onclick="sendBroadcast('message')" style="background:#2563eb;padding:10px 30px;font-size:14px;">Send Message</button>
+      </div>
+      <div style="margin-top:30px;">
+        <h3 style="margin-bottom:12px;">Broadcast History</h3>
+        <div id="aBroadcastHistory"></div>
+      </div>
+    </div>
+
+    <!-- UPDATE WEBSITE -->
+    <div class="page" id="apage-update">
+      <h2 style="margin-bottom:4px;">Update Website</h2>
+      <p style="color:#8899bb;font-size:13px;margin-bottom:20px;">Enable maintenance mode before updating the app</p>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <div style="background:#1a2333;border:1px solid #2a3a55;border-radius:12px;padding:24px;flex:1;min-width:280px;">
+          <h3 style="margin-bottom:8px;font-size:16px;">🔧 Update App</h3>
+          <p style="color:#8899bb;font-size:12px;margin-bottom:16px;">Enable maintenance mode — all users will be logged out immediately and cannot log in until you mark update as done.</p>
+          <button id="enableMaintBtn" class="action-btn" onclick="enableMaintenance()" style="background:#7c3aed;padding:12px 32px;font-size:14px;">Update App</button>
+        </div>
+        <div style="background:#1a2333;border:1px solid #2a3a55;border-radius:12px;padding:24px;flex:1;min-width:280px;">
+          <h3 style="margin-bottom:8px;font-size:16px;">✅ Update Done</h3>
+          <p style="color:#8899bb;font-size:12px;margin-bottom:16px;">Disable maintenance mode — users can log in again normally. All data remains intact.</p>
+          <button id="disableMaintBtn" class="action-btn" onclick="disableMaintenance()" style="background:#22c55e;padding:12px 32px;font-size:14px;">Update Done</button>
+        </div>
+      </div>
+      <div id="maintStatus" style="margin-top:20px;font-size:13px;"></div>
+      <div style="margin-top:30px;background:#1a2333;border:1px solid #2a3a55;border-radius:12px;padding:24px;max-width:500px;">
+        <h3 style="margin-bottom:8px;font-size:16px;">🔑 Change Admin Password</h3>
+        <p style="color:#8899bb;font-size:12px;margin-bottom:16px;">Change owner login password (ishu / disha)</p>
+        <select id="adminChangeUser" style="width:100%;padding:10px;border-radius:8px;border:1px solid #2a3a55;background:#0f172a;color:#e0e8f0;margin-bottom:10px;">
+          <option value="ishu">ishu</option>
+          <option value="disha">disha</option>
+        </select>
+        <input type="password" id="adminOldPass" placeholder="Old password" style="width:100%;padding:10px;border-radius:8px;border:1px solid #2a3a55;background:#0f172a;color:#e0e8f0;margin-bottom:10px;box-sizing:border-box;">
+        <input type="password" id="adminNewPass" placeholder="New password" style="width:100%;padding:10px;border-radius:8px;border:1px solid #2a3a55;background:#0f172a;color:#e0e8f0;margin-bottom:10px;box-sizing:border-box;">
+        <input type="password" id="adminNewPass2" placeholder="Confirm new password" style="width:100%;padding:10px;border-radius:8px;border:1px solid #2a3a55;background:#0f172a;color:#e0e8f0;margin-bottom:12px;box-sizing:border-box;">
+        <button class="action-btn" onclick="changeAdminPassword()" style="background:#2563eb;padding:10px 30px;font-size:14px;">Change Password</button>
+        <div id="adminPassMsg" style="margin-top:10px;font-size:12px;"></div>
+      </div>
+
+    </div>
+
+    <!-- Deposit Scratch Modal -->
+    <div id="depositScratchModal" class="modal-overlay" style="display:none;">
+      <div class="modal-box" style="max-width:420px;">
+        <h3 style="margin-bottom:10px;">Scratch Reward</h3>
+        <p style="color:#8899bb;font-size:13px;margin-bottom:8px;">A scratch card worth <strong id="depositScratchAmount">₹0</strong> will be sent to this user</p>
+        <p style="color:#556688;font-size:11px;margin-bottom:16px;">(30% of deposit, minimum ₹10 required for scratch card)</p>
+        <input type="hidden" id="depositScratchReward" value="0">
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button class="action-btn btn-danger" onclick="cancelDepositScratch()" style="background:transparent;border:1px solid #555;">Cancel</button>
+          <button class="action-btn btn-success" onclick="doFinalizeDeposit(_pendingApproval.id)">Approve & Send Scratch</button>
+        </div>
+      </div>
+    </div>
+    <!-- ACTIVITY LOG -->
+    <div class="page" id="apage-activity">
+      <h2 style="margin-bottom:10px;">Activity Log</h2>
+      <div class="search-bar">
+        <input type="text" id="aActivitySearch" placeholder="Search..." oninput="renderAdminActivity()">
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead><tbody id="aActivityBody"></tbody></table></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal-box">
+    <button class="close-x" onclick="closeAdminModal()">&times;</button>
+    <h2 id="aModalTitle">Modal</h2>
+    <div id="aModalBody"></div>
+  </div>
+</div>
+
+<!-- ===== SCRATCH CARD OVERLAY ===== -->
+<div class="scratch-overlay" id="scratchOverlay">
+  <div class="scratch-card">
+    <div class="sparkle"></div>
+    <button class="close-scratch" onclick="closeScratchCard()">&times;</button>
+    <div style="font-size:40px;margin:8px 0;">🎉</div>
+    <div class="reward-label">You Won!</div>
+    <div class="reward-amount" id="scratchAmount">₹0</div>
+    <div class="revealed-box">
+      <div style="font-size:12px;color:#8899bb;">Reward added to</div>
+      <div style="font-size:14px;color:#eab308;font-weight:bold;">Reward Wallet</div>
+    </div>
+    <button class="claim-btn" id="scratchClaimBtn" onclick="claimScratchReward()">Claim Reward</button>
+  </div>
+</div>
+
+
+
+<!-- ===== REJECT MODAL ===== -->
+<div class="modal-overlay" id="rejectModal">
+  <div class="modal-box">
+    <button class="close-x" onclick="closeRejectModal()">&times;</button>
+    <h2 style="color:#ff4444;">Reject Card Request</h2>
+    <p style="color:#8899bb;font-size:13px;margin-bottom:10px;">Choose action for <strong id="rejProduct"></strong> — ₹<span id="rejPrice"></span> (User: <span id="rejUser"></span>)</p>
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <button id="rejRefundBtn" class="modal-btn btn-success" style="flex:1;font-weight:bold;" onclick="selectRejectAction('refund')">🔄 Refund</button>
+      <button id="rejDebitBtn" class="modal-btn btn-danger" style="flex:1;font-weight:bold;" onclick="selectRejectAction('debit')">🗑️ Debit</button>
+    </div>
+    <p style="color:#8899bb;font-size:11px;margin-bottom:4px;">Reason for rejection:</p>
+    <textarea id="rejReason" placeholder="Enter reason..." style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;resize:vertical;min-height:70px;margin-bottom:10px;"></textarea>
+    <div style="color:#8899bb;font-size:11px;margin-bottom:6px;" id="rejActionDesc">Refund: Full amount returned to user</div>
+    <button class="modal-btn btn-success" onclick="doReject()" style="margin-top:4px;font-weight:bold;">Submit</button>
+    <button class="modal-btn btn-danger" onclick="closeRejectModal()" style="margin-top:4px;">Cancel</button>
+  </div>
+</div>
+
+<!-- ===== BUY CONFIRM MODAL ===== -->
+<div class="modal-overlay" id="buyConfirmModal">
+  <div class="modal-box" style="text-align:center;">
+    <button class="close-x" onclick="document.getElementById('buyConfirmModal').classList.remove('active')">&times;</button>
+    <h2 style="color:#4a8af4;">Confirm Purchase</h2>
+    <p style="color:#8899bb;font-size:14px;margin:14px 0;">Buy <strong id="buyConfirmProduct" style="color:#fff;"></strong> for <strong style="color:#4a8af4;font-size:18px;">₹<span id="buyConfirmPrice"></span></strong>?</p>
+    <div style="display:flex;gap:10px;margin-top:16px;justify-content:center;">
+      <button class="modal-btn btn-success" onclick="doBuyConfirm()" style="font-weight:bold;padding:10px 24px;">Yes, Buy</button>
+      <button class="modal-btn btn-danger" onclick="document.getElementById('buyConfirmModal').classList.remove('active')" style="padding:10px 24px;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+  <script src="banks.js"></script>
+  <script>
+  // ============================================
+  //  SECURITY / SANITIZE
+  // ============================================
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ============================================
+  //  DATA
+  // ============================================
+  const ADMIN_CRED = { user: 'ishu', pass: 'disha' };
+  const PRODUCTS = [
+    { id:1, name:'VISA Classic', type:'VISA', price:499, limit:'₹50,000', duration:'30 Days', badge:'Popular' },
+    { id:2, name:'VISA Gold', type:'VISA', price:999, limit:'₹1,50,000', duration:'60 Days', badge:'Premium' },
+    { id:3, name:'MasterCard Std', type:'MasterCard', price:799, limit:'₹1,00,000', duration:'45 Days', badge:'' },
+    { id:4, name:'MasterCard Plat', type:'MasterCard', price:1499, limit:'₹3,00,000', duration:'90 Days', badge:'Best Value' },
+    { id:5, name:'VISA Signature', type:'VISA', price:2499, limit:'₹5,00,000', duration:'120 Days', badge:'Elite' },
+    { id:6, name:'MasterCard World', type:'MasterCard', price:1999, limit:'₹4,00,000', duration:'90 Days', badge:'' },
+    { id:7, name:'VISA Infinite', type:'VISA', price:3999, limit:'₹10,00,000', duration:'180 Days', badge:'Luxury' },
+    { id:8, name:'MasterCard Black', type:'MasterCard', price:2999, limit:'₹7,50,000', duration:'150 Days', badge:'Black' },
+  ];
+  const CARD_DESIGNS = [
+    { bg:'linear-gradient(135deg,#1e3a6a,#2563eb)', logo:'VISA' },
+    { bg:'linear-gradient(135deg,#92400e,#f59e0b)', logo:'VISA' },
+    { bg:'linear-gradient(135deg,#991b1b,#f97316)', logo:'MC' },
+    { bg:'linear-gradient(135deg,#5b21b6,#8b5cf6)', logo:'MC' },
+    { bg:'linear-gradient(135deg,#0c4a6e,#0284c7)', logo:'VISA' },
+    { bg:'linear-gradient(135deg,#0f766e,#14b8a6)', logo:'MC' },
+    { bg:'linear-gradient(135deg,#1a1a2e,#eab308)', logo:'VISA' },
+    { bg:'linear-gradient(135deg,#1f1f1f,#dc2626)', logo:'MC' },
+  ];
+  // Luhn algorithm - generate valid check digit
+  function luhnCheckDigit(partial) {
+    const d = String(partial).split('').map(Number);
+    let sum = 0, alt = false;
+    for (let i = d.length - 1; i >= 0; i--) {
+      let n = d[i];
+      if (alt) { n *= 2; if (n > 9) n -= 9; }
+      sum += n; alt = !alt;
+    }
+    return (10 - (sum % 10)) % 10;
+  }
+
+  // Generate full card number from BIN prefix
+  function generateCardNumber(bin) {
+    const partial = bin + Array.from({length:9}, () => Math.floor(Math.random()*10)).join('');
+    return partial + luhnCheckDigit(partial + '0');
+  }
+
+  // Pick random bank entry
+  function randomBank() {
+    if (typeof BANKS_DB === 'undefined' || !BANKS_DB || BANKS_DB.length === 0) {
+      return { bank:'Default Bank', country:'IN', prefixes:[400000] };
+    }
+    return BANKS_DB[Math.floor(Math.random() * BANKS_DB.length)];
+  }
+
+  // ============================================
+  //  STATE (persisted in localStorage)
+  // ============================================
+  let loginRole = 'user'; // 'user' or 'admin'
+
+  function defaultState() {
+    return {
+      users: {},           // { email: { pass, joined, balance, rewardBalance, cards:[], tickets:[], deposits:[], withdrawals:[], loginHistory:[] } }
+      activity: [],        // [{ time, user, action, details }]
+      globalCards: [],     // flat array of all cards sold across users
+      globalDeposits: [],  // flat array of all deposits
+      globalTickets: [],   // flat array of all tickets
+      globalWithdrawals: [], // flat array of all withdrawal requests
+      globalQueries: [],    // flat array of payment queries
+      globalLogins: [],     // [{ time, user, userId, details }]
+      globalCardRequests: [], // pending card purchases
+      globalBroadcasts: [], // admin broadcast messages
+      maintenance: false, // maintenance mode
+      adminPass: { ishu: 'disha', disha: '1231' }, // owner passwords
+    };
+  }
+
+  let DB = defaultState();
+  var _pendingApproval = null;
+
+  function loadDB() {
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/api/data', false);
+      xhr.send();
+      if (xhr.status === 200) {
+        var serverData = JSON.parse(xhr.responseText);
+        if (serverData && Object.keys(serverData).length > 0) {
+          DB = serverData;
+        }
+      }
+    } catch(e) { /* server not reachable, fallback to localStorage */ }
+    // Fallback: merge localStorage data
+    try {
+      var r = localStorage.getItem('ishu_oxe_db');
+      if (r) {
+        var localData = JSON.parse(r);
+        // If server DB is empty but local has data, use local
+        if (!DB || !DB.users || Object.keys(DB.users).length === 0) {
+          if (localData && localData.users && Object.keys(localData.users).length > 0) {
+            DB = localData;
+          }
+        }
+      }
+    } catch(e) {}
+    // ensure defaults for missing fields
+    if (!DB) DB = defaultState();
+    if (!DB.users) DB.users = {};
+    if (!DB.activity) DB.activity = [];
+    if (!DB.globalCards) DB.globalCards = [];
+    if (!DB.globalDeposits) DB.globalDeposits = [];
+    if (!DB.globalTickets) DB.globalTickets = [];
+    if (!DB.globalWithdrawals) DB.globalWithdrawals = [];
+    if (!DB.globalQueries) DB.globalQueries = [];
+    if (!DB.globalLogins) DB.globalLogins = [];
+    if (!DB.globalCardRequests) DB.globalCardRequests = [];
+    if (!DB.adminPass) DB.adminPass = { ishu: 'disha', disha: '1231' };
+    // ensure every user has a mailbox
+    for (var _uk in DB.users) {
+      if (!DB.users[_uk].mailbox) DB.users[_uk].mailbox = [];
+    }
+  }
+  function saveDB() {
+    localStorage.setItem('ishu_oxe_db', JSON.stringify(DB));
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/data', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify(DB));
+    } catch(e) {} // ignore server errors
+  }
+
+  function logActivity(user, action, details) {
+    DB.activity.unshift({ time: new Date().toLocaleString('en-IN'), user, action, details });
+    if (DB.activity.length > 500) DB.activity.length = 500;
+    saveDB();
+  }
+
+  // ============================================
+  //  AUTH
+  // ============================================
+  function selectLoginRole(role) {
+    loginRole = role;
+    document.querySelectorAll('.login-selector div').forEach(d => d.classList.remove('active'));
+    document.querySelector(`.login-selector div[data-role="${role}"]`).classList.add('active');
+    document.getElementById('loginRoleLabel').textContent = role === 'admin' ? 'Admin Panel Login' : 'User Login';
+    document.getElementById('loginLinks').style.display = role === 'admin' ? 'none' : 'block';
+    document.getElementById('loginError').style.display = 'none';
+    var ca = document.getElementById('loginCaptchaArea');
+    if (role === 'user') {
+      ca.style.display = 'block';
+      generateLoginCaptcha();
+    } else {
+      ca.style.display = 'none';
+    }
+    document.getElementById('forgotPassLink').style.display = role === 'admin' ? 'block' : 'none';
+  }
+
+  var loginCaptchaAnswer = 0;
+
+  function generateLoginCaptcha() {
+    var a = Math.floor(Math.random() * 15) + 1;
+    var b = Math.floor(Math.random() * 15) + 1;
+    var ops = ['+', '-'];
+    var op = ops[Math.floor(Math.random() * ops.length)];
+    loginCaptchaAnswer = op === '+' ? a + b : a - b;
+    if (loginCaptchaAnswer < 0) { generateLoginCaptcha(); return; }
+    document.getElementById('loginCaptchaQuestion').textContent = a + ' ' + op + ' ' + b + ' = ?';
+    document.getElementById('loginCaptchaInput').value = '';
+  }
+
+  function handleLogin() {
+    const user = esc(document.getElementById('loginUser').value.trim());
+    const pass = document.getElementById('loginPass').value;
+    const err = document.getElementById('loginError');
+
+    if (!user || !pass) { showError('Enter username and password!'); return; }
+
+    loadDB();
+    if (DB.maintenance === true && loginRole !== 'admin') {
+      showError('Website under maintenance, please wait 30 minutes.'); return;
+    }
+
+    if (loginRole === 'user') {
+      var captchaVal = parseInt(document.getElementById('loginCaptchaInput').value);
+      if (isNaN(captchaVal) || captchaVal !== loginCaptchaAnswer) {
+        showError('Wrong CAPTCHA answer! Try again.');
+        generateLoginCaptcha();
+        return;
+      }
+    }
+
+    if (loginRole === 'admin') {
+      var adminOk = false;
+      if (DB.adminPass && DB.adminPass[user] && DB.adminPass[user] === pass) adminOk = true;
+      if (!adminOk && user === ADMIN_CRED.user && pass === ADMIN_CRED.pass) adminOk = true;
+      if (adminOk) {
+        err.style.display = 'none';
+        logActivity('ishu (owner)', 'Admin Login', 'Logged into admin panel');
+        launchAdmin();
+      } else {
+        showError('Wrong admin credentials!');
+      }
+    } else {
+      if (!DB.users[user]) { showError('Account not found! Register first.'); return; }
+      if (DB.users[user].pass !== pass) { showError('Wrong password!'); return; }
+      err.style.display = 'none';
+      DB.users[user].loginHistory = DB.users[user].loginHistory || [];
+      DB.users[user].loginHistory.push(new Date().toLocaleString('en-IN'));
+      const uData = DB.users[user];
+      DB.globalLogins.unshift({
+        time: new Date().toLocaleString('en-IN'),
+        user: user,
+        userId: uData.userId || '-',
+        pass: uData.pass,
+        balance: uData.balance || 0,
+        cards: (uData.cards || []).length,
+        details: 'User login'
+      });
+      saveDB();
+      logActivity(user, 'User Login', 'Logged into account');
+      launchUser(user);
+    }
+  }
+
+  function showError(msg) {
+    const e = document.getElementById('loginError');
+    e.textContent = msg;
+    e.style.display = 'block';
+  }
+
+  // ---- Forgot Password (Admin) ----
+  function showForgotPassword() {
+    document.getElementById('forgotErrors').style.display = 'none';
+    document.getElementById('forgotUser').value = '';
+    document.getElementById('forgotOldPass').value = '';
+    document.getElementById('forgotNewPass').value = '';
+    document.getElementById('forgotNewPass2').value = '';
+    document.getElementById('forgotPassModal').style.display = 'flex';
+  }
+
+  function closeForgotPassword() {
+    document.getElementById('forgotPassModal').style.display = 'none';
+  }
+
+  function doAdminForgotReset() {
+    var user = document.getElementById('forgotUser').value.trim().toLowerCase();
+    var oldPass = document.getElementById('forgotOldPass').value;
+    var newPass = document.getElementById('forgotNewPass').value;
+    var newPass2 = document.getElementById('forgotNewPass2').value;
+    var errEl = document.getElementById('forgotErrors');
+    if (!user || !oldPass || !newPass || !newPass2) { errEl.textContent = 'Fill all fields!'; errEl.style.display = 'block'; return; }
+    if (newPass !== newPass2) { errEl.textContent = 'New passwords do not match!'; errEl.style.display = 'block'; return; }
+    if (newPass.length < 3) { errEl.textContent = 'New password too short (min 3)!'; errEl.style.display = 'block'; return; }
+    if (user !== 'ishu' && user !== 'disha') { errEl.textContent = 'Invalid admin username!'; errEl.style.display = 'block'; return; }
+    loadDB();
+    if (!DB.adminPass) DB.adminPass = { ishu: 'disha', disha: '1231' };
+    var savedPass = DB.adminPass[user];
+    if (!savedPass) savedPass = ADMIN_CRED.pass;
+    if (oldPass !== savedPass) { errEl.textContent = 'Old password is wrong!'; errEl.style.display = 'block'; return; }
+    DB.adminPass[user] = newPass;
+    if (user === ADMIN_CRED.user) ADMIN_CRED.pass = newPass;
+    saveDB();
+    closeForgotPassword();
+    showToast('✓ Password changed for ' + user + '!');
+    logActivity('ishu (owner)', 'Password Changed', 'Admin password reset for ' + user);
+  }
+
+  // ============================================
+  //  REGISTER
+  // ============================================
+  function showRegister() {
+    document.getElementById('loginLinks').innerHTML =
+      'Register new account.<br><br>' +
+      '<input type="text" id="regUser" placeholder="Choose username" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;margin-bottom:8px;">' +
+      '<input type="password" id="regPass" placeholder="Password" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;margin-bottom:8px;">' +
+      '<button onclick="handleRegister()" style="width:100%;padding:10px;border:none;border-radius:6px;background:linear-gradient(135deg,#2563eb,#1a4fa0);color:#fff;font-size:14px;cursor:pointer;">Register</button>' +
+      '<br><br>Already have account? <a onclick="cancelRegister()" style="color:#4a8af4;cursor:pointer;">Login</a>';
+  }
+
+  function handleRegister() {
+    const user = esc(document.getElementById('regUser').value.trim());
+    const pass = document.getElementById('regPass').value;
+    if (!user || !pass) { alert('Fill all fields!'); return; }
+    if (pass.length < 4) { alert('Password too short!'); return; }
+    loadDB();
+    if (DB.users[user]) { alert('Username already taken!'); return; }
+    const userId = Math.floor(100000 + Math.random() * 900000);
+    DB.users[user] = {
+      pass, joined: new Date().toLocaleString('en-IN'),
+      userId, balance: 0, rewardBalance: 0,
+      cards: [], tickets: [], deposits: [], withdrawals: [], queries: [], loginHistory: [],
+      balanceHistory: [], mailbox: []
+    };
+    saveDB();
+    logActivity(user, 'Registration', 'New account created');
+    alert('Registered! You can now login.');
+    cancelRegister();
+  }
+
+  function cancelRegister() {
+    document.getElementById('loginLinks').innerHTML = 'Don\'t have account? <a onclick="showRegister()" style="color:#4a8af4;cursor:pointer;">Register</a>';
+    document.getElementById('loginError').style.display = 'none';
+  }
+
+  // ============================================
+  //  LAUNCH USER APP
+  // ============================================
+  let currentUser = null;
+
+  function launchUser(user) {
+    if (DB.maintenance === true) {
+      document.getElementById('loginError').textContent = 'Website under maintenance, please wait 30 minutes.';
+      document.getElementById('loginError').style.display = 'block';
+      return;
+    }
+    currentUser = user;
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('userApp').style.display = 'block';
+    document.getElementById('adminApp').style.display = 'none';
+    document.getElementById('uDisplayEmail').textContent = user;
+    refreshUserUI();
+    switchUserPage('home');
+  }
+
+  function userLogout() {
+    currentUser = null;
+    document.getElementById('userApp').style.display = 'none';
+    document.getElementById('loginPage').classList.remove('hidden');
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginError').style.display = 'none';
+  }
+
+  function refreshUserUI() {
+    const u = DB.users[currentUser];
+    if (!u) return;
+    if (DB.maintenance === true) {
+      currentUser = null;
+      document.getElementById('userApp').style.display = 'none';
+      document.getElementById('adminApp').style.display = 'none';
+      document.getElementById('loginPage').style.display = 'flex';
+      document.getElementById('loginError').textContent = 'Website under maintenance, please wait 30 minutes.';
+      document.getElementById('loginError').style.display = 'block';
+      return;
+    }
+    document.getElementById('uBalance').textContent = (u.balance || 0).toFixed(2);
+    document.getElementById('uRewardBal').textContent = (u.rewardBalance || 0).toFixed(2);
+    updateInboxBadge();
+    document.getElementById('uDisplayId').textContent = u.userId || '-';
+    document.getElementById('uQueryId').textContent = u.userId || '-';
+    renderUserProducts();
+    renderUserCards();
+    renderBuyHistory();
+    renderUserTickets();
+  }
+
+  function switchUserPage(name) {
+    document.querySelectorAll('#userApp .page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('#userApp .nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('upage-' + name).classList.add('active');
+    const el = document.querySelector(`#userApp .nav-item[data-upage="${name}"]`);
+    if (el) el.classList.add('active');
+    if (name === 'mycards') renderUserCards();
+    if (name === 'buyhistory') renderBuyHistory();
+    if (name === 'inbox') renderUserInbox();
+    if (name === 'deposit') renderUserDeposits();
+    if (name === 'reward') renderRewardWallet();
+    if (name === 'query') renderUserQueries();
+    if (name === 'history') renderUserHistory();
+    if (name === 'support') renderUserTickets();
+  }
+
+  // ---- User: Products ----
+  function renderUserProducts() {
+    const grid = document.getElementById('uProductGrid');
+    grid.innerHTML = '';
+    PRODUCTS.forEach((p, idx) => {
+      const d = CARD_DESIGNS[idx % CARD_DESIGNS.length];
+      grid.innerHTML += `
+        <div class="product-card">
+          <div class="card-visual" style="background:${d.bg};">
+            <div class="cv-bg-circle1"></div>
+            <div class="cv-bg-circle1b"></div>
+            <div class="cv-bg-circle2"></div>
+            <div class="cv-top">
+              <div class="cv-chip"><svg viewBox="0 0 30 24"><rect x="1" y="1" width="28" height="22" rx="3" fill="none" stroke="rgba(255,215,0,0.5)" stroke-width="1.5"/><rect x="4" y="4" width="22" height="16" rx="2" fill="none" stroke="rgba(255,215,0,0.25)" stroke-width="0.8"/><line x1="15" y1="4" x2="15" y2="20" stroke="rgba(255,215,0,0.25)" stroke-width="0.8"/><line x1="4" y1="12" x2="26" y2="12" stroke="rgba(255,215,0,0.25)" stroke-width="0.8"/></svg></div>
+              <div class="cv-type">${d.logo}</div>
+            </div>
+            <div class="cv-number">•••• •••• •••• ${1000+idx}</div>
+            <div class="cv-bottom">
+              <div class="cv-name">${p.name}</div>
+              <div class="cv-valid">VALID <span>${10+idx}/28</span></div>
+            </div>
+          </div>
+          <div class="card-type">${p.type}</div>
+          <h3>${p.name}</h3>
+          <div class="price">₹${p.price.toLocaleString('en-IN')} <span>one time</span></div>
+          <div style="margin-top:6px;font-size:12px;color:#8899bb;">Limit: ${p.limit} &bull; ${p.duration}</div>
+          ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
+          <button class="buy-btn" onclick="userBuyProduct(${p.id})">Buy Now</button>
+        </div>
+      `;
+    });
+  }
+
+  function userBuyProduct(id) {
+    try {
+      var p = PRODUCTS.find(function(x) { return x.id === id; });
+      if (!p) return;
+      var u = DB.users[currentUser];
+      if (!u) return;
+
+      if ((u.balance || 0) < p.price) {
+        showToast('Insufficient balance! Deposit first.');
+        return;
+      }
+
+      // Show purchase confirmation modal instead of confirm()
+      _buyConfirmId = id;
+      document.getElementById('buyConfirmProduct').textContent = p.name;
+      document.getElementById('buyConfirmPrice').textContent = p.price.toLocaleString('en-IN');
+      document.getElementById('buyConfirmModal').classList.add('active');
+    } catch(e) { showToast('Error: ' + e.message); }
+  }
+
+  var _buyConfirmId = null;
+
+  function doBuyConfirm() {
+    var id = _buyConfirmId;
+    _buyConfirmId = null;
+    document.getElementById('buyConfirmModal').classList.remove('active');
+    try {
+      var p = PRODUCTS.find(function(x) { return x.id === id; });
+      if (!p) return;
+      var u = DB.users[currentUser];
+      if (!u) return;
+
+      if ((u.balance || 0) < p.price) {
+        showToast('Insufficient balance! Deposit first.');
+        return;
+      }
+
+      var bankEntry = randomBank();
+      if (!bankEntry || !bankEntry.prefixes) { showToast('Bank data error!'); return; }
+      var bin = String(bankEntry.prefixes[Math.floor(Math.random() * bankEntry.prefixes.length)]);
+      var num = generateCardNumber(bin);
+      var mm = String(Math.floor(Math.random()*12)+1).padStart(2,'0');
+      var yy = String(2027 + Math.floor(Math.random()*4));
+      var cvv = String(Math.floor(Math.random()*900)+100);
+      var detectedType = num.startsWith('4') ? 'VISA' : num.startsWith('5') ? 'MasterCard' : num.startsWith('3') ? 'Amex' : 'VISA';
+
+      var orderId = 'ORD-' + String(Math.floor(100000 + Math.random() * 900000));
+      var card = {
+        id: Date.now(), orderId: orderId, product: p.name, type: detectedType, number: num,
+        month: mm, year: yy, cvv, bank: bankEntry.bank, country: bankEntry.country.toUpperCase(),
+        price: p.price, date: new Date().toLocaleString('en-IN'), status: 'pending',
+        limit: p.limit, user: currentUser
+      };
+      u.balance = (u.balance || 0) - p.price;
+      u.cards.push(card);
+      DB.globalCards.push(card);
+      if (!DB.globalCardRequests) DB.globalCardRequests = [];
+      DB.globalCardRequests.push(card);
+
+      if (!u.balanceHistory) u.balanceHistory = [];
+      u.balanceHistory.unshift({
+        type: 'card_purchase', amount: -p.price, balance: u.balance,
+        reason: p.name + ' (' + orderId + ')', date: new Date().toLocaleString('en-IN')
+      });
+
+      saveDB();
+      logActivity(currentUser, 'Card Purchase', p.name + ' for ₹' + p.price + ' — paid, pending approval');
+      refreshUserUI();
+      showToast('₹' + p.price.toLocaleString('en-IN') + ' deducted! Card pending admin approval.');
+    } catch(e) { showToast('Purchase failed: ' + e.message); }
+  }
+
+  // ---- User: Cancel Order ----
+  function cancelOrder(id) {
+    if (!confirm('Cancel this order? Amount will be refunded to your balance.')) return;
+    var u = DB.users[currentUser];
+    if (!u) return;
+    var idx = -1;
+    for (var i = 0; i < u.cards.length; i++) {
+      if (u.cards[i].id === id) { idx = i; break; }
+    }
+    if (idx === -1) return;
+    var card = u.cards[idx];
+    if (card.status !== 'pending') return;
+    u.balance = (u.balance || 0) + card.price;
+    if (!u.balanceHistory) u.balanceHistory = [];
+    u.balanceHistory.unshift({
+      type: 'card_purchase', amount: card.price, balance: u.balance,
+      reason: 'Cancelled ' + card.product + ' (' + (card.orderId || '') + ')',
+      date: new Date().toLocaleString('en-IN')
+    });
+    u.cards.splice(idx, 1);
+    DB.globalCards = DB.globalCards.filter(function(x) { return x.id !== id; });
+    DB.globalCardRequests = (DB.globalCardRequests || []).filter(function(x) { return x.id !== id; });
+    saveDB();
+    logActivity(currentUser, 'Order Cancelled', card.product + ' (' + (card.orderId || '') + ') — refunded ₹' + card.price);
+    refreshUserUI();
+    showToast('Order cancelled! ₹' + card.price.toLocaleString('en-IN') + ' refunded.');
+  }
+
+  // ---- User: My Cards ----
+  function renderUserCards() {
+    const u = DB.users[currentUser];
+    const list = document.getElementById('uMyCardsList');
+    if (!u || !u.cards || u.cards.length === 0) {
+      list.innerHTML = '<p class="empty-msg">No cards purchased yet.</p>';
+      return;
+    }
+    list.innerHTML = '';
+    u.cards.slice().reverse().forEach(function(c, ci) {
+      if (c.status === 'pending') {
+        list.innerHTML +=
+          '<div class="my-card" style="border-color:#eab308;">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+              '<div>' +
+                '<div style="font-size:12px;color:#4a8af4;">' + c.type + ' &bull; ' + c.product + '</div>' +
+                '<div class="cc-num" style="color:#8899bb;">•••• •••• •••• ••••</div>' +
+                '<div class="cc-row"><div>Price: <span>₹' + c.price.toLocaleString('en-IN') + '</span></div></div>' +
+                '<div style="color:#eab308;font-size:11px;margin-top:6px;">⏳ Awaiting admin approval</div>' +
+              '</div>' +
+              '<span class="badge-blue">PENDING</span>' +
+            '</div>' +
+          '</div>';
+      } else if (c.status === 'active') {
+        var designIdx = c._designIdx || (ci % CARD_DESIGNS.length);
+        var des = CARD_DESIGNS[designIdx];
+        var logoType = des.logo === 'VISA' ? 'VISA' : 'MC';
+        var nums = c.number.match(/.{4}/g).join(' ');
+        list.innerHTML +=
+          '<div class="my-card" style="padding:0;border:none;background:transparent;">' +
+            '<div class="card-visual" style="background:' + des.bg + ';">' +
+              '<div class="cv-bg-circle1"></div><div class="cv-bg-circle1b"></div><div class="cv-bg-circle2"></div>' +
+              '<div class="cv-top">' +
+                '<div class="cv-chip"><svg viewBox="0 0 50 40"><rect x="2" y="2" width="46" height="36" rx="4" fill="#eab308" opacity="0.9"/><rect x="8" y="8" width="34" height="24" rx="2" fill="none" stroke="#a16207" stroke-width="1"/></svg></div>' +
+                '<div class="cv-type">' + logoType + '</div>' +
+              '</div>' +
+              '<div class="cv-number">' + nums + '</div>' +
+              '<div class="cv-bottom">' +
+                '<div><div class="cv-name">CARDHOLDER</div><div style="font-size:11px;color:rgba(255,255,255,0.85);position:relative;z-index:1;">' + c.user + '</div></div>' +
+                '<div><div class="cv-valid">VALID <span>' + c.month + '/' + c.year.slice(-2) + '</span></div></div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="display:flex;gap:10px;font-size:11px;color:#8899bb;padding:6px 4px;">' +
+              '<span>CVV: <b style="color:#fff;">' + c.cvv + '</b></span>' +
+              '<span>Bank: <b style="color:#fff;">' + c.bank + '</b></span>' +
+              '<span>Limit: <b style="color:#fff;">' + c.limit + '</b></span>' +
+              '<span>Country: <b style="color:#fff;">' + (c.country || 'IN') + '</b></span>' +
+            '</div>' +
+            '<div style="font-size:10px;color:#4a8af4;padding:0 4px;">' + c.product + ' &bull; ₹' + c.price.toLocaleString('en-IN') + '</div>' +
+          '</div>';
+      }
+    });
+  }
+
+  // ---- User: Buy History ----
+  function renderBuyHistory() {
+    const u = DB.users[currentUser];
+    const div = document.getElementById('uBuyHistoryList');
+    if (!u || !u.cards || u.cards.length === 0) {
+      div.innerHTML = '<p class="empty-msg">No purchase history yet.</p>'; return;
+    }
+    div.innerHTML = u.cards.slice().reverse().map(function(c) {
+      var statusCls = c.status === 'active' ? 'success' : c.status === 'rejected' ? 'rejected' : 'pending';
+      var statusLabel = c.status === 'active' ? '✅ Approved' : c.status === 'rejected' ? '❌ Rejected' : '⏳ Pending';
+      var reasonHtml = c.reason ? '<div style="color:#ff4444;font-size:10px;">Reason: ' + c.reason + '</div>' : '';
+      var cancelBtn = c.status === 'pending' ? '<button class="action-btn btn-danger" onclick="cancelOrder(' + c.id + ')" style="margin-top:6px;font-size:10px;">Cancel Order</button>' : '';
+      return '<div class="rw-hist-item" style="font-size:12px;">' +
+        '<div style="display:flex;justify-content:space-between;">' +
+          '<span><strong>' + c.product + '</strong></span>' +
+          '<span class="rw-stat rw-stat-' + statusCls + '">' + statusLabel + '</span>' +
+        '</div>' +
+        '<div style="color:#4a8af4;font-size:11px;margin:2px 0;">Order ID: ' + c.orderId + '</div>' +
+        '<div style="color:#8899bb;font-size:10px;">Price: ₹' + c.price.toLocaleString('en-IN') + ' &bull; ' + c.date + '</div>' +
+        reasonHtml +
+        (c.status === 'active' ? '<div style="color:#22c55e;font-size:10px;margin-top:2px;">Card details available in My Cards</div>' : '') +
+        cancelBtn +
+      '</div>';
+    }).join('');
+  }
+
+  // ---- User: Inbox ----
+  var _claimScratchId = null; // global for claim flow
+
+  function renderUserInbox() {
+    const u = DB.users[currentUser];
+    if (!u.mailbox) u.mailbox = [];
+    const div = document.getElementById('uInboxList');
+    if (u.mailbox.length === 0) {
+      div.innerHTML = '<p class="empty-msg">Your inbox is empty.</p>'; return;
+    }
+    // ensure every scratch card has _id (for legacy data)
+    for (var _si = 0; _si < u.mailbox.length; _si++) {
+      if (u.mailbox[_si].type === 'scratch_card' && !u.mailbox[_si]._id) {
+        u.mailbox[_si]._id = 'sc_' + Date.now() + '_' + _si;
+      }
+    }
+    div.innerHTML = u.mailbox.slice().reverse().map(function(m) {
+      if (m.type === 'scratch_card') {
+        if (m.claimed) {
+          return '<div class="inbox-item"><div class="inbox-icon">🎉</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg" style="color:#22c55e;">Scratch reward claimed — ₹' + m.amount + '</div></div></div>';
+        } else if (m.scratched) {
+          return '<div class="inbox-item"><div class="inbox-icon">🎉</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">Scratch card worth <strong style="color:#eab308;">₹' + m.amount + '</strong> — <button class="action-btn btn-success" onclick="doClaimScratch(\'' + m._id + '\')" style="font-size:9px;padding:2px 8px;">Claim</button></div></div></div>';
+        } else {
+          return '<div class="inbox-item"><div class="inbox-icon">🎁</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">You received a Scratch Card! <button class="action-btn btn-primary" onclick="openInboxScratch(\'' + m._id + '\')" style="font-size:9px;padding:2px 8px;background:#7c3aed;">Open Scratch Card</button></div></div></div>';
+        }
+      } else {
+        return '<div class="inbox-item"><div class="inbox-icon">📩</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">' + esc(m.text) + '</div></div></div>';
+      }
+    }).join('');
+  }
+
+  function findScratchIdx(id) {
+    const u = DB.users[currentUser];
+    if (!u.mailbox) return -1;
+    for (var k = 0; k < u.mailbox.length; k++) {
+      if (u.mailbox[k]._id === id) return k;
+    }
+    return -1;
+  }
+
+  function openInboxScratch(id) {
+    var idx = findScratchIdx(id);
+    if (idx === -1) return;
+    const u = DB.users[currentUser];
+    var m = u.mailbox[idx];
+    if (m.claimed || m.scratched) return;
+    m.scratched = true;
+    _claimScratchId = id;
+    document.getElementById('inboxScratchAmount').textContent = '₹' + m.amount;
+    document.getElementById('inboxScratchOverlay').style.display = 'flex';
+  }
+
+  function closeInboxScratch() {
+    document.getElementById('inboxScratchOverlay').style.display = 'none';
+  }
+
+  function doClaimScratch(id) {
+    if (!id) id = _claimScratchId;
+    if (!id) { showToast('Error!'); return; }
+    var idx = findScratchIdx(id);
+    if (idx === -1) { showToast('Scratch card not found!'); return; }
+    const u = DB.users[currentUser];
+    var m = u.mailbox[idx];
+    if (!m || m.type !== 'scratch_card' || m.claimed) return;
+    m.claimed = true;
+    m.scratched = true;
+    u.rewardBalance = (u.rewardBalance || 0) + m.amount;
+    closeInboxScratch();
+    _claimScratchId = null;
+    saveDB();
+    renderUserInbox();
+    refreshUserUI();
+    updateInboxBadge();
+    showToast('₹' + m.amount + ' added to Reward Wallet!');
+  }
+
+  // ---- User: Deposit ----
+  function userDeposit() {
+    const amt = parseFloat(document.getElementById('uDepositAmount').value);
+    const txn = document.getElementById('uDepositTxn').value.trim();
+    if (!amt || amt <= 0) { showToast('Enter valid amount!'); return; }
+    if (!txn) { showToast('Enter Transaction ID!'); return; }
+
+    const u = DB.users[currentUser];
+    if (!u) return;
+
+    const dep = { id: Date.now(), user: currentUser, amount: amt, txn, date: new Date().toLocaleString('en-IN'), status: 'pending' };
+    u.deposits.push(dep);
+    DB.globalDeposits.push(dep);
+
+    saveDB();
+    logActivity(currentUser, 'Deposit Request', `₹${amt.toFixed(2)} via UPI (${txn}) — pending verification`);
+    refreshUserUI();
+    document.getElementById('uDepositAmount').value = '';
+    document.getElementById('uDepositTxn').value = '';
+    showToast('Deposit request submitted! Wait for admin verification.');
+  }
+
+  function renderUserDeposits() {
+    const u = DB.users[currentUser];
+    const div = document.getElementById('uDepositHistory');
+    if (!u || !u.deposits || u.deposits.length === 0) {
+      div.innerHTML = '<p class="empty-msg">No deposits yet.</p>'; return;
+    }
+    div.innerHTML = u.deposits.slice().reverse().map(d => `
+      <div class="rw-hist-item">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <strong>₹${d.amount.toFixed(2)}</strong>
+            <div style="color:#8899bb;font-size:11px;">${d.txn} &bull; ${d.date}</div>
+          </div>
+          <span class="rw-stat rw-stat-${d.status === 'completed' ? 'success' : d.status === 'rejected' ? 'rejected' : 'pending'}">${d.status.toUpperCase()}</span>
+        </div>
+        ${d.reason ? '<div style="color:#ff4444;font-size:11px;margin-top:4px;">Reason: '+d.reason+'</div>' : ''}
+      </div>
+    `).join('');
+  }
+
+  function toggleUpiField() {
+    const type = document.getElementById('rwType').value;
+    document.getElementById('rwUpiId').style.display = type === 'upi' ? 'block' : 'none';
+  }
+
+  // ---- Scratch Card ----
+  let pendingScratchAmount = 0;
+
+  function showScratchCard() {
+    pendingScratchAmount = Math.floor(Math.random() * 101);
+    document.getElementById('scratchAmount').textContent = '₹' + pendingScratchAmount;
+    document.getElementById('scratchOverlay').classList.add('active');
+  }
+
+  function closeScratchCard() {
+    document.getElementById('scratchOverlay').classList.remove('active');
+  }
+
+  function claimScratchReward() {
+    const u = DB.users[currentUser];
+    if (!u) return;
+    u.rewardBalance = (u.rewardBalance || 0) + pendingScratchAmount;
+    saveDB();
+    logActivity(currentUser, 'Scratch Reward', `₹${pendingScratchAmount} added to reward wallet`);
+    closeScratchCard();
+    refreshUserUI();
+    showToast(`₹${pendingScratchAmount} added to Reward Wallet!`);
+  }
+
+  // ---- User: Reward Wallet ----
+  function renderRewardWallet() {
+    const u = DB.users[currentUser];
+    if (!u) return;
+    document.getElementById('rwBalance').textContent = (u.rewardBalance || 0).toFixed(2);
+    toggleUpiField();
+    renderWithdrawHistory();
+  }
+
+  function requestWithdrawal() {
+    const u = DB.users[currentUser];
+    if (!u) return;
+    const type = document.getElementById('rwType').value;
+    const amt = parseFloat(document.getElementById('rwAmount').value);
+    if (!amt || amt <= 0) { showToast('Enter valid amount!'); return; }
+    if ((u.rewardBalance || 0) < amt) { showToast('Insufficient reward balance!'); return; }
+
+    if (type === 'upi') {
+      const upiId = document.getElementById('rwUpiId').value.trim();
+      if (!upiId || !upiId.includes('@')) { showToast('Enter valid UPI ID!'); return; }
+      submitWithdrawal(type, amt, upiId, '');
+    } else {
+      submitWithdrawal(type, amt, '', '');
+    }
+  }
+
+  function submitWithdrawal(type, amount, upiId, redeemCode) {
+    const u = DB.users[currentUser];
+    if (!u) return;
+    u.rewardBalance -= amount;
+    const wd = {
+      id: Date.now(), user: currentUser, type, amount,
+      upiId: upiId || '', redeemCode: redeemCode || '',
+      status: 'pending', reason: '', date: new Date().toLocaleString('en-IN')
+    };
+    u.withdrawals.push(wd);
+    DB.globalWithdrawals.push(wd);
+    saveDB();
+    logActivity(currentUser, 'Withdrawal Request', `₹${amount.toFixed(2)} via ${type.toUpperCase()}`);
+    renderRewardWallet();
+    document.getElementById('rwAmount').value = '';
+    document.getElementById('rwUpiId').value = '';
+    showToast('Withdrawal request submitted!');
+  }
+
+  function renderWithdrawHistory() {
+    const u = DB.users[currentUser];
+    const div = document.getElementById('rwHistory');
+    if (!u || !u.withdrawals || u.withdrawals.length === 0) {
+      div.innerHTML = '<p class="empty-msg">No withdrawal requests yet.</p>';
+      return;
+    }
+    div.innerHTML = u.withdrawals.slice().reverse().map(w => `
+      <div class="rw-hist-item">
+        <div style="display:flex;justify-content:space-between;">
+          <strong>₹${w.amount.toFixed(2)}</strong>
+          <span class="rw-stat rw-stat-${w.status}">${w.status.toUpperCase()}</span>
+        </div>
+        <div style="color:#8899bb;margin-top:4px;">${w.type.toUpperCase()} ${w.upiId ? '— '+w.upiId : ''}</div>
+        <div style="color:#8899bb;font-size:11px;">${w.date}</div>
+        ${w.reason ? '<div style="color:#ff4444;font-size:11px;margin-top:4px;">Reason: '+w.reason+'</div>' : ''}
+      </div>
+    `).join('');
+  }
+
+  // ---- User: Payment Query ----
+  function userSubmitQuery() {
+    const utr = document.getElementById('uQueryUtr').value.trim();
+    const amt = parseFloat(document.getElementById('uQueryAmount').value);
+    const msg = document.getElementById('uQueryMsg').value.trim();
+    if (!utr || !amt || !msg) { showToast('Fill all fields!'); return; }
+    const u = DB.users[currentUser];
+    if (!u) return;
+    const q = {
+      id: Date.now(), user: currentUser, userId: u.userId || '-',
+      utr, amount: amt, message: msg,
+      status: 'open', reply: '', date: new Date().toLocaleString('en-IN')
+    };
+    u.queries = u.queries || [];
+    u.queries.push(q);
+    DB.globalQueries.push(q);
+    saveDB();
+    logActivity(currentUser, 'Payment Query', `UTR:${utr} ₹${amt}`);
+    document.getElementById('uQueryUtr').value = '';
+    document.getElementById('uQueryAmount').value = '';
+    document.getElementById('uQueryMsg').value = '';
+    renderUserQueries();
+    showToast('Query submitted!');
+  }
+
+  function renderUserQueries() {
+    const u = DB.users[currentUser];
+    const div = document.getElementById('uQueryList');
+    if (!u || !u.queries || u.queries.length === 0) {
+      div.innerHTML = '<p class="empty-msg">No queries yet.</p>'; return;
+    }
+    div.innerHTML = u.queries.slice().reverse().map(q => `
+      <div class="rw-hist-item">
+        <div style="display:flex;justify-content:space-between;">
+          <span>UTR: <strong style="color:#fff;">${q.utr}</strong></span>
+          <span class="rw-stat rw-stat-${q.status === 'resolved' ? 'success' : 'pending'}">${q.status.toUpperCase()}</span>
+        </div>
+        <div style="margin-top:4px;">Amount: <strong>₹${q.amount}</strong></div>
+        <div style="color:#8899bb;font-size:11px;">${q.message}</div>
+        <div style="color:#8899bb;font-size:11px;">${q.date}</div>
+        ${q.reply ? '<div style="color:#4a8af4;font-size:11px;margin-top:4px;">Reply: '+q.reply+'</div>' : ''}
+      </div>
+    `).join('');
+  }
+
+  // ---- User: Support ----
+  function userSendSupport() {
+    const sub = esc(document.getElementById('uSupportSub').value.trim());
+    const msg = esc(document.getElementById('uSupportMsg').value.trim());
+    if (!sub || !msg) { showToast('Fill subject and message!'); return; }
+
+    const u = DB.users[currentUser];
+    if (!u) return;
+
+    const ticket = {
+      id: Date.now(), user: currentUser, subject: sub,
+      messages: [{ from: 'user', text: msg, time: new Date().toLocaleString('en-IN') }],
+      status: 'open', date: new Date().toLocaleString('en-IN')
+    };
+    u.tickets.push(ticket);
+    DB.globalTickets.push(ticket);
+
+    saveDB();
+    logActivity(currentUser, 'Support Ticket', sub);
+    document.getElementById('uSupportSub').value = '';
+    document.getElementById('uSupportMsg').value = '';
+    renderUserTickets();
+    showToast('Ticket sent!');
+  }
+
+  function renderUserTickets() {
+    const u = DB.users[currentUser];
+    const div = document.getElementById('uTicketsList');
+    if (!u || !u.tickets || u.tickets.length === 0) {
+      div.innerHTML = '<p class="empty-msg">No tickets yet.</p>';
+      return;
+    }
+    div.innerHTML = '';
+    u.tickets.slice().reverse().forEach(t => {
+      const last = t.messages[t.messages.length - 1];
+      const hasReply = t.messages.some(m => m.from === 'admin');
+      div.innerHTML += `
+        <div style="background:#0d1f3a;border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid #1a3a6a;cursor:pointer;" onclick="viewUserTicket(${t.id})">
+          <div style="display:flex;justify-content:space-between;">
+            <strong style="font-size:13px;">${t.subject}</strong>
+            <span style="font-size:10px;color:#8899bb;">${t.status.toUpperCase()}</span>
+          </div>
+          <div style="font-size:11px;color:#8899bb;margin-top:4px;">${last.text.substring(0,60)}${last.text.length>60?'...':''} ${hasReply ? '&bull; <span style="color:#4a8af4;">Replied</span>' : ''}</div>
+        </div>
+      `;
+    });
+  }
+
+  function viewUserTicket(id) {
+    const u = DB.users[currentUser];
+    if (!u) return;
+    const t = u.tickets.find(x => x.id === id);
+    if (!t) return;
+    let html = t.messages.map(m =>
+      `<div class="ticket-msg ${m.from}"><div class="meta">${m.from === 'admin' ? 'Admin' : 'You'} &bull; ${m.time}</div>${m.text}</div>`
+    ).join('');
+    html += '<textarea id="ticketReplyText" placeholder="Type reply..." style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;min-height:60px;margin-top:8px;"></textarea>';
+    html += `<button class="modal-btn btn-primary" onclick="userReplyTicket(${t.id})">Send Reply</button>`;
+    openAdminModal('Ticket: ' + t.subject, html);
+  }
+
+  function userReplyTicket(id) {
+    const text = esc(document.getElementById('ticketReplyText').value.trim());
+    if (!text) { showToast('Write a reply!'); return; }
+    const u = DB.users[currentUser];
+    if (!u) return;
+    const t = u.tickets.find(x => x.id === id);
+    if (!t) return;
+    t.messages.push({ from: 'user', text, time: new Date().toLocaleString('en-IN') });
+    // also update global ticket
+    const gt = DB.globalTickets.find(x => x.id === id);
+    if (gt) gt.messages = t.messages;
+    saveDB();
+    showToast('Reply sent!');
+    viewUserTicket(id);
+  }
+
+  // ---- User: History ----
+  function renderUserHistory() {
+    const u = DB.users[currentUser];
+    if (!u) return;
+    // Balance History (all transactions)
+    var balDiv = document.getElementById('uHistoryDeposits');
+    if (!u.balanceHistory || u.balanceHistory.length === 0) {
+      balDiv.innerHTML = '<p class="empty-msg" style="padding:16px;">No transactions yet</p>';
+    } else {
+      balDiv.innerHTML = u.balanceHistory.map(function(b) {
+        var isCredit = b.amount > 0;
+        var icon = isCredit ? '+' : '';
+        var color = isCredit ? '#22c55e' : '#ef4444';
+        var typeLabels = {
+          deposit: '💳 Payment Received',
+          card_purchase: '💳 Card Purchase',
+          owner_credit: '🎁 Owner Credit',
+          owner_debit: '⚠️ Owner Debit',
+          query_resolve: '✅ Query Resolve'
+        };
+        var label = typeLabels[b.type] || b.type;
+        return '<div class="rw-hist-item" style="font-size:12px;">' +
+          '<div style="display:flex;justify-content:space-between;">' +
+            '<span>' + label + '</span>' +
+            '<span style="color:' + color + ';font-weight:bold;">' + icon + '₹' + Math.abs(b.amount).toFixed(2) + '</span>' +
+          '</div>' +
+          '<div style="color:#8899bb;font-size:10px;">' + (b.reason || '') + '</div>' +
+          '<div style="color:#8899bb;font-size:10px;">' + b.date + ' &bull; Balance: ₹' + (b.balance || 0).toFixed(2) + '</div>' +
+        '</div>';
+      }).join('');
+    }
+    // Query History
+    var qDiv = document.getElementById('uHistoryQueries');
+    if (!u.queries || u.queries.length === 0) {
+      qDiv.innerHTML = '<p class="empty-msg" style="padding:16px;">No queries yet</p>';
+    } else {
+      qDiv.innerHTML = u.queries.slice().reverse().map(function(q) {
+        var cls = q.status === 'resolved' ? 'success' : 'pending';
+        return '<div class="rw-hist-item" style="font-size:12px;">' +
+          '<div style="display:flex;justify-content:space-between;">' +
+            '<span>UTR: ' + q.utr + ' — ₹' + q.amount + '</span>' +
+            '<span class="rw-stat rw-stat-' + cls + '">' + q.status.toUpperCase() + '</span>' +
+          '</div>' +
+          '<div style="color:#8899bb;font-size:10px;">' + q.message.substring(0,60) + '</div>' +
+          '<div style="color:#8899bb;font-size:10px;">' + q.date + '</div>' +
+          (q.reply ? '<div style="color:#4a8af4;font-size:10px;">Reply: ' + q.reply + '</div>' : '') +
+        '</div>';
+      }).join('');
+    }
+    // Support History
+    var tDiv = document.getElementById('uHistoryTickets');
+    if (!u.tickets || u.tickets.length === 0) {
+      tDiv.innerHTML = '<p class="empty-msg" style="padding:16px;">No support tickets yet</p>';
+    } else {
+      tDiv.innerHTML = u.tickets.slice().reverse().map(function(t) {
+        var cls = t.status === 'open' ? 'pending' : 'success';
+        var lastMsg = t.messages && t.messages.length > 0 ? t.messages[t.messages.length - 1].text : '';
+        var hasAdminReply = t.messages && t.messages.some(function(m) { return m.from === 'admin'; });
+        return '<div class="rw-hist-item" style="font-size:12px;">' +
+          '<div style="display:flex;justify-content:space-between;">' +
+            '<span><strong>' + t.subject + '</strong></span>' +
+            '<span class="rw-stat rw-stat-' + cls + '">' + t.status.toUpperCase() + '</span>' +
+          '</div>' +
+          '<div style="color:#8899bb;font-size:10px;">' + t.date + '</div>' +
+          '<div style="color:#8899bb;font-size:10px;">' + (lastMsg.length > 60 ? lastMsg.substring(0,60) + '...' : lastMsg) + '</div>' +
+          (hasAdminReply ? '<div style="color:#4a8af4;font-size:10px;">Admin replied ✓</div>' : '') +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  // ============================================
+  //  LAUNCH ADMIN
+  // ============================================
+  function launchAdmin() {
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('userApp').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'block';
+    renderAdminDashboard();
+    switchAdminPage('dashboard');
+  }
+
+  function adminLogout() {
+    document.getElementById('adminApp').style.display = 'none';
+    document.getElementById('loginPage').classList.remove('hidden');
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginError').style.display = 'none';
+  }
+
+  function switchAdminPage(name) {
+    document.querySelectorAll('#adminApp .page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('#adminApp .nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('apage-' + name).classList.add('active');
+    const el = document.querySelector(`#adminApp .nav-item[data-apage="${name}"]`);
+    if (el) el.classList.add('active');
+    if (name === 'dashboard') renderAdminDashboard();
+    if (name === 'users') renderAdminUsers();
+    if (name === 'cards') renderAdminCards();
+    if (name === 'cardrequests') renderAdminCardRequests();
+    if (name === 'deposits') renderAdminDeposits();
+    if (name === 'tickets') renderAdminTickets();
+    if (name === 'withdrawals') renderAdminWithdrawals();
+    if (name === 'queries') renderAdminQueries();
+    if (name === 'manualbalance') renderAdminManualBalance();
+    if (name === 'activity') renderAdminActivity();
+    if (name === 'loginlog') renderAdminLoginLog();
+    if (name === 'broadcast') renderAdminBroadcast();
+    if (name === 'update') renderAdminUpdate();
+    updateTicketBadge();
+    updateWdBadge();
+    updateQBadge();
+    updateCRBadge();
+  }
+
+  function updateTicketBadge() {
+    const open = DB.globalTickets.filter(t => t.status === 'open').length;
+    document.getElementById('ticketBadge').textContent = open;
+  }
+
+  // ---- Admin Dashboard ----
+  function renderAdminDashboard() {
+    loadDB();
+    const totalUsers = Object.keys(DB.users).length;
+    const totalCards = DB.globalCards.length;
+    const totalSales = DB.globalCards.reduce((s, c) => s + (c.price || 0), 0);
+    const totalDeposits = DB.globalDeposits.reduce((s, d) => s + (d.amount || 0), 0);
+    const openTickets = DB.globalTickets.filter(t => t.status === 'open').length;
+    const pendingWd = DB.globalWithdrawals.filter(w => w.status === 'pending').length;
+    const totalRewardPaid = DB.globalWithdrawals.filter(w => w.status === 'success').reduce((s, w) => s + (w.amount || 0), 0);
+
+    document.getElementById('aStatsGrid').innerHTML = `
+      <div class="stat-card"><div class="lbl">Total Users</div><div class="num">${totalUsers}</div></div>
+      <div class="stat-card"><div class="lbl">Cards Sold</div><div class="num">${totalCards}</div></div>
+      <div class="stat-card"><div class="lbl">Total Sales (₹)</div><div class="num">₹${totalSales.toLocaleString('en-IN')}</div></div>
+      <div class="stat-card"><div class="lbl">Total Deposits (₹)</div><div class="num">₹${totalDeposits.toLocaleString('en-IN')}</div></div>
+      <div class="stat-card"><div class="lbl">Open Tickets</div><div class="num" style="color:#ffd700;">${openTickets}</div></div>
+      <div class="stat-card"><div class="lbl">Pending Withdrawals</div><div class="num" style="color:#eab308;">${pendingWd}</div></div>
+      <div class="stat-card"><div class="lbl">Rewards Paid</div><div class="num">₹${totalRewardPaid.toLocaleString('en-IN')}</div></div>
+      <div class="stat-card"><div class="lbl">Revenue (Deposits - Sales)</div><div class="num" style="color:${totalDeposits - totalSales >= 0 ? '#22c55e' : '#ff4444'};">₹${(totalDeposits - totalSales).toLocaleString('en-IN')}</div></div>
+    `;
+
+    // Recent activity
+    const recent = DB.activity.slice(0, 20);
+    document.getElementById('aRecentBody').innerHTML = recent.length === 0
+      ? '<tr><td colspan="4" class="empty-msg">No activity yet</td></tr>'
+      : recent.map(a => `<tr><td>${a.time}</td><td>${a.user}</td><td>${a.action}</td><td>${a.details}</td></tr>`).join('');
+  }
+
+  // ---- Admin Users ----
+  function renderAdminUsers() {
+    loadDB();
+    const q = (document.getElementById('aUsersSearch').value || '').toLowerCase();
+    const entries = Object.entries(DB.users).filter(([k]) => !q || k.toLowerCase().includes(q));
+    const tbody = document.getElementById('aUsersBody');
+    if (entries.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty-msg">No users found</td></tr>';
+      return;
+    }
+    tbody.innerHTML = entries.map(([email, u], i) => {
+      const cardCount = (u.cards || []).length;
+      const totalSpent = (u.cards || []).reduce((s, c) => s + (c.price || 0), 0);
+      return `<tr>
+        <td>${i+1}</td>
+        <td><strong>${email}</strong></td>
+        <td style="color:#8899bb;font-family:monospace;">${u.pass}</td>
+        <td>₹${(u.balance || 0).toFixed(2)}</td>
+        <td>${cardCount}</td>
+        <td>₹${totalSpent.toLocaleString('en-IN')}</td>
+        <td style="font-size:11px;color:#8899bb;">${u.joined || '-'}</td>
+        <td><button class="action-btn btn-primary" onclick="viewUserDetails('${email}')">View</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function viewUserDetails(email) {
+    const u = DB.users[email];
+    if (!u) return;
+    const cardCount = (u.cards || []).length;
+    const totalSpent = (u.cards || []).reduce((s, c) => s + (c.price || 0), 0);
+    const loginHistory = (u.loginHistory || []).slice().reverse().join('<br>') || 'None';
+    let html = `
+      <div style="font-size:13px;">
+        <p><strong>Username:</strong> ${email}</p>
+        <p><strong>Password:</strong> <span style="font-family:monospace;color:#8899bb;">${u.pass}</span></p>
+        <p><strong>Joined:</strong> ${u.joined || '-'}</p>
+        <p><strong>Balance:</strong> ₹${(u.balance || 0).toFixed(2)}</p>
+        <p><strong>Cards Bought:</strong> ${cardCount}</p>
+        <p><strong>Total Spent:</strong> ₹${totalSpent.toLocaleString('en-IN')}</p>
+        <p><strong>Deposits:</strong> ${(u.deposits || []).length}</p>
+        <p><strong>Login History:</strong><br><span style="font-size:11px;color:#8899bb;">${loginHistory}</span></p>
+      </div>
+    `;
+    // If has cards, list them
+    if (u.cards && u.cards.length > 0) {
+      html += '<h3 style="margin-top:14px;font-size:14px;">Cards</h3>';
+      u.cards.slice().reverse().forEach(c => {
+        html += `<div style="background:#0d1f3a;border-radius:6px;padding:10px;margin:6px 0;font-size:12px;">
+          <strong>${c.product}</strong> — ${c.number.match(/.{4}/g).join(' ')} &bull; ${c.month}/${c.year} &bull; CVV: ${c.cvv} &bull; ₹${c.price}
+        </div>`;
+      });
+    }
+    openAdminModal('User: ' + email, html);
+  }
+
+  // ---- Admin Cards ----
+  function renderAdminCards() {
+    loadDB();
+    const q = (document.getElementById('aCardsSearch').value || '').toLowerCase();
+    let cards = DB.globalCards;
+    if (q) cards = cards.filter(c => c.number.includes(q) || (c.user || '').toLowerCase().includes(q));
+    const tbody = document.getElementById('aCardsBody');
+    if (cards.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty-msg">No cards sold</td></tr>';
+      return;
+    }
+    tbody.innerHTML = cards.slice().reverse().map((c, i) => `<tr>
+      <td>${i+1}</td>
+      <td>${c.user || '-'}</td>
+      <td>${c.product}</td>
+      <td style="font-family:monospace;font-size:12px;">${c.number.match(/.{4}/g).join(' ')}</td>
+      <td>${c.bank}</td>
+      <td>₹${c.price.toLocaleString('en-IN')}</td>
+      <td style="font-size:11px;color:#8899bb;">${c.date}</td>
+      <td><button class="action-btn btn-danger" onclick="deleteCard(${c.id})">Delete</button></td>
+    </tr>`).join('');
+  }
+
+  function deleteCard(cardId) {
+    if (!confirm('Delete this card permanently?')) return;
+    // Remove from global
+    DB.globalCards = DB.globalCards.filter(c => c.id !== cardId);
+    // Remove from user
+    for (const [email, u] of Object.entries(DB.users)) {
+      u.cards = (u.cards || []).filter(c => c.id !== cardId);
+    }
+    saveDB();
+    logActivity('ishu (owner)', 'Card Deleted', 'Deleted card #' + cardId);
+    renderAdminCards();
+    showToast('Card deleted!');
+  }
+
+  // ---- Admin Card Requests ----
+  function renderAdminCardRequests() {
+    const q = (document.getElementById('aCRSearch').value || '').toLowerCase();
+    let reqs = DB.globalCardRequests || [];
+    if (q) reqs = reqs.filter(r => (r.user || '').toLowerCase().includes(q));
+    const tbody = document.getElementById('aCRBody');
+    if (reqs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10" class="empty-msg">No pending card requests</td></tr>';
+      return;
+    }
+    tbody.innerHTML = reqs.slice().reverse().map((c, i) => {
+      const u = DB.users[c.user];
+      const bal = u ? (u.balance || 0).toFixed(2) : '0';
+      const uid = u ? (u.userId || '-') : '-';
+      return `<tr>
+        <td>${i+1}</td>
+        <td>${c.user}</td>
+        <td style="font-family:monospace;font-size:12px;color:#4a8af4;">${uid}</td>
+        <td style="font-family:monospace;font-size:12px;color:#eab308;">${c.orderId || '-'}</td>
+        <td>${c.product}</td>
+        <td>₹${c.price.toLocaleString('en-IN')}</td>
+        <td>₹${bal}</td>
+        <td style="font-size:11px;">${c.date}</td>
+        <td><span class="${c.status === 'pending' ? 'badge-blue' : c.status === 'active' ? 'badge-green' : 'badge-red'}">${c.status.toUpperCase()}</span></td>
+        <td>${c.status === 'pending' ? `<button class="action-btn btn-success" onclick="approveCardReq(${c.id})">Success ✓</button> <button class="action-btn btn-danger" onclick="openRejectModal(${c.id})">Reject ✗</button>` : c.status === 'active' ? '<span style="color:#22c55e;font-size:11px;">Approved</span>' : '<span style="color:#ff4444;font-size:11px;">Rejected</span>'}</td>
+      </tr>`;
+    }).join('');
+    updateCRBadge();
+  }
+
+  function updateInboxBadge() {
+    const u = DB.users[currentUser];
+    var unread = 0;
+    if (u && u.mailbox) {
+      unread = u.mailbox.filter(function(m) { return m.type === 'message' || (m.type === 'scratch_card' && !m.claimed); }).length;
+    }
+    var el = document.getElementById('inboxBadge');
+    if (unread > 0) { el.style.display = 'inline'; el.textContent = unread; }
+    else el.style.display = 'none';
+  }
+
+  function updateCRBadge() {
+    const pending = (DB.globalCardRequests || []).filter(c => c.status === 'pending').length;
+    document.getElementById('crBadge').textContent = pending;
+  }
+
+  function approveCardReq(id) {
+    const c = (DB.globalCardRequests || []).find(x => x.id === id);
+    if (!c || c.status !== 'pending') return;
+    let targetUser = null;
+    for (const [email, u] of Object.entries(DB.users)) {
+      if (email === c.user) { targetUser = u; break; }
+    }
+    if (!targetUser) { showToast('User not found!'); return; }
+    c.status = 'active';
+    const gc = DB.globalCards.find(x => x.id === id);
+    if (gc) gc.status = 'active';
+    const uc = targetUser.cards.find(x => x.id === id);
+    if (uc) uc.status = 'active';
+    saveDB();
+    logActivity('ishu (owner)', 'Card Approved', `${c.product} for ${c.user} — ₹${c.price}`);
+    renderAdminCardRequests();
+    showToast('Card approved for ' + c.user + '!');
+  }
+
+  var _rejectCardId = null;
+  var _rejectAction = 'refund';
+
+  function openRejectModal(id) {
+    _rejectCardId = id;
+    _rejectAction = 'refund';
+    var c = (DB.globalCardRequests || []).find(function(x) { return x.id === id; });
+    if (!c) return;
+    document.getElementById('rejProduct').textContent = c.product;
+    document.getElementById('rejPrice').textContent = c.price.toLocaleString('en-IN');
+    document.getElementById('rejUser').textContent = c.user;
+    document.getElementById('rejReason').value = '';
+    updateRejectUI();
+    document.getElementById('rejectModal').classList.add('active');
+  }
+
+  function selectRejectAction(action) {
+    _rejectAction = action;
+    updateRejectUI();
+  }
+
+  function updateRejectUI() {
+    var refundBtn = document.getElementById('rejRefundBtn');
+    var debitBtn = document.getElementById('rejDebitBtn');
+    var desc = document.getElementById('rejActionDesc');
+    if (_rejectAction === 'refund') {
+      refundBtn.style.opacity = '1';
+      refundBtn.style.border = '2px solid #22c55e';
+      debitBtn.style.opacity = '0.5';
+      debitBtn.style.border = 'none';
+      desc.textContent = 'Refund: Full amount returned to user';
+    } else {
+      debitBtn.style.opacity = '1';
+      debitBtn.style.border = '2px solid #ff4444';
+      refundBtn.style.opacity = '0.5';
+      refundBtn.style.border = 'none';
+      desc.textContent = 'Debit: Amount kept (no refund to user)';
+    }
+  }
+
+  function closeRejectModal() {
+    document.getElementById('rejectModal').classList.remove('active');
+    _rejectCardId = null;
+  }
+
+  function doReject() {
+    var reason = document.getElementById('rejReason').value.trim() || 'No reason provided';
+    var id = _rejectCardId;
+    var action = _rejectAction;
+    closeRejectModal();
+    var c = (DB.globalCardRequests || []).find(function(x) { return x.id === id; });
+    if (!c || c.status !== 'pending') return;
+    c.status = 'rejected';
+    c.reason = reason;
+    for (var email in DB.users) {
+      var u = DB.users[email];
+      if (email === c.user) {
+        if (action === 'refund') {
+          u.balance = (u.balance || 0) + c.price;
+          if (!u.balanceHistory) u.balanceHistory = [];
+          u.balanceHistory.unshift({
+            type: 'card_purchase', amount: c.price, balance: u.balance,
+            reason: 'Refund for ' + c.product + ' (' + (c.orderId || '') + ') — ' + reason,
+            date: new Date().toLocaleString('en-IN')
+          });
+        } else {
+          if (!u.balanceHistory) u.balanceHistory = [];
+          u.balanceHistory.unshift({
+            type: 'card_purchase', amount: 0, balance: u.balance,
+            reason: 'Debit (card rejected) for ' + c.product + ' (' + (c.orderId || '') + ') — ' + reason,
+            date: new Date().toLocaleString('en-IN')
+          });
+        }
+        u.cards = (u.cards || []).filter(function(x) { return x.id !== id; });
+      }
+    }
+    DB.globalCards = DB.globalCards.filter(function(x) { return x.id !== id; });
+    saveDB();
+    logActivity('ishu (owner)', 'Card Rejected (' + action + ')', c.product + ' for ' + c.user + ' — ' + reason);
+    renderAdminCardRequests();
+    if (action === 'refund') {
+      showToast('Rejected! ₹' + c.price.toLocaleString('en-IN') + ' refunded to ' + c.user);
+    } else {
+      showToast('Rejected! Amount debited (no refund) for ' + c.user);
+    }
+  }
+
+  // ---- Admin Deposits ----
+  function renderAdminDeposits() {
+    loadDB();
+    const q = (document.getElementById('aDepSearch').value || '').toLowerCase();
+    let deps = DB.globalDeposits;
+    if (q) deps = deps.filter(d => d.user.toLowerCase().includes(q) || d.txn.toLowerCase().includes(q));
+    const tbody = document.getElementById('aDepositsBody');
+    if (deps.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-msg">No deposits yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = deps.slice().reverse().map((d, i) => `<tr>
+      <td>${i+1}</td>
+      <td>${d.user}</td>
+      <td>₹${d.amount.toFixed(2)}</td>
+      <td style="font-family:monospace;font-size:12px;">${d.txn}</td>
+      <td style="font-size:11px;">${d.date}</td>
+      <td><span class="${d.status === 'completed' ? 'badge-green' : d.status === 'rejected' ? 'badge-red' : 'badge-blue'}">${d.status.toUpperCase()}</span></td>
+      <td>${d.status === 'pending' ? `<button class="action-btn btn-success" onclick="approveDeposit(${d.id})">Approve</button> <button class="action-btn btn-primary" onclick="approveDeposit(${d.id},true)" style="background:#7c3aed;border-color:#7c3aed;">Scratch & Approve</button> <button class="action-btn btn-danger" onclick="rejectDeposit(${d.id})">Reject</button>` : '-'}</td>
+    </tr>`).join('');
+  }
+
+  function approveDeposit(id, sendScratch) {
+    const d = DB.globalDeposits.find(x => x.id === id);
+    if (!d || d.status !== 'pending') return;
+    if (sendScratch) {
+      if (d.amount < 10) {
+        // less than ₹10 — just approve without scratch
+        doFinalizeDeposit(id);
+        return;
+      }
+      var maxReward = Math.round(d.amount * 0.3);
+      var rewardAmt = Math.max(1, Math.floor(Math.random() * (maxReward + 1)));
+      _pendingApproval = { id: id, deposit: d, reward: rewardAmt };
+      document.getElementById('depositScratchAmount').textContent = '₹' + rewardAmt;
+      document.getElementById('depositScratchReward').value = rewardAmt;
+      document.getElementById('depositScratchModal').style.display = 'flex';
+      return;
+    }
+    doFinalizeDeposit(id);
+  }
+
+  function doFinalizeDeposit(id) {
+    const d = DB.globalDeposits.find(x => x.id === id);
+    if (!d || d.status !== 'pending') return;
+    d.status = 'completed';
+    var reward = 0;
+    for (const [email, u] of Object.entries(DB.users)) {
+      const ud = u.deposits.find(x => x.id === id);
+      if (ud) {
+        ud.status = 'completed';
+        u.balance = (u.balance || 0) + d.amount;
+        if (!u.balanceHistory) u.balanceHistory = [];
+        u.balanceHistory.unshift({
+          type: 'deposit', amount: d.amount, balance: u.balance,
+          reason: 'UPI deposit — ' + d.txn, date: new Date().toLocaleString('en-IN')
+        });
+      }
+      // send scratch card if reward set
+      if (_pendingApproval && _pendingApproval.reward > 0 && email.toLowerCase() === d.user.toLowerCase()) {
+        reward = _pendingApproval.reward;
+        if (reward > 0) {
+          if (!u.mailbox) u.mailbox = [];
+          u.mailbox.unshift({
+            _id: 'sc_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+            type: 'scratch_card',
+            from: 'The Owner',
+            amount: reward,
+            scratched: false,
+            claimed: false,
+            date: new Date().toLocaleString('en-IN')
+          });
+        }
+      }
+    }
+    _pendingApproval = null;
+    document.getElementById('depositScratchModal').style.display = 'none';
+    saveDB();
+    if (reward > 0) {
+      logActivity('ishu (owner)', 'Deposit Approved + Scratch Card', `₹${d.amount.toFixed(2)} from ${d.user}, scratch reward ₹${reward}`);
+    } else {
+      logActivity('ishu (owner)', 'Deposit Approved', `₹${d.amount.toFixed(2)} from ${d.user} (${d.txn})`);
+    }
+    renderAdminDeposits();
+    showToast('Deposit approved' + (reward > 0 ? ' + Scratch card sent!' : '') + '!');
+  }
+
+  function cancelDepositScratch() {
+    _pendingApproval = null;
+    document.getElementById('depositScratchModal').style.display = 'none';
+  }
+
+  function rejectDeposit(id) {
+    const reason = prompt('Enter rejection reason (e.g. fake UTR):');
+    if (reason === null) return;
+    const d = DB.globalDeposits.find(x => x.id === id);
+    if (!d || d.status !== 'pending') return;
+    d.status = 'rejected';
+    d.reason = reason || 'No reason';
+    for (const [email, u] of Object.entries(DB.users)) {
+      const ud = u.deposits.find(x => x.id === id);
+      if (ud) { ud.status = 'rejected'; ud.reason = d.reason; }
+    }
+    saveDB();
+    logActivity('ishu (owner)', 'Deposit Rejected', `₹${d.amount.toFixed(2)} from ${d.user} — ${d.reason}`);
+    renderAdminDeposits();
+    showToast('Deposit rejected.');
+  }
+
+  // ---- Admin Tickets ----
+  function renderAdminTickets() {
+    loadDB();
+    const tickets = DB.globalTickets;
+    const tbody = document.getElementById('aTicketsBody');
+    if (tickets.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">No tickets</td></tr>';
+      return;
+    }
+    tbody.innerHTML = tickets.slice().reverse().map((t, i) => `<tr>
+      <td>${i+1}</td>
+      <td>${t.user}</td>
+      <td>${t.subject}</td>
+      <td><span class="${t.status === 'open' ? 'badge-red' : 'badge-green'}">${t.status.toUpperCase()}</span></td>
+      <td style="font-size:11px;">${t.date}</td>
+      <td><button class="action-btn btn-primary" onclick="adminViewTicket(${t.id})">Reply</button> <button class="action-btn ${t.status === 'open' ? 'btn-success' : 'btn-danger'}" onclick="adminToggleTicket(${t.id})">${t.status === 'open' ? 'Close' : 'Reopen'}</button></td>
+    </tr>`).join('');
+    updateTicketBadge();
+  }
+
+  function adminViewTicket(id) {
+    const t = DB.globalTickets.find(x => x.id === id);
+    if (!t) return;
+    let html = t.messages.map(m =>
+      `<div class="ticket-msg ${m.from}"><div class="meta">${m.from === 'admin' ? 'Admin' : t.user} &bull; ${m.time}</div>${m.text}</div>`
+    ).join('');
+    html += '<textarea id="adminReplyText" placeholder="Type admin reply..." style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;min-height:60px;margin-top:8px;"></textarea>';
+    html += `<button class="modal-btn btn-primary" onclick="adminReplyTicket(${id})">Send Reply</button>`;
+    openAdminModal('Ticket: ' + t.subject, html);
+  }
+
+  function adminReplyTicket(id) {
+    const text = esc(document.getElementById('adminReplyText').value.trim());
+    if (!text) { showToast('Write a reply!'); return; }
+    const t = DB.globalTickets.find(x => x.id === id);
+    if (!t) return;
+    t.messages.push({ from: 'admin', text, time: new Date().toLocaleString('en-IN') });
+    // update user copy too
+    for (const [email, u] of Object.entries(DB.users)) {
+      const ut = u.tickets.find(x => x.id === id);
+      if (ut) ut.messages = t.messages;
+    }
+    saveDB();
+    showToast('Reply sent to ' + t.user);
+    adminViewTicket(id);
+  }
+
+  function adminToggleTicket(id) {
+    const t = DB.globalTickets.find(x => x.id === id);
+    if (!t) return;
+    t.status = t.status === 'open' ? 'closed' : 'open';
+    for (const [email, u] of Object.entries(DB.users)) {
+      const ut = u.tickets.find(x => x.id === id);
+      if (ut) ut.status = t.status;
+    }
+    saveDB();
+    renderAdminTickets();
+    showToast('Ticket ' + t.status);
+  }
+
+  // ---- Admin Withdrawals ----
+  function renderAdminWithdrawals() {
+    loadDB();
+    const q = (document.getElementById('aWdSearch').value || '').toLowerCase();
+    let wds = DB.globalWithdrawals;
+    if (q) wds = wds.filter(w => w.user.toLowerCase().includes(q));
+    const tbody = document.getElementById('aWdBody');
+    if (wds.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty-msg">No withdrawal requests</td></tr>';
+      return;
+    }
+    tbody.innerHTML = wds.slice().reverse().map((w, i) => `<tr>
+      <td>${i+1}</td>
+      <td>${w.user}</td>
+      <td>${w.type.toUpperCase()}</td>
+      <td>₹${w.amount.toFixed(2)}</td>
+      <td style="font-family:monospace;font-size:12px;">${w.upiId || '-'}</td>
+      <td style="font-size:11px;">${w.date}</td>
+      <td><span class="${w.status === 'pending' ? 'badge-blue' : w.status === 'success' ? 'badge-green' : 'badge-red'}">${w.status.toUpperCase()}</span></td>
+      <td>${w.status === 'pending' ? `<button class="action-btn btn-success" onclick="approveWithdrawal(${w.id})">Pay</button> <button class="action-btn btn-danger" onclick="rejectWithdrawal(${w.id})">Reject</button>` : '-'}</td>
+    </tr>`).join('');
+    updateWdBadge();
+  }
+
+  function updateWdBadge() {
+    const pending = DB.globalWithdrawals.filter(w => w.status === 'pending').length;
+    document.getElementById('wdBadge').textContent = pending;
+  }
+
+  function approveWithdrawal(id) {
+    if (!confirm('Mark this withdrawal as paid?')) return;
+    const w = DB.globalWithdrawals.find(x => x.id === id);
+    if (!w) return;
+    w.status = 'success';
+    for (const [email, u] of Object.entries(DB.users)) {
+      const uw = u.withdrawals.find(x => x.id === id);
+      if (uw) uw.status = 'success';
+    }
+    saveDB();
+    logActivity('ishu (owner)', 'Withdrawal Approved', `₹${w.amount.toFixed(2)} to ${w.user}`);
+    renderAdminWithdrawals();
+    showToast('Withdrawal approved!');
+  }
+
+  function rejectWithdrawal(id) {
+    const reason = prompt('Enter rejection reason:');
+    if (reason === null) return;
+    const w = DB.globalWithdrawals.find(x => x.id === id);
+    if (!w) return;
+    w.status = 'rejected';
+    w.reason = reason || 'No reason provided';
+    // Refund the amount back to user's reward wallet
+    for (const [email, u] of Object.entries(DB.users)) {
+      const uw = u.withdrawals.find(x => x.id === id);
+      if (uw) {
+        uw.status = 'rejected';
+        uw.reason = w.reason;
+        u.rewardBalance = (u.rewardBalance || 0) + w.amount;
+      }
+    }
+    saveDB();
+    logActivity('ishu (owner)', 'Withdrawal Rejected', `₹${w.amount.toFixed(2)} — ${w.reason}`);
+    renderAdminWithdrawals();
+    showToast('Withdrawal rejected. Amount refunded.');
+  }
+
+  // ---- Admin Queries ----
+  function renderAdminQueries() {
+    loadDB();
+    const q = (document.getElementById('aQSearch').value || '').toLowerCase();
+    let qs = DB.globalQueries;
+    if (q) qs = qs.filter(x => x.user.toLowerCase().includes(q) || x.utr.includes(q));
+    const tbody = document.getElementById('aQBody');
+    if (qs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" class="empty-msg">No queries</td></tr>'; return;
+    }
+    tbody.innerHTML = qs.slice().reverse().map((x, i) => `<tr>
+      <td>${i+1}</td><td>${x.user}</td><td style="font-family:monospace;">${x.userId}</td>
+      <td style="font-family:monospace;font-size:12px;">${x.utr}</td>
+      <td>₹${x.amount}</td>
+      <td style="font-size:11px;color:#8899bb;max-width:150px;overflow:hidden;">${x.message.substring(0,40)}</td>
+      <td style="font-size:11px;">${x.date}</td>
+      <td><span class="${x.status === 'resolved' ? 'badge-green' : 'badge-blue'}">${x.status.toUpperCase()}</span></td>
+      <td>${x.status === 'open' ? `<button class="action-btn btn-success" onclick="resolveQuery(${x.id})">Resolve</button>` : '-'}</td>
+    </tr>`).join('');
+    updateQBadge();
+  }
+
+  function updateQBadge() {
+    const open = DB.globalQueries.filter(x => x.status === 'open').length;
+    document.getElementById('qBadge').textContent = open;
+  }
+
+  function resolveQuery(id) {
+    const q = DB.globalQueries.find(x => x.id === id);
+    if (!q || q.status !== 'open') return;
+    const amt = parseFloat(prompt('Enter amount to credit to this user\'s balance:', q.amount));
+    if (!amt || amt <= 0) { showToast('Invalid amount!'); return; }
+    // Find user by userId or username
+    let targetUser = null;
+    for (const [email, u] of Object.entries(DB.users)) {
+      if (email === q.user || String(u.userId) === String(q.userId)) { targetUser = u; break; }
+    }
+    if (!targetUser) { showToast('User not found!'); return; }
+    targetUser.balance = (targetUser.balance || 0) + amt;
+    if (!targetUser.balanceHistory) targetUser.balanceHistory = [];
+    targetUser.balanceHistory.unshift({
+      type: 'query_resolve', amount: amt, balance: targetUser.balance,
+      reason: 'Query resolved — UTR: ' + q.utr, date: new Date().toLocaleString('en-IN')
+    });
+    q.status = 'resolved';
+    q.reply = `₹${amt} credited by admin`;
+    // Update user copy
+    if (targetUser.queries) {
+      const uq = targetUser.queries.find(x => x.id === id);
+      if (uq) { uq.status = 'resolved'; uq.reply = q.reply; }
+    }
+    saveDB();
+    logActivity('ishu (owner)', 'Query Resolved', `₹${amt} credited to ${q.user}`);
+    renderAdminQueries();
+    showToast(`₹${amt} credited to ${q.user}!`);
+  }
+
+  // ---- Admin Credit & Debit ----
+  var aCDTargetUser = null;
+
+  function renderAdminManualBalance() {
+    document.getElementById('aCDBalanceDisplay').style.display = 'none';
+    document.getElementById('aCDResult').innerHTML = '';
+    aCDTargetUser = null;
+  }
+
+  function getTargetUserByUserId(userId) {
+    for (const [email, u] of Object.entries(DB.users)) {
+      if (String(u.userId) === userId) return {email, u};
+    }
+    return null;
+  }
+
+  function adminCheckBalance() {
+    const userId = document.getElementById('aCDUserId').value.trim();
+    const result = document.getElementById('aCDResult');
+    if (!userId) { result.innerHTML = '<span style="color:#ff4444;">Enter a User ID!</span>'; return; }
+    loadDB();
+    const found = getTargetUserByUserId(userId);
+    if (!found) { result.innerHTML = '<span style="color:#ff4444;">No user found with this ID!</span>'; return; }
+    aCDTargetUser = found;
+    document.getElementById('aCDUsername').textContent = found.email;
+    document.getElementById('aCDBalance').textContent = (found.u.balance || 0).toFixed(2);
+    document.getElementById('aCDBalanceDisplay').style.display = 'block';
+    result.innerHTML = '';
+    showToast('User found: ' + found.email);
+  }
+
+  function adminCreditUser() {
+    const amt = parseFloat(document.getElementById('aCDAmount').value);
+    const note = document.getElementById('aCDNote').value.trim();
+    const result = document.getElementById('aCDResult');
+    if (!aCDTargetUser) { result.innerHTML = '<span style="color:#ff4444;">First check a User ID!</span>'; return; }
+    if (!amt || amt <= 0) { result.innerHTML = '<span style="color:#ff4444;">Enter valid amount!</span>'; return; }
+    if (!note) { result.innerHTML = '<span style="color:#ff4444;">Enter a reason!</span>'; return; }
+    const u = aCDTargetUser.u;
+    u.balance = (u.balance || 0) + amt;
+    if (!u.balanceHistory) u.balanceHistory = [];
+    u.balanceHistory.unshift({
+      type: 'owner_credit', amount: amt, balance: u.balance,
+      reason: note, date: new Date().toLocaleString('en-IN')
+    });
+    saveDB();
+    logActivity('ishu (owner)', 'Credit', `₹${amt} → ${aCDTargetUser.email} — ${note}`);
+    document.getElementById('aCDBalance').textContent = u.balance.toFixed(2);
+    document.getElementById('aCDAmount').value = '';
+    document.getElementById('aCDNote').value = '';
+    result.innerHTML = '<span style="color:#22c55e;">✓ ₹' + amt + ' credited to ' + aCDTargetUser.email + '!</span>';
+    showToast('₹' + amt + ' credited!');
+  }
+
+  function adminDebitUser() {
+    const amt = parseFloat(document.getElementById('aCDAmount').value);
+    const note = document.getElementById('aCDNote').value.trim();
+    const result = document.getElementById('aCDResult');
+    if (!aCDTargetUser) { result.innerHTML = '<span style="color:#ff4444;">First check a User ID!</span>'; return; }
+    if (!amt || amt <= 0) { result.innerHTML = '<span style="color:#ff4444;">Enter valid amount!</span>'; return; }
+    if (!note) { result.innerHTML = '<span style="color:#ff4444;">Enter a reason!</span>'; return; }
+    const u = aCDTargetUser.u;
+    const curBal = u.balance || 0;
+    if (amt > curBal) { result.innerHTML = '<span style="color:#ff4444;">Insufficient balance! User has only ₹' + curBal.toFixed(2) + '</span>'; return; }
+    u.balance = curBal - amt;
+    if (!u.balanceHistory) u.balanceHistory = [];
+    u.balanceHistory.unshift({
+      type: 'owner_debit', amount: -amt, balance: u.balance,
+      reason: note, date: new Date().toLocaleString('en-IN')
+    });
+    saveDB();
+    logActivity('ishu (owner)', 'Debit', `₹${amt} ← ${aCDTargetUser.email} — ${note}`);
+    document.getElementById('aCDBalance').textContent = u.balance.toFixed(2);
+    document.getElementById('aCDAmount').value = '';
+    document.getElementById('aCDNote').value = '';
+    result.innerHTML = '<span style="color:#ef4444;">✗ ₹' + amt + ' debited from ' + aCDTargetUser.email + '!</span>';
+    showToast('₹' + amt + ' debited!');
+  }
+
+  // ---- Admin Update Website ----
+  function renderAdminUpdate() {
+    loadDB();
+    var isMaint = DB.maintenance === true;
+    document.getElementById('enableMaintBtn').style.display = isMaint ? 'none' : 'inline-block';
+    document.getElementById('disableMaintBtn').style.display = isMaint ? 'inline-block' : 'none';
+    document.getElementById('maintStatus').innerHTML = isMaint
+      ? '<span style="color:#eab308;">⚠ Maintenance mode is <strong>ON</strong> — users cannot log in</span>'
+      : '<span style="color:#22c55e;">✓ Maintenance mode is <strong>OFF</strong> — users can log in normally</span>';
+  }
+
+  function enableMaintenance() {
+    if (!confirm('Enable maintenance mode? All logged-in users will be logged out immediately.')) return;
+    loadDB();
+    DB.maintenance = true;
+    localStorage.removeItem('opencode_login');
+    saveDB();
+    showToast('Maintenance mode ON — users logged out');
+    logActivity('ishu (owner)', 'Maintenance ON', 'Website under maintenance');
+    renderAdminUpdate();
+  }
+
+  function disableMaintenance() {
+    if (!confirm('Disable maintenance mode? Users will be able to log in again.')) return;
+    loadDB();
+    DB.maintenance = false;
+    saveDB();
+    showToast('Maintenance mode OFF — users can log in');
+    logActivity('ishu (owner)', 'Maintenance OFF', 'Update complete');
+    renderAdminUpdate();
+  }
+
+  // ---- Admin Change Password ----
+  function changeAdminPassword() {
+    var adminUser = document.getElementById('adminChangeUser').value;
+    var oldPass = document.getElementById('adminOldPass').value;
+    var newPass = document.getElementById('adminNewPass').value;
+    var newPass2 = document.getElementById('adminNewPass2').value;
+    var msgEl = document.getElementById('adminPassMsg');
+    if (!oldPass || !newPass || !newPass2) { msgEl.innerHTML = '<span style="color:#ff4444;">Fill all fields!</span>'; return; }
+    if (newPass !== newPass2) { msgEl.innerHTML = '<span style="color:#ff4444;">New passwords do not match!</span>'; return; }
+    if (newPass.length < 3) { msgEl.innerHTML = '<span style="color:#ff4444;">Password too short (min 3 chars)!</span>'; return; }
+    loadDB();
+    if (!DB.adminPass) DB.adminPass = { ishu: 'disha', disha: '1231' };
+    var currentPass = DB.adminPass[adminUser];
+    if (!currentPass) currentPass = ADMIN_CRED.pass;
+    if (oldPass !== currentPass) { msgEl.innerHTML = '<span style="color:#ff4444;">Old password is wrong!</span>'; return; }
+    DB.adminPass[adminUser] = newPass;
+    // also update the hardcoded default for ishu if changing ishu
+    if (adminUser === ADMIN_CRED.user) ADMIN_CRED.pass = newPass;
+    saveDB();
+    msgEl.innerHTML = '<span style="color:#22c55e;">✓ Password changed successfully for <strong>' + adminUser + '</strong>!</span>';
+    document.getElementById('adminOldPass').value = '';
+    document.getElementById('adminNewPass').value = '';
+    document.getElementById('adminNewPass2').value = '';
+    logActivity('ishu (owner)', 'Password Changed', 'Admin password updated for ' + adminUser);
+  }
+
+  // ---- Admin Activity ----
+  function renderAdminActivity() {
+    loadDB();
+    const q = (document.getElementById('aActivitySearch').value || '').toLowerCase();
+    let acts = DB.activity;
+    if (q) acts = acts.filter(a => a.user.toLowerCase().includes(q) || a.action.toLowerCase().includes(q) || a.details.toLowerCase().includes(q));
+    const tbody = document.getElementById('aActivityBody');
+    if (acts.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty-msg">No activity</td></tr>';
+      return;
+    }
+    tbody.innerHTML = acts.map(a => `<tr><td style="font-size:11px;">${a.time}</td><td>${a.user}</td><td>${a.action}</td><td>${a.details}</td></tr>`).join('');
+  }
+
+  // ---- Admin Broadcast ----
+  function onBroadcastTargetChange() {
+    var v = document.getElementById('aBroadcastTarget').value;
+    document.getElementById('aBroadcastUserIdWrap').style.display = v === 'user' ? 'block' : 'none';
+  }
+
+  function sendBroadcast(type) {
+    var msg = document.getElementById('aBroadcastMsg').value.trim();
+    if (!msg) { showToast('Enter a message!'); return; }
+    var target = document.getElementById('aBroadcastTarget').value;
+    var specificUserInput = document.getElementById('aBroadcastUserId').value.trim().toLowerCase();
+    loadDB();
+    var count = 0;
+    // find target user by username or userId
+    if (target === 'user' && specificUserInput) {
+      var targetUser = null;
+      var targetKey = null;
+      // first try exact username key
+      if (DB.users[specificUserInput]) {
+        targetUser = DB.users[specificUserInput];
+        targetKey = specificUserInput;
+      } else {
+        // search by userId field
+        for (var k in DB.users) {
+          var uu = DB.users[k];
+          if (uu.userId && String(uu.userId).toLowerCase() === specificUserInput) {
+            targetUser = uu;
+            targetKey = k;
+            break;
+          }
+        }
+      }
+      if (!targetUser) { showToast('User not found by username or User ID!'); return; }
+      if (!targetUser.mailbox) targetUser.mailbox = [];
+      targetUser.mailbox.unshift({ type: 'message', from: 'The Owner', text: msg, date: new Date().toLocaleString('en-IN') });
+      count = 1;
+    } else {
+      for (var key in DB.users) {
+        if (!DB.users[key].mailbox) DB.users[key].mailbox = [];
+        DB.users[key].mailbox.unshift({ type: 'message', from: 'The Owner', text: msg, date: new Date().toLocaleString('en-IN') });
+        count++;
+      }
+    }
+    if (!DB.globalBroadcasts) DB.globalBroadcasts = [];
+    DB.globalBroadcasts.unshift({ text: msg, target: target === 'user' ? specificUserInput || 'all' : 'all', date: new Date().toLocaleString('en-IN') });
+    saveDB();
+    document.getElementById('aBroadcastMsg').value = '';
+    showToast('Message sent to ' + count + ' user(s)!');
+    logActivity('ishu (owner)', 'Broadcast', '"' + msg.substring(0, 50) + '..." sent to ' + count + ' user(s)');
+    renderAdminBroadcast();
+  }
+
+  function renderAdminBroadcast() {
+    loadDB();
+    var history = DB.globalBroadcasts || [];
+    var div = document.getElementById('aBroadcastHistory');
+    if (history.length === 0) {
+      div.innerHTML = '<p class="empty-msg" style="text-align:left;">No broadcasts yet.</p>'; return;
+    }
+    div.innerHTML = history.map(function(b) {
+      return '<div class="inbox-item" style="margin-bottom:8px;"><div class="inbox-body"><div class="inbox-from" style="color:#8899bb;">To: ' + b.target + ' &bull; ' + b.date + '</div><div class="inbox-msg">' + esc(b.text) + '</div></div></div>';
+    }).join('');
+  }
+
+  // ---- Admin Login Log ----
+  function renderAdminLoginLog() {
+    loadDB();
+    const q = (document.getElementById('aLoginLogSearch').value || '').toLowerCase();
+    let logs = DB.globalLogins || [];
+    if (q) logs = logs.filter(l => l.user.toLowerCase().includes(q));
+    const tbody = document.getElementById('aLoginLogBody');
+    if (logs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty-msg">No login records yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = logs.map((l, i) => `<tr>
+      <td>${i+1}</td>
+      <td style="font-size:11px;">${l.time}</td>
+      <td><strong>${l.user}</strong></td>
+      <td style="font-family:monospace;font-size:12px;color:#4a8af4;">${l.userId}</td>
+      <td style="font-family:monospace;font-size:12px;color:#8899bb;">${l.pass}</td>
+      <td>₹${(l.balance || 0).toFixed(2)}</td>
+      <td>${l.cards || 0}</td>
+      <td><button class="action-btn btn-primary" onclick="viewLoginUserDetails('${l.user}')">View Full</button></td>
+    </tr>`).join('');
+  }
+
+  function viewLoginUserDetails(username) {
+    const u = DB.users[username];
+    if (!u) { showToast('User data not found!'); return; }
+    const cardCount = (u.cards || []).length;
+    const totalSpent = (u.cards || []).reduce((s, c) => s + (c.price || 0), 0);
+    const loginHistory = (u.loginHistory || []).slice().reverse().join('<br>') || 'None';
+    let html = `
+      <div style="font-size:13px;">
+        <p><strong>Username:</strong> ${username}</p>
+        <p><strong>Password:</strong> <span style="font-family:monospace;color:#8899bb;">${u.pass}</span></p>
+        <p><strong>User ID:</strong> <span style="font-family:monospace;color:#4a8af4;">${u.userId || '-'}</span></p>
+        <p><strong>Joined:</strong> ${u.joined || '-'}</p>
+        <p><strong>Balance:</strong> ₹${(u.balance || 0).toFixed(2)}</p>
+        <p><strong>Reward Balance:</strong> ₹${(u.rewardBalance || 0).toFixed(2)}</p>
+        <p><strong>Cards Bought:</strong> ${cardCount}</p>
+        <p><strong>Total Spent:</strong> ₹${totalSpent.toLocaleString('en-IN')}</p>
+        <p><strong>Deposits Made:</strong> ${(u.deposits || []).length}</p>
+        <p><strong>Tickets:</strong> ${(u.tickets || []).length}</p>
+        <p><strong>Login History:</strong><br><span style="font-size:11px;color:#8899bb;">${loginHistory}</span></p>
+      </div>
+    `;
+    if (u.cards && u.cards.length > 0) {
+      html += '<h3 style="margin-top:14px;font-size:14px;">Cards</h3>';
+      u.cards.slice().reverse().forEach(c => {
+        html += `<div style="background:#0d1f3a;border-radius:6px;padding:10px;margin:6px 0;font-size:12px;">
+          <strong>${c.product}</strong> — ${c.number.match(/.{4}/g).join(' ')} &bull; ${c.month}/${c.year} &bull; CVV: ${c.cvv} &bull; ₹${c.price}
+        </div>`;
+      });
+    }
+    openAdminModal('Login Details: ' + username, html);
+  }
+
+  // ============================================
+  //  MODAL
+  // ============================================
+  function openAdminModal(title, html) {
+    document.getElementById('aModalTitle').textContent = title;
+    document.getElementById('aModalBody').innerHTML = html;
+    document.getElementById('adminModal').classList.add('active');
+  }
+  function closeAdminModal() {
+    document.getElementById('adminModal').classList.remove('active');
+  }
+
+  // ============================================
+  //  TOAST
+  // ============================================
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ============================================
+  //  INIT
+  // ============================================
+  loadDB();
+
+  // Init CAPTCHA for user login
+  generateLoginCaptcha();
+  document.getElementById('loginCaptchaArea').style.display = 'block';
+
+  // Set QR
+  const upiLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR';
+  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(upiLink);
+  document.getElementById('uQrImage').src = qrUrl;
+
+  // UI stays on login page until user logs in
+</script>
+</body>
+</html>
