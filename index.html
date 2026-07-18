@@ -2443,13 +2443,17 @@
   }
 
   function adminCreditUser() {
+    loadDB();
     const amt = parseFloat(document.getElementById('aCDAmount').value);
     const note = document.getElementById('aCDNote').value.trim();
     const result = document.getElementById('aCDResult');
     if (!aCDTargetUser) { result.innerHTML = '<span style="color:#ff4444;">First check a User ID!</span>'; return; }
     if (!amt || amt <= 0) { result.innerHTML = '<span style="color:#ff4444;">Enter valid amount!</span>'; return; }
     if (!note) { result.innerHTML = '<span style="color:#ff4444;">Enter a reason!</span>'; return; }
-    const u = aCDTargetUser.u;
+    const found = getTargetUserByUserId(document.getElementById('aCDUserId').value.trim());
+    if (!found) { result.innerHTML = '<span style="color:#ff4444;">User not found! Check again.</span>'; return; }
+    aCDTargetUser = found;
+    const u = found.u;
     u.balance = (u.balance || 0) + amt;
     if (!u.balanceHistory) u.balanceHistory = [];
     u.balanceHistory.unshift({
@@ -2457,22 +2461,27 @@
       reason: note, date: new Date().toLocaleString('en-IN')
     });
     saveDB();
-    logActivity('ishu (owner)', 'Credit', `₹${amt} → ${aCDTargetUser.email} — ${note}`);
+    logActivity('ishu (owner)', 'Credit', `₹${amt} → ${found.email} — ${note}`);
+    document.getElementById('aCDUsername').textContent = found.email;
     document.getElementById('aCDBalance').textContent = u.balance.toFixed(2);
     document.getElementById('aCDAmount').value = '';
     document.getElementById('aCDNote').value = '';
-    result.innerHTML = '<span style="color:#22c55e;">✓ ₹' + amt + ' credited to ' + aCDTargetUser.email + '!</span>';
+    result.innerHTML = '<span style="color:#22c55e;">✓ ₹' + amt + ' credited to ' + found.email + '!</span>';
     showToast('₹' + amt + ' credited!');
   }
 
   function adminDebitUser() {
+    loadDB();
     const amt = parseFloat(document.getElementById('aCDAmount').value);
     const note = document.getElementById('aCDNote').value.trim();
     const result = document.getElementById('aCDResult');
     if (!aCDTargetUser) { result.innerHTML = '<span style="color:#ff4444;">First check a User ID!</span>'; return; }
     if (!amt || amt <= 0) { result.innerHTML = '<span style="color:#ff4444;">Enter valid amount!</span>'; return; }
     if (!note) { result.innerHTML = '<span style="color:#ff4444;">Enter a reason!</span>'; return; }
-    const u = aCDTargetUser.u;
+    const found = getTargetUserByUserId(document.getElementById('aCDUserId').value.trim());
+    if (!found) { result.innerHTML = '<span style="color:#ff4444;">User not found! Check again.</span>'; return; }
+    aCDTargetUser = found;
+    const u = found.u;
     const curBal = u.balance || 0;
     if (amt > curBal) { result.innerHTML = '<span style="color:#ff4444;">Insufficient balance! User has only ₹' + curBal.toFixed(2) + '</span>'; return; }
     u.balance = curBal - amt;
@@ -2482,11 +2491,12 @@
       reason: note, date: new Date().toLocaleString('en-IN')
     });
     saveDB();
-    logActivity('ishu (owner)', 'Debit', `₹${amt} ← ${aCDTargetUser.email} — ${note}`);
+    logActivity('ishu (owner)', 'Debit', `₹${amt} ← ${found.email} — ${note}`);
+    document.getElementById('aCDUsername').textContent = found.email;
     document.getElementById('aCDBalance').textContent = u.balance.toFixed(2);
     document.getElementById('aCDAmount').value = '';
     document.getElementById('aCDNote').value = '';
-    result.innerHTML = '<span style="color:#ef4444;">✗ ₹' + amt + ' debited from ' + aCDTargetUser.email + '!</span>';
+    result.innerHTML = '<span style="color:#ef4444;">✗ ₹' + amt + ' debited from ' + found.email + '!</span>';
     showToast('₹' + amt + ' debited!');
   }
 
