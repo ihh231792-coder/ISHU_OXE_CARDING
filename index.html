@@ -1185,6 +1185,36 @@
   //  LAUNCH USER APP
   // ============================================
   let currentUser = null;
+  var _autoSyncTimer = null;
+
+  function startAutoSync() {
+    stopAutoSync();
+    _autoSyncTimer = setInterval(function() {
+      loadDB();
+      if (currentUser) refreshUserUI();
+      else if (document.getElementById('adminApp').style.display === 'block') {
+        var active = document.querySelector('#adminApp .page.active');
+        if (active) {
+          var id = active.id.replace('apage-', '');
+          if (id === 'dashboard') renderAdminDashboard();
+          else if (id === 'users') renderAdminUsers();
+          else if (id === 'cards') renderAdminCards();
+          else if (id === 'cardrequests') renderAdminCardRequests();
+          else if (id === 'deposits') renderAdminDeposits();
+          else if (id === 'tickets') renderAdminTickets();
+          else if (id === 'withdrawals') renderAdminWithdrawals();
+          else if (id === 'queries') renderAdminQueries();
+          else if (id === 'activity') renderAdminActivity();
+          else if (id === 'loginlog') renderAdminLoginLog();
+          else if (id === 'broadcast') renderAdminBroadcast();
+        }
+      }
+    }, 8000);
+  }
+
+  function stopAutoSync() {
+    if (_autoSyncTimer) { clearInterval(_autoSyncTimer); _autoSyncTimer = null; }
+  }
 
   function launchUser(user) {
     if (DB.maintenance === true) {
@@ -1199,9 +1229,11 @@
     document.getElementById('uDisplayEmail').textContent = user;
     refreshUserUI();
     switchUserPage('home');
+    startAutoSync();
   }
 
   function userLogout() {
+    stopAutoSync();
     currentUser = null;
     document.getElementById('userApp').style.display = 'none';
     document.getElementById('loginPage').classList.remove('hidden');
@@ -1876,9 +1908,11 @@
     document.getElementById('adminApp').style.display = 'block';
     renderAdminDashboard();
     switchAdminPage('dashboard');
+    startAutoSync();
   }
 
   function adminLogout() {
+    stopAutoSync();
     document.getElementById('adminApp').style.display = 'none';
     document.getElementById('loginPage').classList.remove('hidden');
     document.getElementById('loginUser').value = '';
