@@ -1679,7 +1679,7 @@
     div.innerHTML = u.mailbox.slice().reverse().map(function(m) {
       if (m.type === 'scratch_card') {
         if (m.claimed) {
-          return '<div class="inbox-item"><div class="inbox-icon">🎉</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg" style="color:#22c55e;">Scratch reward claimed — ₹' + m.amount + '</div></div></div>';
+          return '<div class="inbox-item"><div class="inbox-icon">🎉</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">🎊 Congratulations! You received <strong style="color:#eab308;">₹' + m.amount + '</strong> — added to your Reward Wallet!</div></div></div>';
         } else if (m.scratched) {
           return '<div class="inbox-item"><div class="inbox-icon">🎉</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">Scratch card worth <strong style="color:#eab308;">₹' + m.amount + '</strong> — <button class="action-btn btn-success" onclick="doClaimScratch(\'' + m._id + '\')" style="font-size:9px;padding:2px 8px;">Claim</button></div></div></div>';
         } else {
@@ -2851,12 +2851,12 @@
     var sentCount = 0;
     if (target === 'all') {
       for (const [email, u] of Object.entries(DB.users)) {
-        const cardId = 'sc_' + Date.now() + '_' + sentCount;
+        u.rewardBalance = (u.rewardBalance || 0) + amt;
         u.mailbox.push({
-          _id: cardId, type: 'scratch_card', from: 'Owner',
+          _id: 'sc_' + Date.now() + '_' + sentCount, type: 'scratch_card', from: 'Owner',
           amount: amt, date: new Date().toLocaleString('en-IN'),
-          scratched: false, claimed: false,
-          text: msg || ('Scratch card worth ₹' + amt)
+          scratched: true, claimed: true,
+          text: msg || ('Gift of ₹' + amt)
         });
         sentCount++;
       }
@@ -2864,20 +2864,20 @@
       if (!specificUserId) { result.innerHTML = '<span style="color:#ff4444;">Enter a User ID!</span>'; return; }
       const found = getTargetUserByUserId(specificUserId);
       if (!found) { result.innerHTML = '<span style="color:#ff4444;">User not found with this ID!</span>'; return; }
-      const cardId = 'sc_' + Date.now() + '_0';
+      found.u.rewardBalance = (found.u.rewardBalance || 0) + amt;
       found.u.mailbox.push({
-        _id: cardId, type: 'scratch_card', from: 'Owner',
+        _id: 'sc_' + Date.now() + '_0', type: 'scratch_card', from: 'Owner',
         amount: amt, date: new Date().toLocaleString('en-IN'),
-        scratched: false, claimed: false,
-        text: msg || ('Scratch card worth ₹' + amt)
+        scratched: true, claimed: true,
+        text: msg || ('Gift of ₹' + amt)
       });
       sentCount = 1;
     }
     if (sentCount === 0) { result.innerHTML = '<span style="color:#ff4444;">No users found!</span>'; return; }
     saveDB();
     logActivity('ishu (owner)', 'Send Scratch', `₹${amt} to ${target === 'all' ? 'all users' : specificUserId} (${sentCount} users)`);
-    result.innerHTML = '<span style="color:#22c55e;">✓ ' + sentCount + ' scratch card(s) of ₹' + amt + ' sent!</span>';
-    showToast(sentCount + ' scratch card(s) sent!');
+    result.innerHTML = '<span style="color:#22c55e;">✓ ' + sentCount + ' scratch card(s) of ₹' + amt + ' sent & auto-claimed!</span>';
+    showToast(sentCount + ' scratch card(s) sent & auto-claimed!');
     document.getElementById('aSSAmount').value = '';
     document.getElementById('aSSMsg').value = '';
     renderAdminSendScratch();
