@@ -870,13 +870,12 @@
 
       <div class="home-form">
         <h3>📱 Free Earning Apps</h3>
-        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Paste Play Store link & click Auto Fetch to get icon. Or upload icon manually.</p>
+        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Paste Play Store / app link — name & icon auto-fetch automatically! Or upload icon manually.</p>
         <div id="aAppList"></div>
         <div class="btn-row" style="margin-top:8px;">
-          <input type="text" id="aAppNameInput" placeholder="App name..." style="flex:0.6;">
-          <input type="text" id="aAppIconInput" placeholder="Icon URL..." style="flex:0.8;">
+          <input type="text" id="aAppNameInput" placeholder="App name (auto-fetched)..." style="flex:0.6;">
+          <input type="text" id="aAppIconInput" placeholder="Icon URL (auto-fetched)..." style="flex:0.8;">
           <input type="text" id="aAppLinkInput" placeholder="Play Store / app link..." style="flex:0.8;">
-          <button class="btn-add" onclick="fetchPlayStoreIcon('aAppIconInput','aAppLinkInput')" style="background:#7c3aed;">Auto Fetch</button>
           <label class="btn-add" style="background:#22c55e;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('appIconFile').click()">📁 Icon</label>
           <input type="file" id="appIconFile" accept="image/*" style="display:none;" onchange="uploadAppIconFile(this)">
           <button class="btn-add" onclick="addAdminApp()">+ Add</button>
@@ -898,14 +897,13 @@
 
       <div class="home-form">
         <h3>⭐ Premium Free Earning Apps</h3>
-        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Users complete task → auto-credit reward to their Reward Wallet. Track all completions.</p>
+        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Paste link → name & icon auto-fetch. Users complete task → auto-credit reward to their Reward Wallet.</p>
         <div id="aPremiumAppList"></div>
         <div class="btn-row" style="margin-top:8px;">
-          <input type="text" id="aPAppNameInput" placeholder="App name..." style="flex:0.5;">
-          <input type="text" id="aPAppIconInput" placeholder="Icon URL..." style="flex:0.6;">
+          <input type="text" id="aPAppNameInput" placeholder="App name (auto-fetched)..." style="flex:0.5;">
+          <input type="text" id="aPAppIconInput" placeholder="Icon URL (auto-fetched)..." style="flex:0.6;">
           <input type="text" id="aPAppLinkInput" placeholder="Task link / Play Store..." style="flex:0.6;">
           <input type="number" id="aPAppRewardInput" placeholder="Reward ₹" style="flex:0.2;">
-          <button class="btn-add" onclick="fetchPlayStoreIcon('aPAppIconInput','aPAppLinkInput')" style="background:#7c3aed;">Fetch</button>
           <label class="btn-add" style="background:#22c55e;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('pAppIconFile').click()">📁</label>
           <input type="file" id="pAppIconFile" accept="image/*" style="display:none;" onchange="uploadPremiumAppIconFile(this)">
           <button class="btn-add" onclick="addAdminPremiumApp()">+ Add</button>
@@ -2295,15 +2293,87 @@
   }
 
   // ---- Play Store Auto Fetch Icon ----
-  function fetchPlayStoreIcon(iconInputId, linkInputId) {
+  // ---- Auto Fetch App Info from Link ----
+  function autoFetchAppInfo(linkInputId, nameInputId, iconInputId) {
     var link = document.getElementById(linkInputId).value.trim();
-    if (!link) { showToast('Enter a Play Store link first!'); return; }
-    var match = link.match(/[?&]id=([a-zA-Z0-9._]+)/);
-    if (!match) { showToast('Could not find app ID in the link. Try a Play Store URL like: https://play.google.com/store/apps/details?id=com.example'); return; }
-    var pkg = match[1];
-    document.getElementById(iconInputId).value = 'https://play-lh.googleusercontent.com/' + pkg;
-    showToast('Icon URL guessed! If wrong, upload icon manually.');
+    if (!link) return;
+    // Play Store link
+    var playMatch = link.match(/[?&]id=([a-zA-Z0-9._-]+)/);
+    if (playMatch) {
+      var pkg = playMatch[1];
+      var iconUrl = 'https://play-lh.googleusercontent.com/' + pkg;
+      document.getElementById(iconInputId).value = iconUrl;
+      // Try to fetch app name from Play Store
+      fetchViaProxy(link, function(html) {
+        var name = extractMetaContent(html, 'og:title') || extractMetaContent(html, 'title') || extractPlayStoreName(html);
+        if (name) document.getElementById(nameInputId).value = name;
+      });
+      return;
+    }
+    // Any other URL — try to fetch OG tags
+    fetchViaProxy(link, function(html) {
+      var name = extractMetaContent(html, 'og:title') || extractMetaContent(html, 'twitter:title') || extractTitle(html);
+      var icon = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || '';
+      if (name) document.getElementById(nameInputId).value = name;
+      if (icon) document.getElementById(iconInputId).value = icon;
+    });
   }
+
+  function fetchViaProxy(url, callback) {
+    var proxies = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?url='];
+    var idx = 0;
+    function tryNext() {
+      if (idx >= proxies.length) { return; }
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', proxies[idx] + encodeURIComponent(url), true);
+      xhr.timeout = 8000;
+      xhr.onload = function() {
+        if (xhr.status === 200 && xhr.responseText) { callback(xhr.responseText); }
+        else { idx++; tryNext(); }
+      };
+      xhr.onerror = function() { idx++; tryNext(); };
+      xhr.ontimeout = function() { idx++; tryNext(); };
+      xhr.send();
+    }
+    tryNext();
+  }
+
+  function extractMetaContent(html, property) {
+    var regex = new RegExp('<meta[^>]+(?:property|name)=["\']' + property + '["\'][^>]*content=["\']([^"\']+)["\']', 'i');
+    var m = html.match(regex);
+    if (!m) {
+      regex = new RegExp('<meta[^>]*content=["\']([^"\']+)["\'][^>]*(?:property|name)=["\']' + property + '["\']', 'i');
+      m = html.match(regex);
+    }
+    return m ? m[1] : null;
+  }
+
+  function extractTitle(html) {
+    var m = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    return m ? m[1].replace(/[_-].*$/, '').trim() : null;
+  }
+
+  function extractPlayStoreName(html) {
+    var m = html.match(/<h1[^>]*itemprop="name"[^>]*>([^<]+)<\/h1>/i);
+    if (m) return m[1].trim();
+    m = html.match(/<title[^>]*>([^<]+) - Apps on Google Play<\/title>/i);
+    if (m) return m[1].trim();
+    return null;
+  }
+
+  // ---- Auto fetch on paste/input ----
+  function setupAutoFetch(linkId, nameId, iconId) {
+    var el = document.getElementById(linkId);
+    if (!el) return;
+    el.addEventListener('input', function() { autoFetchAppInfo(linkId, nameId, iconId); });
+    el.addEventListener('change', function() { autoFetchAppInfo(linkId, nameId, iconId); });
+  }
+
+  // Wire up auto-fetch for link inputs
+  setTimeout(function() {
+    setupAutoFetch('aAppLinkInput', 'aAppNameInput', 'aAppIconInput');
+    setupAutoFetch('aPAppLinkInput', 'aPAppNameInput', 'aPAppIconInput');
+  }, 100);
 
   // ---- Admin: Premium Apps ----
   function renderAPremiumAppList() {
