@@ -445,14 +445,13 @@
     </div>
     <!-- Scratch Card Overlay (for Inbox) -->
     <div class="scratch-overlay" id="inboxScratchOverlay">
-      <div class="scratch-card">
+      <div class="scratch-card" onclick="event.stopPropagation()">
         <div class="sparkle"></div>
         <button class="close-scratch" onclick="closeInboxScratch()">&times;</button>
         <div style="font-size:40px;margin:8px 0;">🎉</div>
-        <div class="reward-label">You Won a Scratch Reward!</div>
+        <div class="reward-label">Congrats, you received</div>
         <div class="reward-amount" id="inboxScratchAmount">₹0</div>
-        <div style="color:#556688;font-size:12px;margin:8px 0;">Click "Claim Reward" to add to your Reward Wallet</div>
-        <button class="claim-btn" id="inboxScratchClaimBtn" onclick="doClaimScratch()">Claim Reward</button>
+        <div style="color:#22c55e;font-size:13px;margin:10px 0;">🎊 Added to your Reward Wallet! 🎊</div>
       </div>
     </div>
     <div class="page" id="upage-deposit">
@@ -1705,19 +1704,25 @@
     if (idx === -1) return;
     const u = DB.users[currentUser];
     var m = u.mailbox[idx];
-    if (m.claimed || m.scratched) return;
+    if (m.claimed) return;
     m.claimed = true;
     m.scratched = true;
     u.rewardBalance = (u.rewardBalance || 0) + m.amount;
     saveDB();
-    renderUserInbox();
-    refreshUserUI();
-    updateInboxBadge();
-    showToast('₹' + m.amount + ' added to Reward Wallet!');
+    document.getElementById('inboxScratchAmount').textContent = '₹' + m.amount;
+    document.getElementById('inboxScratchOverlay').style.display = 'flex';
+    document.getElementById('inboxScratchOverlay').classList.add('active');
+    setTimeout(function() {
+      closeInboxScratch();
+      renderUserInbox();
+      refreshUserUI();
+      updateInboxBadge();
+    }, 2500);
   }
 
   function closeInboxScratch() {
     document.getElementById('inboxScratchOverlay').style.display = 'none';
+    document.getElementById('inboxScratchOverlay').classList.remove('active');
   }
 
   function doClaimScratch(id) {
