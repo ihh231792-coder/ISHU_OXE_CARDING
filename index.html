@@ -443,6 +443,17 @@
       <div id="uInboxList"></div>
     </div>
     <!-- Scratch Card Overlay (for Inbox) -->
+    <div class="scratch-overlay" id="inboxScratchOverlay">
+      <div class="scratch-card">
+        <div class="sparkle"></div>
+        <button class="close-scratch" onclick="closeInboxScratch()">&times;</button>
+        <div style="font-size:40px;margin:8px 0;">ðŸŽ‰</div>
+        <div class="reward-label">You Won a Scratch Reward!</div>
+        <div class="reward-amount" id="inboxScratchAmount">â‚¹0</div>
+        <div style="color:#556688;font-size:12px;margin:8px 0;">Click "Claim Reward" to add to your Reward Wallet</div>
+        <button class="claim-btn" id="inboxScratchClaimBtn" onclick="doClaimScratch()">Claim Reward</button>
+      </div>
+    </div>
     <div class="page" id="upage-deposit">
       <div class="deposit-box">
         <h2>Deposit Funds</h2>
@@ -1597,6 +1608,8 @@
   }
 
   // ---- User: Inbox ----
+  var _claimScratchId = null; // global for claim flow
+
   function renderUserInbox() {
     const u = DB.users[currentUser];
     if (!u.mailbox) u.mailbox = [];
@@ -1615,7 +1628,7 @@
         if (m.claimed) {
           return '<div class="inbox-item"><div class="inbox-icon">ðŸŽ‰</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg" style="color:#22c55e;">Scratch reward claimed â€” â‚¹' + m.amount + '</div></div></div>';
         } else if (m.scratched) {
-          return '<div class="inbox-item"><div class="inbox-icon">ðŸŽ‰</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg" style="color:#22c55e;">Scratch reward claimed â€” â‚¹' + m.amount + '</div></div></div>';
+          return '<div class="inbox-item"><div class="inbox-icon">ðŸŽ‰</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">Scratch card worth <strong style="color:#eab308;">â‚¹' + m.amount + '</strong> â€” <button class="action-btn btn-success" onclick="doClaimScratch(\'' + m._id + '\')" style="font-size:9px;padding:2px 8px;">Claim</button></div></div></div>';
         } else {
           return '<div class="inbox-item"><div class="inbox-icon">ðŸŽ</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">You received a Scratch Card! <button class="action-btn btn-primary" onclick="openInboxScratch(\'' + m._id + '\')" style="font-size:9px;padding:2px 8px;background:#7c3aed;">Open Scratch Card</button></div></div></div>';
         }
@@ -1640,9 +1653,29 @@
     const u = DB.users[currentUser];
     var m = u.mailbox[idx];
     if (m.claimed || m.scratched) return;
+    m.scratched = true;
+    _claimScratchId = id;
+    document.getElementById('inboxScratchAmount').textContent = 'â‚¹' + m.amount;
+    document.getElementById('inboxScratchOverlay').style.display = 'flex';
+  }
+
+  function closeInboxScratch() {
+    document.getElementById('inboxScratchOverlay').style.display = 'none';
+  }
+
+  function doClaimScratch(id) {
+    if (!id) id = _claimScratchId;
+    if (!id) { showToast('Error!'); return; }
+    var idx = findScratchIdx(id);
+    if (idx === -1) { showToast('Scratch card not found!'); return; }
+    const u = DB.users[currentUser];
+    var m = u.mailbox[idx];
+    if (!m || m.type !== 'scratch_card' || m.claimed) return;
     m.claimed = true;
     m.scratched = true;
     u.rewardBalance = (u.rewardBalance || 0) + m.amount;
+    closeInboxScratch();
+    _claimScratchId = null;
     saveDB();
     renderUserInbox();
     refreshUserUI();
@@ -2607,7 +2640,7 @@
 
   function getTargetUserByUserId(userId) {
     for (const [email, u] of Object.entries(DB.users)) {
-      if (String(u.userId) === userId || email.toLowerCase() === userId.toLowerCase()) return {email, u};
+      if (String(u.userId) === userId) return {email, u};
     }
     return null;
   }
