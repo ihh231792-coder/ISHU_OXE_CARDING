@@ -1011,21 +1011,43 @@
 
   function loadDB() {
     var loaded = false;
-    // 1) Try GitHub API
+    var localUpdatedAt = 0;
+    // 1) Try localStorage FIRST (fastest, always has latest local changes)
     try {
-      var xhr = githubApi('GET');
-      if (xhr.status === 200) {
-        var resp = JSON.parse(xhr.responseText);
-        _dbSha = resp.sha;
-        var raw = decodeURIComponent(escape(atob(resp.content)));
-        var gitData = JSON.parse(raw);
-        if (gitData && gitData.users) {
-          DB = gitData;
+      var r = localStorage.getItem('ishu_oxe_db');
+      if (r) {
+        var localData = JSON.parse(r);
+        if (localData && localData.users && Object.keys(localData.users).length > 0) {
+          DB = localData;
+          localUpdatedAt = localData._updatedAt || 0;
           loaded = true;
         }
       }
     } catch(e) {}
-    // 2) Try local server /api/data
+    // 2) Try GitHub API — only use if it has NEWER data
+    try {
+      var xhr = githubApi('GET');
+      if (xhr.status === 200) {
+        var resp = JSON.parse(xhr.responseText);
+        var raw = decodeURIComponent(escape(atob(resp.content)));
+        var gitData = JSON.parse(raw);
+        if (gitData && gitData.users) {
+          var gitUpdatedAt = gitData._updatedAt || 0;
+          if (gitUpdatedAt > localUpdatedAt) {
+            // GitHub has newer data — use it
+            _dbSha = resp.sha;
+            DB = gitData;
+            loaded = true;
+            // update localStorage cache
+            try { localStorage.setItem('ishu_oxe_db', JSON.stringify(DB)); } catch(e) {}
+          } else {
+            // Local is newer or equal — keep local, still save sha for next save
+            _dbSha = resp.sha;
+          }
+        }
+      }
+    } catch(e) {}
+    // 3) Try local server /api/data (fallback if nothing loaded yet)
     if (!loaded) {
       try {
         var xhr2 = new XMLHttpRequest();
@@ -1035,19 +1057,6 @@
           var serverData = JSON.parse(xhr2.responseText);
           if (serverData && Object.keys(serverData).length > 0) {
             DB = serverData;
-            loaded = true;
-          }
-        }
-      } catch(e) {}
-    }
-    // 3) Fallback to localStorage
-    if (!loaded) {
-      try {
-        var r = localStorage.getItem('ishu_oxe_db');
-        if (r) {
-          var localData = JSON.parse(r);
-          if (localData && localData.users && Object.keys(localData.users).length > 0) {
-            DB = localData;
             loaded = true;
           }
         }
@@ -1073,6 +1082,8 @@
   }
 
   function saveDB() {
+    // stamp timestamp so loadDB() can compare freshness
+    DB._updatedAt = Date.now();
     // save to localStorage (always works)
     try { localStorage.setItem('ishu_oxe_db', JSON.stringify(DB)); } catch(e) {}
     // save to GitHub repo (async, best-effort)
@@ -1655,6 +1666,7 @@
     if (m.claimed || m.scratched) return;
     m.scratched = true;
     _claimScratchId = id;
+    saveDB();
     document.getElementById('inboxScratchAmount').textContent = '₹' + m.amount;
     document.getElementById('inboxScratchOverlay').style.display = 'flex';
   }
@@ -2639,8 +2651,9 @@
   }
 
   function getTargetUserByUserId(userId) {
+    // match by userId OR by username/email (for legacy users without userId)
     for (const [email, u] of Object.entries(DB.users)) {
-      if (String(u.userId) === userId) return {email, u};
+      if (String(u.userId) === userId || email.toLowerCase() === userId.toLowerCase()) return {email, u};
     }
     return null;
   }
