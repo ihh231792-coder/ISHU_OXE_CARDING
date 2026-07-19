@@ -1668,11 +1668,10 @@
     m.scratched = true;
     u.rewardBalance = (u.rewardBalance || 0) + m.amount;
     saveDB();
-    document.getElementById('inboxScratchAmount').textContent = '₹' + m.amount;
-    document.getElementById('inboxScratchOverlay').style.display = 'flex';
     renderUserInbox();
     refreshUserUI();
     updateInboxBadge();
+    showToast('🎉 ₹' + m.amount + ' added to your Reward Wallet!');
   }
 
   function closeInboxScratch() {
