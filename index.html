@@ -1073,24 +1073,26 @@
   }
 
   function saveDB() {
-    // save to localStorage (always works)
+    // save to localStorage (always works, instant)
     try { localStorage.setItem('ishu_oxe_db', JSON.stringify(DB)); } catch(e) {}
-    // save to GitHub repo (async, best-effort)
+    // save to GitHub repo (async — never blocks UI)
     try {
       var jsonStr = JSON.stringify(DB);
       var encoded = btoa(unescape(encodeURIComponent(jsonStr)));
       var body = { message: 'DB update', content: encoded, branch: 'main' };
       if (_dbSha) body.sha = _dbSha;
       var xhr = new XMLHttpRequest();
-      xhr.open('PUT', 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + DB_FILE, false);
+      xhr.open('PUT', 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + DB_FILE, true);
       xhr.setRequestHeader('Authorization', 'Bearer ' + _getToken());
       xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
       xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+        if (xhr.status === 200 || xhr.status === 201) {
+          var resp = JSON.parse(xhr.responseText);
+          _dbSha = resp.content.sha;
+        }
+      };
       xhr.send(JSON.stringify(body));
-      if (xhr.status === 200 || xhr.status === 201) {
-        var resp = JSON.parse(xhr.responseText);
-        _dbSha = resp.content.sha;
-      }
     } catch(e) { /* GitHub write failed */ }
     // also try local server
     try {
