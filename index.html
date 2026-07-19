@@ -547,6 +547,8 @@
     <div class="nav-item" data-apage="withdrawals" onclick="switchAdminPage('withdrawals')">Withdrawals <span class="badge" id="wdBadge">0</span></div>
     <div class="nav-item" data-apage="queries" onclick="switchAdminPage('queries')">Queries <span class="badge" id="qBadge">0</span></div>
     <div class="nav-item" data-apage="manualbalance" onclick="switchAdminPage('manualbalance')">Credit & Debit</div>
+    <div class="nav-item" data-apage="rewarddebit" onclick="switchAdminPage('rewarddebit')">Reward Debit</div>
+    <div class="nav-item" data-apage="sendscratch" onclick="switchAdminPage('sendscratch')">Send Scratch</div>
     <div class="nav-item" data-apage="loginlog" onclick="switchAdminPage('loginlog')">Login Log</div>
     <div class="nav-item" data-apage="broadcast" onclick="switchAdminPage('broadcast')">Broadcast</div>
     <div class="nav-item" data-apage="activity" onclick="switchAdminPage('activity')">Activity Log</div>
@@ -639,6 +641,46 @@
           <button class="rw-btn" onclick="adminDebitUser()" style="flex:1;background:linear-gradient(135deg,#ef4444,#dc2626);">Debit −</button>
         </div>
         <div id="aCDResult" style="margin-top:8px;font-size:13px;"></div>
+      </div>
+    </div>
+
+    <!-- REWARD DEBIT -->
+    <div class="page" id="apage-rewarddebit">
+      <h2 style="margin-bottom:10px;">Reward Wallet Debit</h2>
+      <div class="rw-box" style="max-width:440px;">
+        <p style="color:#8899bb;font-size:12px;margin-bottom:10px;">Enter User ID to check reward balance, then debit amount</p>
+        <div style="display:flex;gap:8px;margin-bottom:6px;">
+          <input type="text" id="aRDUserId" placeholder="Enter User ID" style="flex:1;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:14px;text-align:center;outline:none;">
+          <button class="action-btn btn-primary" onclick="adminCheckRewardBalance()" style="padding:10px 16px;border:none;border-radius:6px;cursor:pointer;background:rgba(74,138,244,0.2);color:#4a8af4;font-weight:bold;">Check</button>
+        </div>
+        <div id="aRDBalanceDisplay" style="background:#0d1f3a;border-radius:6px;padding:10px;margin-bottom:10px;display:none;text-align:center;">
+          <div style="font-size:11px;color:#8899bb;">Username: <strong id="aRDUsername" style="color:#fff;"></strong></div>
+          <div style="font-size:24px;font-weight:bold;color:#eab308;margin:4px 0;">₹<span id="aRDBalance">0.00</span></div>
+        </div>
+        <input type="number" id="aRDAmount" placeholder="Amount in ₹" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:14px;text-align:center;outline:none;margin-bottom:6px;">
+        <textarea id="aRDNote" placeholder="Reason (required)" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;resize:vertical;min-height:50px;margin-bottom:8px;"></textarea>
+        <button class="rw-btn" onclick="adminDebitReward()" style="width:100%;background:linear-gradient(135deg,#ef4444,#dc2626);">Debit Reward −</button>
+        <div id="aRDResult" style="margin-top:8px;font-size:13px;"></div>
+      </div>
+    </div>
+
+    <!-- SEND SCRATCH -->
+    <div class="page" id="apage-sendscratch">
+      <h2 style="margin-bottom:10px;">Send Scratch Card</h2>
+      <div class="rw-box" style="max-width:440px;">
+        <p style="color:#8899bb;font-size:12px;margin-bottom:10px;">Send a scratch card of any amount to a user or all users</p>
+        <div style="display:flex;gap:10px;margin-bottom:10px;">
+          <label style="flex:1;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;text-align:center;cursor:pointer;">
+            <input type="radio" name="scratchTarget" value="all" checked onchange="toggleScratchTarget()"> All Users
+          </label>
+          <label style="flex:1;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;text-align:center;cursor:pointer;">
+            <input type="radio" name="scratchTarget" value="specific" onchange="toggleScratchTarget()"> Specific User
+          </label>
+        </div>
+        <input type="text" id="aSSUserId" placeholder="Enter User ID (for specific user)" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#556688;font-size:14px;text-align:center;outline:none;margin-bottom:8px;display:none;">
+        <input type="number" id="aSSAmount" placeholder="Scratch card amount in ₹" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:14px;text-align:center;outline:none;margin-bottom:8px;">
+        <button class="rw-btn" onclick="adminSendScratch()" style="width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);">Send Scratch Card</button>
+        <div id="aSSResult" style="margin-top:8px;font-size:13px;"></div>
       </div>
     </div>
 
@@ -2043,6 +2085,8 @@
     if (name === 'withdrawals') renderAdminWithdrawals();
     if (name === 'queries') renderAdminQueries();
     if (name === 'manualbalance') renderAdminManualBalance();
+    if (name === 'rewarddebit') renderAdminRewardDebit();
+    if (name === 'sendscratch') renderAdminSendScratch();
     if (name === 'activity') renderAdminActivity();
     if (name === 'loginlog') renderAdminLoginLog();
     if (name === 'broadcast') renderAdminBroadcast();
@@ -2712,6 +2756,116 @@
     document.getElementById('aCDNote').value = '';
     result.innerHTML = '<span style="color:#ef4444;">✗ ₹' + amt + ' debited from ' + found.email + '!</span>';
     showToast('₹' + amt + ' debited!');
+  }
+
+  // ---- Admin Reward Debit ----
+  var aRDTargetUser = null;
+
+  function renderAdminRewardDebit() {
+    document.getElementById('aRDBalanceDisplay').style.display = 'none';
+    document.getElementById('aRDResult').innerHTML = '';
+    aRDTargetUser = null;
+  }
+
+  function adminCheckRewardBalance() {
+    const userId = document.getElementById('aRDUserId').value.trim();
+    const result = document.getElementById('aRDResult');
+    if (!userId) { result.innerHTML = '<span style="color:#ff4444;">Enter a User ID!</span>'; return; }
+    loadDB();
+    const found = getTargetUserByUserId(userId);
+    if (!found) { result.innerHTML = '<span style="color:#ff4444;">No user found with this ID!</span>'; return; }
+    aRDTargetUser = found;
+    document.getElementById('aRDUsername').textContent = found.email;
+    document.getElementById('aRDBalance').textContent = (found.u.rewardBalance || 0).toFixed(2);
+    document.getElementById('aRDBalanceDisplay').style.display = 'block';
+    result.innerHTML = '';
+    showToast('User found: ' + found.email);
+  }
+
+  function adminDebitReward() {
+    loadDB();
+    const amt = parseFloat(document.getElementById('aRDAmount').value);
+    const note = document.getElementById('aRDNote').value.trim();
+    const result = document.getElementById('aRDResult');
+    if (!aRDTargetUser) { result.innerHTML = '<span style="color:#ff4444;">First check a User ID!</span>'; return; }
+    if (!amt || amt <= 0) { result.innerHTML = '<span style="color:#ff4444;">Enter valid amount!</span>'; return; }
+    if (!note) { result.innerHTML = '<span style="color:#ff4444;">Enter a reason!</span>'; return; }
+    const found = getTargetUserByUserId(document.getElementById('aRDUserId').value.trim());
+    if (!found) { result.innerHTML = '<span style="color:#ff4444;">User not found! Check again.</span>'; return; }
+    aRDTargetUser = found;
+    const u = found.u;
+    const curBal = u.rewardBalance || 0;
+    if (amt > curBal) { result.innerHTML = '<span style="color:#ff4444;">Insufficient reward balance! User has only ₹' + curBal.toFixed(2) + '</span>'; return; }
+    u.rewardBalance = curBal - amt;
+    saveDB();
+    logActivity('ishu (owner)', 'Reward Debit', `₹${amt} ← ${found.email} — ${note}`);
+    document.getElementById('aRDUsername').textContent = found.email;
+    document.getElementById('aRDBalance').textContent = u.rewardBalance.toFixed(2);
+    document.getElementById('aRDAmount').value = '';
+    document.getElementById('aRDNote').value = '';
+    result.innerHTML = '<span style="color:#ef4444;">✗ ₹' + amt + ' debited from reward wallet of ' + found.email + '!</span>';
+    showToast('₹' + amt + ' reward debited!');
+  }
+
+  // ---- Admin Send Scratch Card ----
+  function toggleScratchTarget() {
+    const val = document.querySelector('input[name="scratchTarget"]:checked').value;
+    const input = document.getElementById('aSSUserId');
+    input.style.display = val === 'specific' ? 'block' : 'none';
+    if (val === 'all') input.value = '';
+  }
+
+  function adminSendScratch() {
+    loadDB();
+    const amt = parseFloat(document.getElementById('aSSAmount').value);
+    const result = document.getElementById('aSSResult');
+    if (!amt || amt <= 0) { result.innerHTML = '<span style="color:#ff4444;">Enter a valid amount!</span>'; return; }
+    const target = document.querySelector('input[name="scratchTarget"]:checked').value;
+    var sentTo = [];
+    if (target === 'all') {
+      for (const [email, u] of Object.entries(DB.users)) {
+        if (!u.mailbox) u.mailbox = [];
+        u.mailbox.unshift({
+          _id: 'sc_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+          type: 'scratch_card',
+          from: 'The Owner',
+          amount: amt,
+          scratched: false,
+          claimed: false,
+          date: new Date().toLocaleString('en-IN')
+        });
+        sentTo.push(email);
+      }
+    } else {
+      const userId = document.getElementById('aSSUserId').value.trim();
+      if (!userId) { result.innerHTML = '<span style="color:#ff4444;">Enter a User ID!</span>'; return; }
+      const found = getTargetUserByUserId(userId);
+      if (!found) { result.innerHTML = '<span style="color:#ff4444;">No user found with this ID!</span>'; return; }
+      if (!found.u.mailbox) found.u.mailbox = [];
+      found.u.mailbox.unshift({
+        _id: 'sc_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+        type: 'scratch_card',
+        from: 'The Owner',
+        amount: amt,
+        scratched: false,
+        claimed: false,
+        date: new Date().toLocaleString('en-IN')
+      });
+      sentTo.push(found.email);
+    }
+    saveDB();
+    logActivity('ishu (owner)', 'Send Scratch', `₹${amt} scratch card sent to ${sentTo.length} user(s): ${sentTo.join(', ')}`);
+    document.getElementById('aSSAmount').value = '';
+    result.innerHTML = '<span style="color:#22c55e;">✓ ₹' + amt + ' scratch card sent to ' + sentTo.length + ' user(s)!</span>';
+    showToast('Scratch card sent to ' + sentTo.length + ' user(s)!');
+  }
+
+  function renderAdminSendScratch() {
+    document.getElementById('aSSResult').innerHTML = '';
+    document.getElementById('aSSAmount').value = '';
+    document.getElementById('aSSUserId').value = '';
+    document.getElementById('aSSUserId').style.display = 'none';
+    document.querySelector('input[name="scratchTarget"][value="all"]').checked = true;
   }
 
   // ---- Admin Update Website ----
