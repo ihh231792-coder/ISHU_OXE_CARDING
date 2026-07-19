@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ISHU_OXE CARDING â€” Admin Panel</title>
+  <title>ISHU_OXE CARDING — Admin Panel</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
     body { background: #0a1628; color: #fff; min-height: 100vh; }
@@ -405,8 +405,8 @@
     <div class="right">
       <span id="uDisplayEmail">user</span>
       <span style="color:#8899bb;font-size:11px;">ID: <span id="uDisplayId" style="color:#4a8af4;">-</span></span>
-      <span style="color:#4a8af4;font-weight:bold;">â‚¹<span id="uBalance">0.00</span></span>
-      <span style="color:#eab308;font-weight:bold;font-size:12px;">ðŸŽ â‚¹<span id="uRewardBal">0</span></span>
+      <span style="color:#4a8af4;font-weight:bold;">₹<span id="uBalance">0.00</span></span>
+      <span style="color:#eab308;font-weight:bold;font-size:12px;">🎁 ₹<span id="uRewardBal">0</span></span>
       <button class="logout-btn" onclick="userLogout()">Logout</button>
     </div>
   </div>
@@ -447,9 +447,9 @@
       <div class="scratch-card">
         <div class="sparkle"></div>
         <button class="close-scratch" onclick="closeInboxScratch()">&times;</button>
-        <div style="font-size:40px;margin:8px 0;">ðŸŽ‰</div>
+        <div style="font-size:40px;margin:8px 0;">🎉</div>
         <div class="reward-label">You Won a Scratch Reward!</div>
-        <div class="reward-amount" id="inboxScratchAmount">â‚¹0</div>
+        <div class="reward-amount" id="inboxScratchAmount">₹0</div>
         <div style="color:#556688;font-size:12px;margin:8px 0;">Click "Claim Reward" to add to your Reward Wallet</div>
         <button class="claim-btn" id="inboxScratchClaimBtn" onclick="doClaimScratch()">Claim Reward</button>
       </div>
@@ -460,7 +460,7 @@
         <p style="color:#8899bb;font-size:12px;">Pay via UPI to add balance</p>
         <div class="qr-area"><img id="uQrImage" src="" alt="QR"></div>
         <p style="color:#8899bb;font-size:11px;margin-bottom:10px;">Scan with any UPI app</p>
-        <input type="number" id="uDepositAmount" placeholder="Amount in â‚¹">
+        <input type="number" id="uDepositAmount" placeholder="Amount in ₹">
         <input type="text" id="uDepositTxn" placeholder="Transaction ID (UTI)">
         <button class="submit-btn" onclick="userDeposit()">Submit</button>
         <div class="note">Enter UTI after payment. Admin will verify & credit your balance.</div>
@@ -473,13 +473,13 @@
       <p style="color:#8899bb;margin-bottom:16px;font-size:13px;">Earn scratch rewards on every purchase</p>
       <div class="rw-box">
         <div class="rw-lbl">Your Reward Balance</div>
-        <div class="rw-bal">â‚¹<span id="rwBalance">0.00</span></div>
+        <div class="rw-bal">₹<span id="rwBalance">0.00</span></div>
         <div class="rw-sub">Withdraw your scratch rewards</div>
         <select id="rwType" onchange="toggleUpiField()">
           <option value="upi">UPI Withdraw</option>
           <option value="redeem">Redeem Code</option>
         </select>
-        <input type="number" id="rwAmount" placeholder="Amount in â‚¹">
+        <input type="number" id="rwAmount" placeholder="Amount in ₹">
         <input type="text" id="rwUpiId" placeholder="Your UPI ID (e.g. name@okaxis)">
         <button class="rw-btn" onclick="requestWithdrawal()">Submit Request</button>
       </div>
@@ -495,7 +495,7 @@
           <div style="font-size:24px;font-weight:bold;color:#4a8af4;letter-spacing:2px;" id="uQueryId">-</div>
         </div>
         <input type="text" id="uQueryUtr" placeholder="UTR / Transaction ID" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;margin-bottom:6px;">
-        <input type="number" id="uQueryAmount" placeholder="Amount Paid (â‚¹)" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;margin-bottom:6px;">
+        <input type="number" id="uQueryAmount" placeholder="Amount Paid (₹)" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;margin-bottom:6px;">
         <textarea id="uQueryMsg" placeholder="Describe your issue..." style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;resize:vertical;min-height:70px;margin-bottom:6px;"></textarea>
         <button class="send-btn" onclick="userSubmitQuery()">Submit Query</button>
       </div>
@@ -505,11 +505,11 @@
     <div class="page" id="upage-history">
       <h2 style="margin-bottom:10px;">My History</h2>
       <p style="color:#8899bb;font-size:12px;margin-bottom:14px;">Balance transactions, payment queries & support tickets</p>
-      <h3 style="font-size:15px;margin-bottom:8px;">ðŸ’° Balance History</h3>
+      <h3 style="font-size:15px;margin-bottom:8px;">💰 Balance History</h3>
       <div id="uHistoryDeposits"></div>
-      <h3 style="font-size:15px;margin:14px 0 8px;">ðŸ“© Payment Queries</h3>
+      <h3 style="font-size:15px;margin:14px 0 8px;">📩 Payment Queries</h3>
       <div id="uHistoryQueries"></div>
-      <h3 style="font-size:15px;margin:14px 0 8px;">ðŸŽ« Support Tickets</h3>
+      <h3 style="font-size:15px;margin:14px 0 8px;">🎫 Support Tickets</h3>
       <div id="uHistoryTickets"></div>
     </div>
     <div class="page" id="upage-support">
@@ -594,7 +594,7 @@
     <!-- DEPOSITS -->
     <div class="page" id="apage-deposits">
       <h2 style="margin-bottom:10px;">Deposit Verification</h2>
-      <p style="color:#8899bb;font-size:12px;margin-bottom:10px;">Manually verify deposits â€” approve only real UTR payments</p>
+      <p style="color:#8899bb;font-size:12px;margin-bottom:10px;">Manually verify deposits — approve only real UTR payments</p>
       <div class="search-bar">
         <input type="text" id="aDepSearch" placeholder="Search user/UTR..." oninput="renderAdminDeposits()">
       </div>
@@ -631,13 +631,13 @@
         </div>
         <div id="aCDBalanceDisplay" style="background:#0d1f3a;border-radius:6px;padding:10px;margin-bottom:10px;display:none;text-align:center;">
           <div style="font-size:11px;color:#8899bb;">Username: <strong id="aCDUsername" style="color:#fff;"></strong></div>
-          <div style="font-size:24px;font-weight:bold;color:#4a8af4;margin:4px 0;">â‚¹<span id="aCDBalance">0.00</span></div>
+          <div style="font-size:24px;font-weight:bold;color:#4a8af4;margin:4px 0;">₹<span id="aCDBalance">0.00</span></div>
         </div>
-        <input type="number" id="aCDAmount" placeholder="Amount in â‚¹" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:14px;text-align:center;outline:none;margin-bottom:6px;">
+        <input type="number" id="aCDAmount" placeholder="Amount in ₹" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:14px;text-align:center;outline:none;margin-bottom:6px;">
         <textarea id="aCDNote" placeholder="Reason (required)" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;resize:vertical;min-height:50px;margin-bottom:8px;"></textarea>
         <div style="display:flex;gap:8px;">
           <button class="rw-btn" onclick="adminCreditUser()" style="flex:1;background:linear-gradient(135deg,#22c55e,#16a34a);">Credit +</button>
-          <button class="rw-btn" onclick="adminDebitUser()" style="flex:1;background:linear-gradient(135deg,#ef4444,#dc2626);">Debit âˆ’</button>
+          <button class="rw-btn" onclick="adminDebitUser()" style="flex:1;background:linear-gradient(135deg,#ef4444,#dc2626);">Debit −</button>
         </div>
         <div id="aCDResult" style="margin-top:8px;font-size:13px;"></div>
       </div>
@@ -652,7 +652,7 @@
     <!-- LOGIN LOG -->
     <div class="page" id="apage-loginlog">
       <h2 style="margin-bottom:10px;">Login Log</h2>
-      <p style="color:#8899bb;font-size:12px;margin-bottom:10px;">Complete record of everyone who logged in â€” with full details</p>
+      <p style="color:#8899bb;font-size:12px;margin-bottom:10px;">Complete record of everyone who logged in — with full details</p>
       <div class="search-bar">
         <input type="text" id="aLoginLogSearch" placeholder="Search by user..." oninput="renderAdminLoginLog()">
       </div>
@@ -690,19 +690,19 @@
       <p style="color:#8899bb;font-size:13px;margin-bottom:20px;">Enable maintenance mode before updating the app</p>
       <div style="display:flex;gap:16px;flex-wrap:wrap;">
         <div style="background:#1a2333;border:1px solid #2a3a55;border-radius:12px;padding:24px;flex:1;min-width:280px;">
-          <h3 style="margin-bottom:8px;font-size:16px;">ðŸ”§ Update App</h3>
-          <p style="color:#8899bb;font-size:12px;margin-bottom:16px;">Enable maintenance mode â€” all users will be logged out immediately and cannot log in until you mark update as done.</p>
+          <h3 style="margin-bottom:8px;font-size:16px;">🔧 Update App</h3>
+          <p style="color:#8899bb;font-size:12px;margin-bottom:16px;">Enable maintenance mode — all users will be logged out immediately and cannot log in until you mark update as done.</p>
           <button id="enableMaintBtn" class="action-btn" onclick="enableMaintenance()" style="background:#7c3aed;padding:12px 32px;font-size:14px;">Update App</button>
         </div>
         <div style="background:#1a2333;border:1px solid #2a3a55;border-radius:12px;padding:24px;flex:1;min-width:280px;">
-          <h3 style="margin-bottom:8px;font-size:16px;">âœ… Update Done</h3>
-          <p style="color:#8899bb;font-size:12px;margin-bottom:16px;">Disable maintenance mode â€” users can log in again normally. All data remains intact.</p>
+          <h3 style="margin-bottom:8px;font-size:16px;">✅ Update Done</h3>
+          <p style="color:#8899bb;font-size:12px;margin-bottom:16px;">Disable maintenance mode — users can log in again normally. All data remains intact.</p>
           <button id="disableMaintBtn" class="action-btn" onclick="disableMaintenance()" style="background:#22c55e;padding:12px 32px;font-size:14px;">Update Done</button>
         </div>
       </div>
       <div id="maintStatus" style="margin-top:20px;font-size:13px;"></div>
       <div style="margin-top:30px;background:#1a2333;border:1px solid #2a3a55;border-radius:12px;padding:24px;max-width:500px;">
-        <h3 style="margin-bottom:8px;font-size:16px;">ðŸ”‘ Change Admin Password</h3>
+        <h3 style="margin-bottom:8px;font-size:16px;">🔑 Change Admin Password</h3>
         <p style="color:#8899bb;font-size:12px;margin-bottom:16px;">Change owner login password (ishu / disha)</p>
         <select id="adminChangeUser" style="width:100%;padding:10px;border-radius:8px;border:1px solid #2a3a55;background:#0f172a;color:#e0e8f0;margin-bottom:10px;">
           <option value="ishu">ishu</option>
@@ -721,8 +721,8 @@
     <div id="depositScratchModal" class="modal-overlay" style="display:none;">
       <div class="modal-box" style="max-width:420px;">
         <h3 style="margin-bottom:10px;">Scratch Reward</h3>
-        <p style="color:#8899bb;font-size:13px;margin-bottom:8px;">A scratch card worth <strong id="depositScratchAmount">â‚¹0</strong> will be sent to this user</p>
-        <p style="color:#556688;font-size:11px;margin-bottom:16px;">(30% of deposit, minimum â‚¹10 required for scratch card)</p>
+        <p style="color:#8899bb;font-size:13px;margin-bottom:8px;">A scratch card worth <strong id="depositScratchAmount">₹0</strong> will be sent to this user</p>
+        <p style="color:#556688;font-size:11px;margin-bottom:16px;">(30% of deposit, minimum ₹10 required for scratch card)</p>
         <input type="hidden" id="depositScratchReward" value="0">
         <div style="display:flex;gap:10px;justify-content:flex-end;">
           <button class="action-btn btn-danger" onclick="cancelDepositScratch()" style="background:transparent;border:1px solid #555;">Cancel</button>
@@ -756,9 +756,9 @@
   <div class="scratch-card">
     <div class="sparkle"></div>
     <button class="close-scratch" onclick="closeScratchCard()">&times;</button>
-    <div style="font-size:40px;margin:8px 0;">ðŸŽ‰</div>
+    <div style="font-size:40px;margin:8px 0;">🎉</div>
     <div class="reward-label">You Won!</div>
-    <div class="reward-amount" id="scratchAmount">â‚¹0</div>
+    <div class="reward-amount" id="scratchAmount">₹0</div>
     <div class="revealed-box">
       <div style="font-size:12px;color:#8899bb;">Reward added to</div>
       <div style="font-size:14px;color:#eab308;font-weight:bold;">Reward Wallet</div>
@@ -774,10 +774,10 @@
   <div class="modal-box">
     <button class="close-x" onclick="closeRejectModal()">&times;</button>
     <h2 style="color:#ff4444;">Reject Card Request</h2>
-    <p style="color:#8899bb;font-size:13px;margin-bottom:10px;">Choose action for <strong id="rejProduct"></strong> â€” â‚¹<span id="rejPrice"></span> (User: <span id="rejUser"></span>)</p>
+    <p style="color:#8899bb;font-size:13px;margin-bottom:10px;">Choose action for <strong id="rejProduct"></strong> — ₹<span id="rejPrice"></span> (User: <span id="rejUser"></span>)</p>
     <div style="display:flex;gap:10px;margin-bottom:12px;">
-      <button id="rejRefundBtn" class="modal-btn btn-success" style="flex:1;font-weight:bold;" onclick="selectRejectAction('refund')">ðŸ”„ Refund</button>
-      <button id="rejDebitBtn" class="modal-btn btn-danger" style="flex:1;font-weight:bold;" onclick="selectRejectAction('debit')">ðŸ—‘ï¸ Debit</button>
+      <button id="rejRefundBtn" class="modal-btn btn-success" style="flex:1;font-weight:bold;" onclick="selectRejectAction('refund')">🔄 Refund</button>
+      <button id="rejDebitBtn" class="modal-btn btn-danger" style="flex:1;font-weight:bold;" onclick="selectRejectAction('debit')">🗑️ Debit</button>
     </div>
     <p style="color:#8899bb;font-size:11px;margin-bottom:4px;">Reason for rejection:</p>
     <textarea id="rejReason" placeholder="Enter reason..." style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;resize:vertical;min-height:70px;margin-bottom:10px;"></textarea>
@@ -792,7 +792,7 @@
   <div class="modal-box" style="text-align:center;">
     <button class="close-x" onclick="document.getElementById('buyConfirmModal').classList.remove('active')">&times;</button>
     <h2 style="color:#4a8af4;">Confirm Purchase</h2>
-    <p style="color:#8899bb;font-size:14px;margin:14px 0;">Buy <strong id="buyConfirmProduct" style="color:#fff;"></strong> for <strong style="color:#4a8af4;font-size:18px;">â‚¹<span id="buyConfirmPrice"></span></strong>?</p>
+    <p style="color:#8899bb;font-size:14px;margin:14px 0;">Buy <strong id="buyConfirmProduct" style="color:#fff;"></strong> for <strong style="color:#4a8af4;font-size:18px;">₹<span id="buyConfirmPrice"></span></strong>?</p>
     <div style="display:flex;gap:10px;margin-top:16px;justify-content:center;">
       <button class="modal-btn btn-success" onclick="doBuyConfirm()" style="font-weight:bold;padding:10px 24px;">Yes, Buy</button>
       <button class="modal-btn btn-danger" onclick="document.getElementById('buyConfirmModal').classList.remove('active')" style="padding:10px 24px;">Cancel</button>
@@ -815,14 +815,14 @@
   // ============================================
   const ADMIN_CRED = { user: 'ishu', pass: 'disha' };
   const PRODUCTS = [
-    { id:1, name:'VISA Classic', type:'VISA', price:499, limit:'â‚¹50,000', duration:'30 Days', badge:'Popular' },
-    { id:2, name:'VISA Gold', type:'VISA', price:999, limit:'â‚¹1,50,000', duration:'60 Days', badge:'Premium' },
-    { id:3, name:'MasterCard Std', type:'MasterCard', price:799, limit:'â‚¹1,00,000', duration:'45 Days', badge:'' },
-    { id:4, name:'MasterCard Plat', type:'MasterCard', price:1499, limit:'â‚¹3,00,000', duration:'90 Days', badge:'Best Value' },
-    { id:5, name:'VISA Signature', type:'VISA', price:2499, limit:'â‚¹5,00,000', duration:'120 Days', badge:'Elite' },
-    { id:6, name:'MasterCard World', type:'MasterCard', price:1999, limit:'â‚¹4,00,000', duration:'90 Days', badge:'' },
-    { id:7, name:'VISA Infinite', type:'VISA', price:3999, limit:'â‚¹10,00,000', duration:'180 Days', badge:'Luxury' },
-    { id:8, name:'MasterCard Black', type:'MasterCard', price:2999, limit:'â‚¹7,50,000', duration:'150 Days', badge:'Black' },
+    { id:1, name:'VISA Classic', type:'VISA', price:499, limit:'₹50,000', duration:'30 Days', badge:'Popular' },
+    { id:2, name:'VISA Gold', type:'VISA', price:999, limit:'₹1,50,000', duration:'60 Days', badge:'Premium' },
+    { id:3, name:'MasterCard Std', type:'MasterCard', price:799, limit:'₹1,00,000', duration:'45 Days', badge:'' },
+    { id:4, name:'MasterCard Plat', type:'MasterCard', price:1499, limit:'₹3,00,000', duration:'90 Days', badge:'Best Value' },
+    { id:5, name:'VISA Signature', type:'VISA', price:2499, limit:'₹5,00,000', duration:'120 Days', badge:'Elite' },
+    { id:6, name:'MasterCard World', type:'MasterCard', price:1999, limit:'₹4,00,000', duration:'90 Days', badge:'' },
+    { id:7, name:'VISA Infinite', type:'VISA', price:3999, limit:'₹10,00,000', duration:'180 Days', badge:'Luxury' },
+    { id:8, name:'MasterCard Black', type:'MasterCard', price:2999, limit:'₹7,50,000', duration:'150 Days', badge:'Black' },
   ];
   const CARD_DESIGNS = [
     { bg:'linear-gradient(135deg,#1e3a6a,#2563eb)', logo:'VISA' },
@@ -1234,7 +1234,7 @@
     if (user === ADMIN_CRED.user) ADMIN_CRED.pass = newPass;
     saveDB();
     closeForgotPassword();
-    showToast('âœ“ Password changed for ' + user + '!');
+    showToast('✓ Password changed for ' + user + '!');
     logActivity('ishu (owner)', 'Password Changed', 'Admin password reset for ' + user);
   }
 
@@ -1391,7 +1391,7 @@
               <div class="cv-chip"><svg viewBox="0 0 30 24"><rect x="1" y="1" width="28" height="22" rx="3" fill="none" stroke="rgba(255,215,0,0.5)" stroke-width="1.5"/><rect x="4" y="4" width="22" height="16" rx="2" fill="none" stroke="rgba(255,215,0,0.25)" stroke-width="0.8"/><line x1="15" y1="4" x2="15" y2="20" stroke="rgba(255,215,0,0.25)" stroke-width="0.8"/><line x1="4" y1="12" x2="26" y2="12" stroke="rgba(255,215,0,0.25)" stroke-width="0.8"/></svg></div>
               <div class="cv-type">${d.logo}</div>
             </div>
-            <div class="cv-number">â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ ${1000+idx}</div>
+            <div class="cv-number">•••• •••• •••• ${1000+idx}</div>
             <div class="cv-bottom">
               <div class="cv-name">${p.name}</div>
               <div class="cv-valid">VALID <span>${10+idx}/28</span></div>
@@ -1399,7 +1399,7 @@
           </div>
           <div class="card-type">${p.type}</div>
           <h3>${p.name}</h3>
-          <div class="price">â‚¹${p.price.toLocaleString('en-IN')} <span>one time</span></div>
+          <div class="price">₹${p.price.toLocaleString('en-IN')} <span>one time</span></div>
           <div style="margin-top:6px;font-size:12px;color:#8899bb;">Limit: ${p.limit} &bull; ${p.duration}</div>
           ${p.badge ? `<div class="badge">${p.badge}</div>` : ''}
           <button class="buy-btn" onclick="userBuyProduct(${p.id})">Buy Now</button>
@@ -1493,9 +1493,9 @@
       });
 
       saveDB();
-      logActivity(currentUser, 'Card Purchase', p.name + ' for â‚¹' + p.price + ' â€” paid, pending approval');
+      logActivity(currentUser, 'Card Purchase', p.name + ' for ₹' + p.price + ' — paid, pending approval');
       refreshUserUI();
-      showToast('â‚¹' + p.price.toLocaleString('en-IN') + ' deducted! Card pending admin approval.');
+      showToast('₹' + p.price.toLocaleString('en-IN') + ' deducted! Card pending admin approval.');
     } catch(e) { showToast('Purchase failed: ' + e.message); }
   }
 
@@ -1522,9 +1522,9 @@
     DB.globalCards = DB.globalCards.filter(function(x) { return x.id !== id; });
     DB.globalCardRequests = (DB.globalCardRequests || []).filter(function(x) { return x.id !== id; });
     saveDB();
-    logActivity(currentUser, 'Order Cancelled', card.product + ' (' + (card.orderId || '') + ') â€” refunded â‚¹' + card.price);
+    logActivity(currentUser, 'Order Cancelled', card.product + ' (' + (card.orderId || '') + ') — refunded ₹' + card.price);
     refreshUserUI();
-    showToast('Order cancelled! â‚¹' + card.price.toLocaleString('en-IN') + ' refunded.');
+    showToast('Order cancelled! ₹' + card.price.toLocaleString('en-IN') + ' refunded.');
   }
 
   // ---- User: My Cards ----
@@ -1543,9 +1543,9 @@
             '<div style="display:flex;justify-content:space-between;align-items:center;">' +
               '<div>' +
                 '<div style="font-size:12px;color:#4a8af4;">' + c.type + ' &bull; ' + c.product + '</div>' +
-                '<div class="cc-num" style="color:#8899bb;">â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢</div>' +
-                '<div class="cc-row"><div>Price: <span>â‚¹' + c.price.toLocaleString('en-IN') + '</span></div></div>' +
-                '<div style="color:#eab308;font-size:11px;margin-top:6px;">â³ Awaiting admin approval</div>' +
+                '<div class="cc-num" style="color:#8899bb;">•••• •••• •••• ••••</div>' +
+                '<div class="cc-row"><div>Price: <span>₹' + c.price.toLocaleString('en-IN') + '</span></div></div>' +
+                '<div style="color:#eab308;font-size:11px;margin-top:6px;">⏳ Awaiting admin approval</div>' +
               '</div>' +
               '<span class="badge-blue">PENDING</span>' +
             '</div>' +
@@ -1575,7 +1575,7 @@
               '<span>Limit: <b style="color:#fff;">' + c.limit + '</b></span>' +
               '<span>Country: <b style="color:#fff;">' + (c.country || 'IN') + '</b></span>' +
             '</div>' +
-            '<div style="font-size:10px;color:#4a8af4;padding:0 4px;">' + c.product + ' &bull; â‚¹' + c.price.toLocaleString('en-IN') + '</div>' +
+            '<div style="font-size:10px;color:#4a8af4;padding:0 4px;">' + c.product + ' &bull; ₹' + c.price.toLocaleString('en-IN') + '</div>' +
           '</div>';
       }
     });
@@ -1590,7 +1590,7 @@
     }
     div.innerHTML = u.cards.slice().reverse().map(function(c) {
       var statusCls = c.status === 'active' ? 'success' : c.status === 'rejected' ? 'rejected' : 'pending';
-      var statusLabel = c.status === 'active' ? 'âœ… Approved' : c.status === 'rejected' ? 'âŒ Rejected' : 'â³ Pending';
+      var statusLabel = c.status === 'active' ? '✅ Approved' : c.status === 'rejected' ? '❌ Rejected' : '⏳ Pending';
       var reasonHtml = c.reason ? '<div style="color:#ff4444;font-size:10px;">Reason: ' + c.reason + '</div>' : '';
       var cancelBtn = c.status === 'pending' ? '<button class="action-btn btn-danger" onclick="cancelOrder(' + c.id + ')" style="margin-top:6px;font-size:10px;">Cancel Order</button>' : '';
       return '<div class="rw-hist-item" style="font-size:12px;">' +
@@ -1599,7 +1599,7 @@
           '<span class="rw-stat rw-stat-' + statusCls + '">' + statusLabel + '</span>' +
         '</div>' +
         '<div style="color:#4a8af4;font-size:11px;margin:2px 0;">Order ID: ' + c.orderId + '</div>' +
-        '<div style="color:#8899bb;font-size:10px;">Price: â‚¹' + c.price.toLocaleString('en-IN') + ' &bull; ' + c.date + '</div>' +
+        '<div style="color:#8899bb;font-size:10px;">Price: ₹' + c.price.toLocaleString('en-IN') + ' &bull; ' + c.date + '</div>' +
         reasonHtml +
         (c.status === 'active' ? '<div style="color:#22c55e;font-size:10px;margin-top:2px;">Card details available in My Cards</div>' : '') +
         cancelBtn +
@@ -1626,14 +1626,14 @@
     div.innerHTML = u.mailbox.slice().reverse().map(function(m) {
       if (m.type === 'scratch_card') {
         if (m.claimed) {
-          return '<div class="inbox-item"><div class="inbox-icon">ðŸŽ‰</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg" style="color:#22c55e;">Scratch reward claimed â€” â‚¹' + m.amount + '</div></div></div>';
+          return '<div class="inbox-item"><div class="inbox-icon">🎉</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg" style="color:#22c55e;">Scratch reward claimed — ₹' + m.amount + '</div></div></div>';
         } else if (m.scratched) {
-          return '<div class="inbox-item"><div class="inbox-icon">ðŸŽ‰</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">Scratch card worth <strong style="color:#eab308;">â‚¹' + m.amount + '</strong> â€” <button class="action-btn btn-success" onclick="doClaimScratch(\'' + m._id + '\')" style="font-size:9px;padding:2px 8px;">Claim</button></div></div></div>';
+          return '<div class="inbox-item"><div class="inbox-icon">🎉</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">Scratch card worth <strong style="color:#eab308;">₹' + m.amount + '</strong> — <button class="action-btn btn-success" onclick="doClaimScratch(\'' + m._id + '\')" style="font-size:9px;padding:2px 8px;">Claim</button></div></div></div>';
         } else {
-          return '<div class="inbox-item"><div class="inbox-icon">ðŸŽ</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">You received a Scratch Card! <button class="action-btn btn-primary" onclick="openInboxScratch(\'' + m._id + '\')" style="font-size:9px;padding:2px 8px;background:#7c3aed;">Open Scratch Card</button></div></div></div>';
+          return '<div class="inbox-item"><div class="inbox-icon">🎁</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">You received a Scratch Card! <button class="action-btn btn-primary" onclick="openInboxScratch(\'' + m._id + '\')" style="font-size:9px;padding:2px 8px;background:#7c3aed;">Open Scratch Card</button></div></div></div>';
         }
       } else {
-        return '<div class="inbox-item"><div class="inbox-icon">ðŸ“©</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">' + esc(m.text) + '</div></div></div>';
+        return '<div class="inbox-item"><div class="inbox-icon">📩</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">' + esc(m.text) + '</div></div></div>';
       }
     }).join('');
   }
@@ -1655,7 +1655,7 @@
     if (m.claimed || m.scratched) return;
     m.scratched = true;
     _claimScratchId = id;
-    document.getElementById('inboxScratchAmount').textContent = 'â‚¹' + m.amount;
+    document.getElementById('inboxScratchAmount').textContent = '₹' + m.amount;
     document.getElementById('inboxScratchOverlay').style.display = 'flex';
   }
 
@@ -1680,7 +1680,7 @@
     renderUserInbox();
     refreshUserUI();
     updateInboxBadge();
-    showToast('â‚¹' + m.amount + ' added to Reward Wallet!');
+    showToast('₹' + m.amount + ' added to Reward Wallet!');
   }
 
   // ---- User: Deposit ----
@@ -1698,7 +1698,7 @@
     DB.globalDeposits.push(dep);
 
     saveDB();
-    logActivity(currentUser, 'Deposit Request', `â‚¹${amt.toFixed(2)} via UPI (${txn}) â€” pending verification`);
+    logActivity(currentUser, 'Deposit Request', `₹${amt.toFixed(2)} via UPI (${txn}) — pending verification`);
     refreshUserUI();
     document.getElementById('uDepositAmount').value = '';
     document.getElementById('uDepositTxn').value = '';
@@ -1715,7 +1715,7 @@
       <div class="rw-hist-item">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <strong>â‚¹${d.amount.toFixed(2)}</strong>
+            <strong>₹${d.amount.toFixed(2)}</strong>
             <div style="color:#8899bb;font-size:11px;">${d.txn} &bull; ${d.date}</div>
           </div>
           <span class="rw-stat rw-stat-${d.status === 'completed' ? 'success' : d.status === 'rejected' ? 'rejected' : 'pending'}">${d.status.toUpperCase()}</span>
@@ -1735,7 +1735,7 @@
 
   function showScratchCard() {
     pendingScratchAmount = Math.floor(Math.random() * 101);
-    document.getElementById('scratchAmount').textContent = 'â‚¹' + pendingScratchAmount;
+    document.getElementById('scratchAmount').textContent = '₹' + pendingScratchAmount;
     document.getElementById('scratchOverlay').classList.add('active');
   }
 
@@ -1748,10 +1748,10 @@
     if (!u) return;
     u.rewardBalance = (u.rewardBalance || 0) + pendingScratchAmount;
     saveDB();
-    logActivity(currentUser, 'Scratch Reward', `â‚¹${pendingScratchAmount} added to reward wallet`);
+    logActivity(currentUser, 'Scratch Reward', `₹${pendingScratchAmount} added to reward wallet`);
     closeScratchCard();
     refreshUserUI();
-    showToast(`â‚¹${pendingScratchAmount} added to Reward Wallet!`);
+    showToast(`₹${pendingScratchAmount} added to Reward Wallet!`);
   }
 
   // ---- User: Reward Wallet ----
@@ -1792,7 +1792,7 @@
     u.withdrawals.push(wd);
     DB.globalWithdrawals.push(wd);
     saveDB();
-    logActivity(currentUser, 'Withdrawal Request', `â‚¹${amount.toFixed(2)} via ${type.toUpperCase()}`);
+    logActivity(currentUser, 'Withdrawal Request', `₹${amount.toFixed(2)} via ${type.toUpperCase()}`);
     renderRewardWallet();
     document.getElementById('rwAmount').value = '';
     document.getElementById('rwUpiId').value = '';
@@ -1809,10 +1809,10 @@
     div.innerHTML = u.withdrawals.slice().reverse().map(w => `
       <div class="rw-hist-item">
         <div style="display:flex;justify-content:space-between;">
-          <strong>â‚¹${w.amount.toFixed(2)}</strong>
+          <strong>₹${w.amount.toFixed(2)}</strong>
           <span class="rw-stat rw-stat-${w.status}">${w.status.toUpperCase()}</span>
         </div>
-        <div style="color:#8899bb;margin-top:4px;">${w.type.toUpperCase()} ${w.upiId ? 'â€” '+w.upiId : ''}</div>
+        <div style="color:#8899bb;margin-top:4px;">${w.type.toUpperCase()} ${w.upiId ? '— '+w.upiId : ''}</div>
         <div style="color:#8899bb;font-size:11px;">${w.date}</div>
         ${w.reason ? '<div style="color:#ff4444;font-size:11px;margin-top:4px;">Reason: '+w.reason+'</div>' : ''}
       </div>
@@ -1836,7 +1836,7 @@
     u.queries.push(q);
     DB.globalQueries.push(q);
     saveDB();
-    logActivity(currentUser, 'Payment Query', `UTR:${utr} â‚¹${amt}`);
+    logActivity(currentUser, 'Payment Query', `UTR:${utr} ₹${amt}`);
     document.getElementById('uQueryUtr').value = '';
     document.getElementById('uQueryAmount').value = '';
     document.getElementById('uQueryMsg').value = '';
@@ -1856,7 +1856,7 @@
           <span>UTR: <strong style="color:#fff;">${q.utr}</strong></span>
           <span class="rw-stat rw-stat-${q.status === 'resolved' ? 'success' : 'pending'}">${q.status.toUpperCase()}</span>
         </div>
-        <div style="margin-top:4px;">Amount: <strong>â‚¹${q.amount}</strong></div>
+        <div style="margin-top:4px;">Amount: <strong>₹${q.amount}</strong></div>
         <div style="color:#8899bb;font-size:11px;">${q.message}</div>
         <div style="color:#8899bb;font-size:11px;">${q.date}</div>
         ${q.reply ? '<div style="color:#4a8af4;font-size:11px;margin-top:4px;">Reply: '+q.reply+'</div>' : ''}
@@ -1955,20 +1955,20 @@
         var icon = isCredit ? '+' : '';
         var color = isCredit ? '#22c55e' : '#ef4444';
         var typeLabels = {
-          deposit: 'ðŸ’³ Payment Received',
-          card_purchase: 'ðŸ’³ Card Purchase',
-          owner_credit: 'ðŸŽ Owner Credit',
-          owner_debit: 'âš ï¸ Owner Debit',
-          query_resolve: 'âœ… Query Resolve'
+          deposit: '💳 Payment Received',
+          card_purchase: '💳 Card Purchase',
+          owner_credit: '🎁 Owner Credit',
+          owner_debit: '⚠️ Owner Debit',
+          query_resolve: '✅ Query Resolve'
         };
         var label = typeLabels[b.type] || b.type;
         return '<div class="rw-hist-item" style="font-size:12px;">' +
           '<div style="display:flex;justify-content:space-between;">' +
             '<span>' + label + '</span>' +
-            '<span style="color:' + color + ';font-weight:bold;">' + icon + 'â‚¹' + Math.abs(b.amount).toFixed(2) + '</span>' +
+            '<span style="color:' + color + ';font-weight:bold;">' + icon + '₹' + Math.abs(b.amount).toFixed(2) + '</span>' +
           '</div>' +
           '<div style="color:#8899bb;font-size:10px;">' + (b.reason || '') + '</div>' +
-          '<div style="color:#8899bb;font-size:10px;">' + b.date + ' &bull; Balance: â‚¹' + (b.balance || 0).toFixed(2) + '</div>' +
+          '<div style="color:#8899bb;font-size:10px;">' + b.date + ' &bull; Balance: ₹' + (b.balance || 0).toFixed(2) + '</div>' +
         '</div>';
       }).join('');
     }
@@ -1981,7 +1981,7 @@
         var cls = q.status === 'resolved' ? 'success' : 'pending';
         return '<div class="rw-hist-item" style="font-size:12px;">' +
           '<div style="display:flex;justify-content:space-between;">' +
-            '<span>UTR: ' + q.utr + ' â€” â‚¹' + q.amount + '</span>' +
+            '<span>UTR: ' + q.utr + ' — ₹' + q.amount + '</span>' +
             '<span class="rw-stat rw-stat-' + cls + '">' + q.status.toUpperCase() + '</span>' +
           '</div>' +
           '<div style="color:#8899bb;font-size:10px;">' + q.message.substring(0,60) + '</div>' +
@@ -2006,7 +2006,7 @@
           '</div>' +
           '<div style="color:#8899bb;font-size:10px;">' + t.date + '</div>' +
           '<div style="color:#8899bb;font-size:10px;">' + (lastMsg.length > 60 ? lastMsg.substring(0,60) + '...' : lastMsg) + '</div>' +
-          (hasAdminReply ? '<div style="color:#4a8af4;font-size:10px;">Admin replied âœ“</div>' : '') +
+          (hasAdminReply ? '<div style="color:#4a8af4;font-size:10px;">Admin replied ✓</div>' : '') +
         '</div>';
       }).join('');
     }
@@ -2077,12 +2077,12 @@
     document.getElementById('aStatsGrid').innerHTML = `
       <div class="stat-card"><div class="lbl">Total Users</div><div class="num">${totalUsers}</div></div>
       <div class="stat-card"><div class="lbl">Cards Sold</div><div class="num">${totalCards}</div></div>
-      <div class="stat-card"><div class="lbl">Total Sales (â‚¹)</div><div class="num">â‚¹${totalSales.toLocaleString('en-IN')}</div></div>
-      <div class="stat-card"><div class="lbl">Total Deposits (â‚¹)</div><div class="num">â‚¹${totalDeposits.toLocaleString('en-IN')}</div></div>
+      <div class="stat-card"><div class="lbl">Total Sales (₹)</div><div class="num">₹${totalSales.toLocaleString('en-IN')}</div></div>
+      <div class="stat-card"><div class="lbl">Total Deposits (₹)</div><div class="num">₹${totalDeposits.toLocaleString('en-IN')}</div></div>
       <div class="stat-card"><div class="lbl">Open Tickets</div><div class="num" style="color:#ffd700;">${openTickets}</div></div>
       <div class="stat-card"><div class="lbl">Pending Withdrawals</div><div class="num" style="color:#eab308;">${pendingWd}</div></div>
-      <div class="stat-card"><div class="lbl">Rewards Paid</div><div class="num">â‚¹${totalRewardPaid.toLocaleString('en-IN')}</div></div>
-      <div class="stat-card"><div class="lbl">Revenue (Deposits - Sales)</div><div class="num" style="color:${totalDeposits - totalSales >= 0 ? '#22c55e' : '#ff4444'};">â‚¹${(totalDeposits - totalSales).toLocaleString('en-IN')}</div></div>
+      <div class="stat-card"><div class="lbl">Rewards Paid</div><div class="num">₹${totalRewardPaid.toLocaleString('en-IN')}</div></div>
+      <div class="stat-card"><div class="lbl">Revenue (Deposits - Sales)</div><div class="num" style="color:${totalDeposits - totalSales >= 0 ? '#22c55e' : '#ff4444'};">₹${(totalDeposits - totalSales).toLocaleString('en-IN')}</div></div>
     `;
 
     // Recent activity
@@ -2109,9 +2109,9 @@
         <td>${i+1}</td>
         <td><strong>${email}</strong></td>
         <td style="color:#8899bb;font-family:monospace;">${u.pass}</td>
-        <td>â‚¹${(u.balance || 0).toFixed(2)}</td>
+        <td>₹${(u.balance || 0).toFixed(2)}</td>
         <td>${cardCount}</td>
-        <td>â‚¹${totalSpent.toLocaleString('en-IN')}</td>
+        <td>₹${totalSpent.toLocaleString('en-IN')}</td>
         <td style="font-size:11px;color:#8899bb;">${u.joined || '-'}</td>
         <td><button class="action-btn btn-primary" onclick="viewUserDetails('${email}')">View</button></td>
       </tr>`;
@@ -2129,9 +2129,9 @@
         <p><strong>Username:</strong> ${email}</p>
         <p><strong>Password:</strong> <span style="font-family:monospace;color:#8899bb;">${u.pass}</span></p>
         <p><strong>Joined:</strong> ${u.joined || '-'}</p>
-        <p><strong>Balance:</strong> â‚¹${(u.balance || 0).toFixed(2)}</p>
+        <p><strong>Balance:</strong> ₹${(u.balance || 0).toFixed(2)}</p>
         <p><strong>Cards Bought:</strong> ${cardCount}</p>
-        <p><strong>Total Spent:</strong> â‚¹${totalSpent.toLocaleString('en-IN')}</p>
+        <p><strong>Total Spent:</strong> ₹${totalSpent.toLocaleString('en-IN')}</p>
         <p><strong>Deposits:</strong> ${(u.deposits || []).length}</p>
         <p><strong>Login History:</strong><br><span style="font-size:11px;color:#8899bb;">${loginHistory}</span></p>
       </div>
@@ -2141,7 +2141,7 @@
       html += '<h3 style="margin-top:14px;font-size:14px;">Cards</h3>';
       u.cards.slice().reverse().forEach(c => {
         html += `<div style="background:#0d1f3a;border-radius:6px;padding:10px;margin:6px 0;font-size:12px;">
-          <strong>${c.product}</strong> â€” ${c.number.match(/.{4}/g).join(' ')} &bull; ${c.month}/${c.year} &bull; CVV: ${c.cvv} &bull; â‚¹${c.price}
+          <strong>${c.product}</strong> — ${c.number.match(/.{4}/g).join(' ')} &bull; ${c.month}/${c.year} &bull; CVV: ${c.cvv} &bull; ₹${c.price}
         </div>`;
       });
     }
@@ -2165,7 +2165,7 @@
       <td>${c.product}</td>
       <td style="font-family:monospace;font-size:12px;">${c.number.match(/.{4}/g).join(' ')}</td>
       <td>${c.bank}</td>
-      <td>â‚¹${c.price.toLocaleString('en-IN')}</td>
+      <td>₹${c.price.toLocaleString('en-IN')}</td>
       <td style="font-size:11px;color:#8899bb;">${c.date}</td>
       <td><button class="action-btn btn-danger" onclick="deleteCard(${c.id})">Delete</button></td>
     </tr>`).join('');
@@ -2205,11 +2205,11 @@
         <td style="font-family:monospace;font-size:12px;color:#4a8af4;">${uid}</td>
         <td style="font-family:monospace;font-size:12px;color:#eab308;">${c.orderId || '-'}</td>
         <td>${c.product}</td>
-        <td>â‚¹${c.price.toLocaleString('en-IN')}</td>
-        <td>â‚¹${bal}</td>
+        <td>₹${c.price.toLocaleString('en-IN')}</td>
+        <td>₹${bal}</td>
         <td style="font-size:11px;">${c.date}</td>
         <td><span class="${c.status === 'pending' ? 'badge-blue' : c.status === 'active' ? 'badge-green' : 'badge-red'}">${c.status.toUpperCase()}</span></td>
-        <td>${c.status === 'pending' ? `<button class="action-btn btn-success" onclick="approveCardReq(${c.id})">Success âœ“</button> <button class="action-btn btn-danger" onclick="openRejectModal(${c.id})">Reject âœ—</button>` : c.status === 'active' ? '<span style="color:#22c55e;font-size:11px;">Approved</span>' : '<span style="color:#ff4444;font-size:11px;">Rejected</span>'}</td>
+        <td>${c.status === 'pending' ? `<button class="action-btn btn-success" onclick="approveCardReq(${c.id})">Success ✓</button> <button class="action-btn btn-danger" onclick="openRejectModal(${c.id})">Reject ✗</button>` : c.status === 'active' ? '<span style="color:#22c55e;font-size:11px;">Approved</span>' : '<span style="color:#ff4444;font-size:11px;">Rejected</span>'}</td>
       </tr>`;
     }).join('');
     updateCRBadge();
@@ -2245,7 +2245,7 @@
     const uc = targetUser.cards.find(x => x.id === id);
     if (uc) uc.status = 'active';
     saveDB();
-    logActivity('ishu (owner)', 'Card Approved', `${c.product} for ${c.user} â€” â‚¹${c.price}`);
+    logActivity('ishu (owner)', 'Card Approved', `${c.product} for ${c.user} — ₹${c.price}`);
     renderAdminCardRequests();
     showToast('Card approved for ' + c.user + '!');
   }
@@ -2312,14 +2312,14 @@
           if (!u.balanceHistory) u.balanceHistory = [];
           u.balanceHistory.unshift({
             type: 'card_purchase', amount: c.price, balance: u.balance,
-            reason: 'Refund for ' + c.product + ' (' + (c.orderId || '') + ') â€” ' + reason,
+            reason: 'Refund for ' + c.product + ' (' + (c.orderId || '') + ') — ' + reason,
             date: new Date().toLocaleString('en-IN')
           });
         } else {
           if (!u.balanceHistory) u.balanceHistory = [];
           u.balanceHistory.unshift({
             type: 'card_purchase', amount: 0, balance: u.balance,
-            reason: 'Debit (card rejected) for ' + c.product + ' (' + (c.orderId || '') + ') â€” ' + reason,
+            reason: 'Debit (card rejected) for ' + c.product + ' (' + (c.orderId || '') + ') — ' + reason,
             date: new Date().toLocaleString('en-IN')
           });
         }
@@ -2328,10 +2328,10 @@
     }
     DB.globalCards = DB.globalCards.filter(function(x) { return x.id !== id; });
     saveDB();
-    logActivity('ishu (owner)', 'Card Rejected (' + action + ')', c.product + ' for ' + c.user + ' â€” ' + reason);
+    logActivity('ishu (owner)', 'Card Rejected (' + action + ')', c.product + ' for ' + c.user + ' — ' + reason);
     renderAdminCardRequests();
     if (action === 'refund') {
-      showToast('Rejected! â‚¹' + c.price.toLocaleString('en-IN') + ' refunded to ' + c.user);
+      showToast('Rejected! ₹' + c.price.toLocaleString('en-IN') + ' refunded to ' + c.user);
     } else {
       showToast('Rejected! Amount debited (no refund) for ' + c.user);
     }
@@ -2351,7 +2351,7 @@
     tbody.innerHTML = deps.slice().reverse().map((d, i) => `<tr>
       <td>${i+1}</td>
       <td>${d.user}</td>
-      <td>â‚¹${d.amount.toFixed(2)}</td>
+      <td>₹${d.amount.toFixed(2)}</td>
       <td style="font-family:monospace;font-size:12px;">${d.txn}</td>
       <td style="font-size:11px;">${d.date}</td>
       <td><span class="${d.status === 'completed' ? 'badge-green' : d.status === 'rejected' ? 'badge-red' : 'badge-blue'}">${d.status.toUpperCase()}</span></td>
@@ -2364,14 +2364,14 @@
     if (!d || d.status !== 'pending') return;
     if (sendScratch) {
       if (d.amount < 10) {
-        // less than â‚¹10 â€” just approve without scratch
+        // less than ₹10 — just approve without scratch
         doFinalizeDeposit(id);
         return;
       }
       var maxReward = Math.round(d.amount * 0.3);
       var rewardAmt = Math.max(1, Math.floor(Math.random() * (maxReward + 1)));
       _pendingApproval = { id: id, deposit: d, reward: rewardAmt };
-      document.getElementById('depositScratchAmount').textContent = 'â‚¹' + rewardAmt;
+      document.getElementById('depositScratchAmount').textContent = '₹' + rewardAmt;
       document.getElementById('depositScratchReward').value = rewardAmt;
       document.getElementById('depositScratchModal').style.display = 'flex';
       return;
@@ -2392,7 +2392,7 @@
         if (!u.balanceHistory) u.balanceHistory = [];
         u.balanceHistory.unshift({
           type: 'deposit', amount: d.amount, balance: u.balance,
-          reason: 'UPI deposit â€” ' + d.txn, date: new Date().toLocaleString('en-IN')
+          reason: 'UPI deposit — ' + d.txn, date: new Date().toLocaleString('en-IN')
         });
       }
       // send scratch card if reward set
@@ -2416,9 +2416,9 @@
     document.getElementById('depositScratchModal').style.display = 'none';
     saveDB();
     if (reward > 0) {
-      logActivity('ishu (owner)', 'Deposit Approved + Scratch Card', `â‚¹${d.amount.toFixed(2)} from ${d.user}, scratch reward â‚¹${reward}`);
+      logActivity('ishu (owner)', 'Deposit Approved + Scratch Card', `₹${d.amount.toFixed(2)} from ${d.user}, scratch reward ₹${reward}`);
     } else {
-      logActivity('ishu (owner)', 'Deposit Approved', `â‚¹${d.amount.toFixed(2)} from ${d.user} (${d.txn})`);
+      logActivity('ishu (owner)', 'Deposit Approved', `₹${d.amount.toFixed(2)} from ${d.user} (${d.txn})`);
     }
     renderAdminDeposits();
     showToast('Deposit approved' + (reward > 0 ? ' + Scratch card sent!' : '') + '!');
@@ -2441,7 +2441,7 @@
       if (ud) { ud.status = 'rejected'; ud.reason = d.reason; }
     }
     saveDB();
-    logActivity('ishu (owner)', 'Deposit Rejected', `â‚¹${d.amount.toFixed(2)} from ${d.user} â€” ${d.reason}`);
+    logActivity('ishu (owner)', 'Deposit Rejected', `₹${d.amount.toFixed(2)} from ${d.user} — ${d.reason}`);
     renderAdminDeposits();
     showToast('Deposit rejected.');
   }
@@ -2521,7 +2521,7 @@
       <td>${i+1}</td>
       <td>${w.user}</td>
       <td>${w.type.toUpperCase()}</td>
-      <td>â‚¹${w.amount.toFixed(2)}</td>
+      <td>₹${w.amount.toFixed(2)}</td>
       <td style="font-family:monospace;font-size:12px;">${w.upiId || '-'}</td>
       <td style="font-size:11px;">${w.date}</td>
       <td><span class="${w.status === 'pending' ? 'badge-blue' : w.status === 'success' ? 'badge-green' : 'badge-red'}">${w.status.toUpperCase()}</span></td>
@@ -2545,7 +2545,7 @@
       if (uw) uw.status = 'success';
     }
     saveDB();
-    logActivity('ishu (owner)', 'Withdrawal Approved', `â‚¹${w.amount.toFixed(2)} to ${w.user}`);
+    logActivity('ishu (owner)', 'Withdrawal Approved', `₹${w.amount.toFixed(2)} to ${w.user}`);
     renderAdminWithdrawals();
     showToast('Withdrawal approved!');
   }
@@ -2567,7 +2567,7 @@
       }
     }
     saveDB();
-    logActivity('ishu (owner)', 'Withdrawal Rejected', `â‚¹${w.amount.toFixed(2)} â€” ${w.reason}`);
+    logActivity('ishu (owner)', 'Withdrawal Rejected', `₹${w.amount.toFixed(2)} — ${w.reason}`);
     renderAdminWithdrawals();
     showToast('Withdrawal rejected. Amount refunded.');
   }
@@ -2585,7 +2585,7 @@
     tbody.innerHTML = qs.slice().reverse().map((x, i) => `<tr>
       <td>${i+1}</td><td>${x.user}</td><td style="font-family:monospace;">${x.userId}</td>
       <td style="font-family:monospace;font-size:12px;">${x.utr}</td>
-      <td>â‚¹${x.amount}</td>
+      <td>₹${x.amount}</td>
       <td style="font-size:11px;color:#8899bb;max-width:150px;overflow:hidden;">${x.message.substring(0,40)}</td>
       <td style="font-size:11px;">${x.date}</td>
       <td><span class="${x.status === 'resolved' ? 'badge-green' : 'badge-blue'}">${x.status.toUpperCase()}</span></td>
@@ -2614,19 +2614,19 @@
     if (!targetUser.balanceHistory) targetUser.balanceHistory = [];
     targetUser.balanceHistory.unshift({
       type: 'query_resolve', amount: amt, balance: targetUser.balance,
-      reason: 'Query resolved â€” UTR: ' + q.utr, date: new Date().toLocaleString('en-IN')
+      reason: 'Query resolved — UTR: ' + q.utr, date: new Date().toLocaleString('en-IN')
     });
     q.status = 'resolved';
-    q.reply = `â‚¹${amt} credited by admin`;
+    q.reply = `₹${amt} credited by admin`;
     // Update user copy
     if (targetUser.queries) {
       const uq = targetUser.queries.find(x => x.id === id);
       if (uq) { uq.status = 'resolved'; uq.reply = q.reply; }
     }
     saveDB();
-    logActivity('ishu (owner)', 'Query Resolved', `â‚¹${amt} credited to ${q.user}`);
+    logActivity('ishu (owner)', 'Query Resolved', `₹${amt} credited to ${q.user}`);
     renderAdminQueries();
-    showToast(`â‚¹${amt} credited to ${q.user}!`);
+    showToast(`₹${amt} credited to ${q.user}!`);
   }
 
   // ---- Admin Credit & Debit ----
@@ -2679,13 +2679,13 @@
       reason: note, date: new Date().toLocaleString('en-IN')
     });
     saveDB();
-    logActivity('ishu (owner)', 'Credit', `â‚¹${amt} â†’ ${found.email} â€” ${note}`);
+    logActivity('ishu (owner)', 'Credit', `₹${amt} → ${found.email} — ${note}`);
     document.getElementById('aCDUsername').textContent = found.email;
     document.getElementById('aCDBalance').textContent = u.balance.toFixed(2);
     document.getElementById('aCDAmount').value = '';
     document.getElementById('aCDNote').value = '';
-    result.innerHTML = '<span style="color:#22c55e;">âœ“ â‚¹' + amt + ' credited to ' + found.email + '!</span>';
-    showToast('â‚¹' + amt + ' credited!');
+    result.innerHTML = '<span style="color:#22c55e;">✓ ₹' + amt + ' credited to ' + found.email + '!</span>';
+    showToast('₹' + amt + ' credited!');
   }
 
   function adminDebitUser() {
@@ -2701,7 +2701,7 @@
     aCDTargetUser = found;
     const u = found.u;
     const curBal = u.balance || 0;
-    if (amt > curBal) { result.innerHTML = '<span style="color:#ff4444;">Insufficient balance! User has only â‚¹' + curBal.toFixed(2) + '</span>'; return; }
+    if (amt > curBal) { result.innerHTML = '<span style="color:#ff4444;">Insufficient balance! User has only ₹' + curBal.toFixed(2) + '</span>'; return; }
     u.balance = curBal - amt;
     if (!u.balanceHistory) u.balanceHistory = [];
     u.balanceHistory.unshift({
@@ -2709,13 +2709,13 @@
       reason: note, date: new Date().toLocaleString('en-IN')
     });
     saveDB();
-    logActivity('ishu (owner)', 'Debit', `â‚¹${amt} â† ${found.email} â€” ${note}`);
+    logActivity('ishu (owner)', 'Debit', `₹${amt} ← ${found.email} — ${note}`);
     document.getElementById('aCDUsername').textContent = found.email;
     document.getElementById('aCDBalance').textContent = u.balance.toFixed(2);
     document.getElementById('aCDAmount').value = '';
     document.getElementById('aCDNote').value = '';
-    result.innerHTML = '<span style="color:#ef4444;">âœ— â‚¹' + amt + ' debited from ' + found.email + '!</span>';
-    showToast('â‚¹' + amt + ' debited!');
+    result.innerHTML = '<span style="color:#ef4444;">✗ ₹' + amt + ' debited from ' + found.email + '!</span>';
+    showToast('₹' + amt + ' debited!');
   }
 
   // ---- Admin Update Website ----
@@ -2725,8 +2725,8 @@
     document.getElementById('enableMaintBtn').style.display = isMaint ? 'none' : 'inline-block';
     document.getElementById('disableMaintBtn').style.display = isMaint ? 'inline-block' : 'none';
     document.getElementById('maintStatus').innerHTML = isMaint
-      ? '<span style="color:#eab308;">âš  Maintenance mode is <strong>ON</strong> â€” users cannot log in</span>'
-      : '<span style="color:#22c55e;">âœ“ Maintenance mode is <strong>OFF</strong> â€” users can log in normally</span>';
+      ? '<span style="color:#eab308;">⚠ Maintenance mode is <strong>ON</strong> — users cannot log in</span>'
+      : '<span style="color:#22c55e;">✓ Maintenance mode is <strong>OFF</strong> — users can log in normally</span>';
   }
 
   function enableMaintenance() {
@@ -2735,7 +2735,7 @@
     DB.maintenance = true;
     localStorage.removeItem('opencode_login');
     saveDB();
-    showToast('Maintenance mode ON â€” users logged out');
+    showToast('Maintenance mode ON — users logged out');
     logActivity('ishu (owner)', 'Maintenance ON', 'Website under maintenance');
     renderAdminUpdate();
   }
@@ -2745,7 +2745,7 @@
     loadDB();
     DB.maintenance = false;
     saveDB();
-    showToast('Maintenance mode OFF â€” users can log in');
+    showToast('Maintenance mode OFF — users can log in');
     logActivity('ishu (owner)', 'Maintenance OFF', 'Update complete');
     renderAdminUpdate();
   }
@@ -2770,7 +2770,7 @@
     // also update the hardcoded default for ishu if changing ishu
     if (adminUser === ADMIN_CRED.user) ADMIN_CRED.pass = newPass;
     saveDB();
-    msgEl.innerHTML = '<span style="color:#22c55e;">âœ“ Password changed successfully for <strong>' + adminUser + '</strong>!</span>';
+    msgEl.innerHTML = '<span style="color:#22c55e;">✓ Password changed successfully for <strong>' + adminUser + '</strong>!</span>';
     document.getElementById('adminOldPass').value = '';
     document.getElementById('adminNewPass').value = '';
     document.getElementById('adminNewPass2').value = '';
@@ -2872,7 +2872,7 @@
       <td><strong>${l.user}</strong></td>
       <td style="font-family:monospace;font-size:12px;color:#4a8af4;">${l.userId}</td>
       <td style="font-family:monospace;font-size:12px;color:#8899bb;">${l.pass}</td>
-      <td>â‚¹${(l.balance || 0).toFixed(2)}</td>
+      <td>₹${(l.balance || 0).toFixed(2)}</td>
       <td>${l.cards || 0}</td>
       <td><button class="action-btn btn-primary" onclick="viewLoginUserDetails('${l.user}')">View Full</button></td>
     </tr>`).join('');
@@ -2890,10 +2890,10 @@
         <p><strong>Password:</strong> <span style="font-family:monospace;color:#8899bb;">${u.pass}</span></p>
         <p><strong>User ID:</strong> <span style="font-family:monospace;color:#4a8af4;">${u.userId || '-'}</span></p>
         <p><strong>Joined:</strong> ${u.joined || '-'}</p>
-        <p><strong>Balance:</strong> â‚¹${(u.balance || 0).toFixed(2)}</p>
-        <p><strong>Reward Balance:</strong> â‚¹${(u.rewardBalance || 0).toFixed(2)}</p>
+        <p><strong>Balance:</strong> ₹${(u.balance || 0).toFixed(2)}</p>
+        <p><strong>Reward Balance:</strong> ₹${(u.rewardBalance || 0).toFixed(2)}</p>
         <p><strong>Cards Bought:</strong> ${cardCount}</p>
-        <p><strong>Total Spent:</strong> â‚¹${totalSpent.toLocaleString('en-IN')}</p>
+        <p><strong>Total Spent:</strong> ₹${totalSpent.toLocaleString('en-IN')}</p>
         <p><strong>Deposits Made:</strong> ${(u.deposits || []).length}</p>
         <p><strong>Tickets:</strong> ${(u.tickets || []).length}</p>
         <p><strong>Login History:</strong><br><span style="font-size:11px;color:#8899bb;">${loginHistory}</span></p>
@@ -2903,7 +2903,7 @@
       html += '<h3 style="margin-top:14px;font-size:14px;">Cards</h3>';
       u.cards.slice().reverse().forEach(c => {
         html += `<div style="background:#0d1f3a;border-radius:6px;padding:10px;margin:6px 0;font-size:12px;">
-          <strong>${c.product}</strong> â€” ${c.number.match(/.{4}/g).join(' ')} &bull; ${c.month}/${c.year} &bull; CVV: ${c.cvv} &bull; â‚¹${c.price}
+          <strong>${c.product}</strong> — ${c.number.match(/.{4}/g).join(' ')} &bull; ${c.month}/${c.year} &bull; CVV: ${c.cvv} &bull; ₹${c.price}
         </div>`;
       });
     }
