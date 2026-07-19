@@ -449,6 +449,28 @@
     .task-log-item .info { flex: 1; min-width: 0; }
     .task-log-item .info span { color: #8899bb; }
 
+    /* ===== HOME SECTION ROW/COL LAYOUT ===== */
+    .home-section-row { display: flex; gap: 16px; margin-bottom: 8px; flex-wrap: wrap; }
+    .home-section-col { flex: 1; min-width: 280px; }
+    .home-section-col .section-title { margin-bottom: 10px; }
+
+    /* ===== REFER & EARN ===== */
+    .refer-box {
+      background: linear-gradient(135deg,#122a4a,#0d1f3a); border-radius: 10px;
+      padding: 16px; border: 1px solid #eab308; max-width: 500px; margin: 0 auto 16px; text-align: center;
+    }
+    .refer-box .refer-link {
+      background: #0a1628; border-radius: 6px; padding: 10px; margin: 8px 0;
+      border: 1px solid #1a3a6a; font-size: 12px; color: #4a8af4; word-break: break-all; cursor: pointer;
+    }
+    .refer-box .refer-link:hover { background: #0d1f3a; }
+    .refer-box .refer-stat { font-size: 11px; color: #8899bb; }
+    .refer-box .refer-stat strong { color: #eab308; }
+    .refer-hist-item {
+      background: #0d1f3a; border-radius: 6px; padding: 8px; margin: 4px 0;
+      border: 1px solid #1a3a6a; font-size: 11px;
+    }
+
     /* ===== VIDEOS ===== */
     .video-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -572,9 +594,13 @@
         <button class="arrow next" onclick="bannerNext()">&#10095;</button>
         <div class="dots" id="bannerDots"></div>
       </div>
-      <div id="freeEarningApps"><div class="section-title">📱 Free Earning Apps</div><div class="app-grid" id="appGrid"></div></div>
-      <div id="premiumEarningApps"><div class="section-title">⭐ Premium Free Earning</div><div class="premium-grid" id="premiumAppGrid"></div></div>
-      <div id="freeEarningVideos"><div class="section-title">🎥 Tutorial Videos</div><div class="video-grid" id="videoGrid"></div></div>
+      <div class="home-section-row">
+        <div class="home-section-col" id="freeEarningApps"><div class="section-title">📱 Free Earning Apps</div><div class="app-grid" id="appGrid"></div></div>
+        <div class="home-section-col" id="premiumEarningApps"><div class="section-title">⭐ Premium Free Earning</div><div class="premium-grid" id="premiumAppGrid"></div></div>
+      </div>
+      <div class="home-section-row">
+        <div class="home-section-col" id="freeEarningVideos"><div class="section-title">🎥 Tutorial Videos</div><div class="video-grid" id="videoGrid"></div></div>
+      </div>
       <h2 style="margin-bottom:4px;">Virtual Cards</h2>
       <p style="color:#8899bb;margin-bottom:16px;font-size:13px;">Select & purchase instantly</p>
       <div class="card-grid" id="uProductGrid"></div>
@@ -636,6 +662,12 @@
       </div>
       <h3 style="font-size:15px;margin-bottom:10px;">Withdrawal History</h3>
       <div id="rwHistory"></div>
+      <div class="refer-box" id="referSection" style="margin-top:20px;">
+        <h3 style="font-size:14px;margin-bottom:8px;">🔗 Refer & Earn</h3>
+        <p style="color:#8899bb;font-size:11px;margin-bottom:6px;">Share your referral link. When someone registers & earns, you get <strong style="color:#eab308;">10%</strong> of their earnings!</p>
+        <div class="refer-link" id="referLinkText" onclick="copyReferLink()">Loading...</div>
+        <div style="font-size:11px;color:#556688;margin-top:6px;" id="referEarnings">Referral Earnings: ₹<strong id="referEarningAmount">0</strong></div>
+      </div>
     </div>
     <div class="page" id="upage-query">
       <div class="support-box" style="max-width:500px;margin:0 auto;">
@@ -825,35 +857,42 @@
 
       <div class="home-form">
         <h3>📸 Banner Images</h3>
-        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Add image URLs (JPG/PNG) — they'll display in a carousel on home page</p>
+        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Add image URLs or upload from gallery</p>
         <div id="aBannerList"></div>
         <div class="btn-row" style="margin-top:8px;">
           <input type="text" id="aBannerUrlInput" placeholder="Banner image URL..." style="flex:1;">
           <input type="text" id="aBannerLinkInput" placeholder="Optional link URL..." style="flex:1;">
           <button class="btn-add" onclick="addAdminBanner()">+ Add Banner</button>
+          <label class="btn-add" style="background:#7c3aed;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('bannerFileInput').click()">📁 Upload</label>
+          <input type="file" id="bannerFileInput" accept="image/*" style="display:none;" onchange="uploadBannerFile(this)">
         </div>
       </div>
 
       <div class="home-form">
         <h3>📱 Free Earning Apps</h3>
-        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Add app name, icon URL, and click link — users see "Click Link" button</p>
+        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Paste Play Store link & click Auto Fetch to get icon. Or upload icon manually.</p>
         <div id="aAppList"></div>
         <div class="btn-row" style="margin-top:8px;">
-          <input type="text" id="aAppNameInput" placeholder="App name..." style="flex:1;">
-          <input type="text" id="aAppIconInput" placeholder="Icon URL (Play Store style)..." style="flex:1;">
-          <input type="text" id="aAppLinkInput" placeholder="Click link URL..." style="flex:1;">
-          <button class="btn-add" onclick="addAdminApp()">+ Add App</button>
+          <input type="text" id="aAppNameInput" placeholder="App name..." style="flex:0.6;">
+          <input type="text" id="aAppIconInput" placeholder="Icon URL..." style="flex:0.8;">
+          <input type="text" id="aAppLinkInput" placeholder="Play Store / app link..." style="flex:0.8;">
+          <button class="btn-add" onclick="fetchPlayStoreIcon('aAppIconInput','aAppLinkInput')" style="background:#7c3aed;">Auto Fetch</button>
+          <label class="btn-add" style="background:#22c55e;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('appIconFile').click()">📁 Icon</label>
+          <input type="file" id="appIconFile" accept="image/*" style="display:none;" onchange="uploadAppIconFile(this)">
+          <button class="btn-add" onclick="addAdminApp()">+ Add</button>
         </div>
       </div>
 
       <div class="home-form">
         <h3>🎥 Tutorial Videos</h3>
-        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Add video title and direct video URL (MP4, WebM, etc.) — plays inline on home page</p>
+        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Add video URL or upload from gallery (MP4, small videos recommended)</p>
         <div id="aVideoList"></div>
         <div class="btn-row" style="margin-top:8px;">
-          <input type="text" id="aVideoTitleInput" placeholder="Video title..." style="flex:1;">
-          <input type="text" id="aVideoUrlInput" placeholder="Video URL (direct MP4 link)..." style="flex:1;">
-          <button class="btn-add" onclick="addAdminVideo()">+ Add Video</button>
+          <input type="text" id="aVideoTitleInput" placeholder="Video title..." style="flex:0.6;">
+          <input type="text" id="aVideoUrlInput" placeholder="Video URL (MP4)..." style="flex:1;">
+          <button class="btn-add" onclick="addAdminVideo()">+ Add</button>
+          <label class="btn-add" style="background:#7c3aed;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('videoFileInput').click()">📁 Upload</label>
+          <input type="file" id="videoFileInput" accept="video/*" style="display:none;" onchange="uploadVideoFile(this)">
         </div>
       </div>
 
@@ -862,11 +901,14 @@
         <p style="color:#556688;font-size:11px;margin-bottom:8px;">Users complete task → auto-credit reward to their Reward Wallet. Track all completions.</p>
         <div id="aPremiumAppList"></div>
         <div class="btn-row" style="margin-top:8px;">
-          <input type="text" id="aPAppNameInput" placeholder="App name..." style="flex:0.8;">
-          <input type="text" id="aPAppIconInput" placeholder="Icon URL..." style="flex:0.8;">
-          <input type="text" id="aPAppLinkInput" placeholder="Task link URL..." style="flex:0.8;">
-          <input type="number" id="aPAppRewardInput" placeholder="Reward ₹" style="flex:0.3;">
-          <button class="btn-add" onclick="addAdminPremiumApp()">+ Add Premium App</button>
+          <input type="text" id="aPAppNameInput" placeholder="App name..." style="flex:0.5;">
+          <input type="text" id="aPAppIconInput" placeholder="Icon URL..." style="flex:0.6;">
+          <input type="text" id="aPAppLinkInput" placeholder="Task link / Play Store..." style="flex:0.6;">
+          <input type="number" id="aPAppRewardInput" placeholder="Reward ₹" style="flex:0.2;">
+          <button class="btn-add" onclick="fetchPlayStoreIcon('aPAppIconInput','aPAppLinkInput')" style="background:#7c3aed;">Fetch</button>
+          <label class="btn-add" style="background:#22c55e;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('pAppIconFile').click()">📁</label>
+          <input type="file" id="pAppIconFile" accept="image/*" style="display:none;" onchange="uploadPremiumAppIconFile(this)">
+          <button class="btn-add" onclick="addAdminPremiumApp()">+ Add</button>
         </div>
         <div style="margin-top:10px;">
           <h4 style="font-size:12px;color:#22c55e;margin-bottom:6px;">📋 All User Task Completions</h4>
@@ -1517,16 +1559,32 @@
     loadDB();
     if (DB.users[user]) { alert('Username already taken!'); return; }
     const userId = Math.floor(100000 + Math.random() * 900000);
+    var refCode = getUrlParam('ref');
+    var refBy = null;
+    if (refCode) {
+      for (const [email, u] of Object.entries(DB.users)) {
+        if (String(u.userId) === refCode) { refBy = email; break; }
+      }
+    }
     DB.users[user] = {
       pass, joined: new Date().toLocaleString('en-IN'),
       userId, balance: 0, rewardBalance: 0,
       cards: [], tickets: [], deposits: [], withdrawals: [], queries: [], loginHistory: [],
-      balanceHistory: [], mailbox: []
+      balanceHistory: [], mailbox: [], referrer: refBy || null, referralEarnings: 0
     };
+    if (refBy) {
+      DB.users[user].referredBy = refBy;
+      logActivity(refBy, 'Referral', 'New user registered via referral: ' + user);
+    }
     saveDB();
-    logActivity(user, 'Registration', 'New account created');
+    logActivity(user, 'Registration', 'New account created' + (refBy ? ' (referred by ' + refBy + ')' : ''));
     alert('Registered! You can now login.');
     cancelRegister();
+  }
+
+  function getUrlParam(name) {
+    var match = location.search.match(new RegExp('[?&]' + name + '=([^&]+)'));
+    return match ? decodeURIComponent(match[1]) : null;
   }
 
   function cancelRegister() {
@@ -1920,6 +1978,7 @@
     m.claimed = true;
     m.scratched = true;
     u.rewardBalance = (u.rewardBalance || 0) + m.amount;
+    creditReferrer(currentUser, m.amount);
     saveDB();
     document.getElementById('inboxScratchAmount').textContent = '₹' + m.amount;
     document.getElementById('inboxScratchOverlay').style.display = 'flex';
@@ -1948,6 +2007,7 @@
     m.claimed = true;
     m.scratched = true;
     u.rewardBalance = (u.rewardBalance || 0) + m.amount;
+    creditReferrer(currentUser, m.amount);
     closeInboxScratch();
     _claimScratchId = null;
     saveDB();
@@ -2072,6 +2132,7 @@
     if (u.premiumTasks.find(function(t) { return t.appName === appName; })) { showToast('Already completed!'); return; }
     u.premiumTasks.push({ appName: appName, reward: reward, date: new Date().toLocaleString('en-IN'), userId: u.userId });
     u.rewardBalance = (u.rewardBalance || 0) + reward;
+    creditReferrer(currentUser, reward);
     saveDB();
     renderPremiumApps();
     refreshUserUI();
@@ -2182,6 +2243,66 @@
     DB.homeContent.videos.splice(idx, 1);
     saveDB();
     renderAVideoList();
+  }
+
+  // ---- File Upload Helpers ----
+  function readFileAsDataURL(file, callback) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { showToast('File too large! Max 5MB.'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e) { callback(e.target.result); };
+    reader.readAsDataURL(file);
+  }
+
+  function uploadBannerFile(input) {
+    var file = input.files[0];
+    readFileAsDataURL(file, function(dataUrl) {
+      document.getElementById('aBannerUrlInput').value = dataUrl;
+      showToast('Image loaded! Click "+ Add Banner" to save.');
+    });
+    input.value = '';
+  }
+
+  function uploadAppIconFile(input) {
+    var file = input.files[0];
+    readFileAsDataURL(file, function(dataUrl) {
+      document.getElementById('aAppIconInput').value = dataUrl;
+      showToast('Icon loaded! Add app name & link, then click "+ Add".');
+    });
+    input.value = '';
+  }
+
+  function uploadPremiumAppIconFile(input) {
+    var file = input.files[0];
+    readFileAsDataURL(file, function(dataUrl) {
+      document.getElementById('aPAppIconInput').value = dataUrl;
+      showToast('Icon loaded! Add details, then click "+ Add".');
+    });
+    input.value = '';
+  }
+
+  function uploadVideoFile(input) {
+    var file = input.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { showToast('Video too large! Max 10MB. Use URL for larger videos.'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('aVideoUrlInput').value = e.target.result;
+      showToast('Video loaded! Add title, then click "+ Add".');
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  }
+
+  // ---- Play Store Auto Fetch Icon ----
+  function fetchPlayStoreIcon(iconInputId, linkInputId) {
+    var link = document.getElementById(linkInputId).value.trim();
+    if (!link) { showToast('Enter a Play Store link first!'); return; }
+    var match = link.match(/[?&]id=([a-zA-Z0-9._]+)/);
+    if (!match) { showToast('Could not find app ID in the link. Try a Play Store URL like: https://play.google.com/store/apps/details?id=com.example'); return; }
+    var pkg = match[1];
+    document.getElementById(iconInputId).value = 'https://play-lh.googleusercontent.com/' + pkg;
+    showToast('Icon URL guessed! If wrong, upload icon manually.');
   }
 
   // ---- Admin: Premium Apps ----
@@ -2315,6 +2436,44 @@
     document.getElementById('rwBalance').textContent = (u.rewardBalance || 0).toFixed(2);
     toggleUpiField();
     renderWithdrawHistory();
+    renderReferralSection();
+  }
+
+  function renderReferralSection() {
+    const u = DB.users[currentUser];
+    if (!u) return;
+    var baseUrl = location.protocol + '//' + location.host + location.pathname.replace(/\/+$/, '');
+    document.getElementById('referLinkText').textContent = baseUrl + '?ref=' + u.userId;
+    document.getElementById('referEarningAmount').textContent = (u.referralEarnings || 0).toFixed(2);
+  }
+
+  function copyReferLink() {
+    var text = document.getElementById('referLinkText').textContent;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(function() { showToast('Referral link copied!'); }).catch(function() { fallbackCopy(text); });
+    } else { fallbackCopy(text); }
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); showToast('Referral link copied!'); } catch(e) { showToast('Copy failed!'); }
+    document.body.removeChild(ta);
+  }
+
+  function creditReferrer(userEmail, amount) {
+    if (!userEmail || !amount || amount <= 0) return;
+    var u = DB.users[userEmail];
+    if (!u || !u.referrer) return;
+    var refEmail = u.referrer;
+    var ref = DB.users[refEmail];
+    if (!ref) return;
+    var refAmt = Math.round(amount * 0.1 * 100) / 100;
+    if (refAmt <= 0) return;
+    ref.rewardBalance = (ref.rewardBalance || 0) + refAmt;
+    ref.referralEarnings = (ref.referralEarnings || 0) + refAmt;
+    logActivity(refEmail, 'Referral Earning', 'Earned ₹' + refAmt + ' (10% of ' + userEmail + '\'s earning of ₹' + amount + ')');
   }
 
   function requestWithdrawal() {
@@ -2946,6 +3105,7 @@
       if (ud) {
         ud.status = 'completed';
         u.balance = (u.balance || 0) + d.amount;
+        creditReferrer(email, d.amount);
         if (!u.balanceHistory) u.balanceHistory = [];
         u.balanceHistory.unshift({
           type: 'deposit', amount: d.amount, balance: u.balance,
