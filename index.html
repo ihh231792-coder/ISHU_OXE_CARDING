@@ -352,6 +352,105 @@
       padding:8px 20px; border:none; border-radius:6px;
       background: linear-gradient(135deg,#2563eb,#1a4fa0); color:#fff; font-size:13px; cursor:pointer;
     }
+    
+    /* ===== BANNER CAROUSEL ===== */
+    .banner-carousel {
+      position: relative; width: 100%; max-width: 900px; margin: 0 auto 20px;
+      border-radius: 12px; overflow: hidden; aspect-ratio: 16/7;
+      background: #0d1f3a; box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+    }
+    .banner-carousel .slides { display: flex; transition: transform 0.5s ease; height: 100%; }
+    .banner-carousel .slide { min-width: 100%; height: 100%; }
+    .banner-carousel .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .banner-carousel .dots {
+      position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 6px; z-index: 2;
+    }
+    .banner-carousel .dots .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4);
+      cursor: pointer; transition: 0.3s;
+    }
+    .banner-carousel .dots .dot.active { background: #eab308; width: 20px; border-radius: 4px; }
+    .banner-carousel .arrow {
+      position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+      background: rgba(0,0,0,0.5); color: #fff; border: none; width: 32px; height: 32px;
+      border-radius: 50%; font-size: 16px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; transition: 0.3s;
+    }
+    .banner-carousel .arrow:hover { background: rgba(0,0,0,0.8); }
+    .banner-carousel .arrow.prev { left: 6px; }
+    .banner-carousel .arrow.next { right: 6px; }
+    .banner-empty { text-align: center; padding: 40px; color: #556688; font-size: 13px; }
+
+    /* ===== FREE EARNING APPS ===== */
+    .section-title { font-size: 16px; margin-bottom: 12px; color: #eab308; display: flex; align-items: center; gap: 8px; }
+    .app-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px; margin-bottom: 24px;
+    }
+    .app-card {
+      background: linear-gradient(135deg,#122a4a,#0d1f3a); border-radius: 10px;
+      padding: 14px; text-align: center; border: 1px solid #1a3a6a;
+      transition: 0.3s; cursor: pointer;
+    }
+    .app-card:hover { border-color: #4a8af4; transform: translateY(-2px); box-shadow: 0 4px 20px rgba(74,138,244,0.15); }
+    .app-card img {
+      width: 64px; height: 64px; border-radius: 12px; object-fit: cover;
+      margin-bottom: 8px; background: #0a1628; border: 1px solid #1a3a6a;
+    }
+    .app-card .app-name { font-size: 12px; color: #c8d6e5; margin-bottom: 8px; font-weight: bold; }
+    .app-card .click-link {
+      display: inline-block; padding: 4px 14px; border-radius: 6px;
+      background: linear-gradient(135deg,#2563eb,#1a4fa0); color: #fff;
+      font-size: 11px; font-weight: bold; text-decoration: none; transition: 0.3s;
+    }
+    .app-card .click-link:hover { background: linear-gradient(135deg,#3b82f6,#2563eb); }
+
+    /* ===== VIDEOS ===== */
+    .video-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px; margin-bottom: 24px;
+    }
+    .video-card {
+      background: #0d1f3a; border-radius: 10px; overflow: hidden;
+      border: 1px solid #1a3a6a; transition: 0.3s;
+    }
+    .video-card:hover { border-color: #4a8af4; }
+    .video-card video { width: 100%; display: block; max-height: 400px; }
+    .video-card .video-title {
+      padding: 8px 12px; font-size: 12px; color: #c8d6e5;
+      border-top: 1px solid #1a3a6a; text-align: center;
+    }
+    .video-empty { text-align: center; padding: 30px; color: #556688; font-size: 13px; }
+
+    /* ===== ADMIN HOME SETTINGS ===== */
+    .home-form {
+      background: #0d1f3a; border-radius: 10px; padding: 16px;
+      border: 1px solid #1a3a6a; margin-bottom: 16px; max-width: 600px;
+    }
+    .home-form h3 { font-size: 14px; margin-bottom: 10px; color: #eab308; }
+    .home-form input, .home-form textarea {
+      width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #1a3a6a;
+      background: #0a1628; color: #fff; font-size: 12px; outline: none;
+      margin-bottom: 6px; box-sizing: border-box;
+    }
+    .home-form .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .home-form .btn-row button {
+      padding: 6px 14px; border: none; border-radius: 6px; font-size: 11px;
+      cursor: pointer; font-weight: bold; transition: 0.3s;
+    }
+    .home-form .btn-add { background: #2563eb; color: #fff; }
+    .home-form .btn-add:hover { background: #3b82f6; }
+    .home-form .btn-remove { background: #dc2626; color: #fff; }
+    .home-form .btn-remove:hover { background: #ef4444; }
+    .home-form .btn-edit { background: #eab308; color: #000; }
+    .home-form .home-item {
+      background: #0a1628; border-radius: 6px; padding: 10px; margin-bottom: 6px;
+      border: 1px solid #1a3a6a; font-size: 12px; display: flex;
+      justify-content: space-between; align-items: center; gap: 8px;
+    }
+    .home-form .home-item .info { flex: 1; min-width: 0; word-break: break-all; }
+    .home-form .home-item .info span { color: #8899bb; }
   </style>
 </head>
 <body>
@@ -424,6 +523,14 @@
   </div>
   <div class="content">
     <div class="page active" id="upage-home">
+      <div class="banner-carousel" id="homeBanner">
+        <div class="slides" id="bannerSlides"></div>
+        <button class="arrow prev" onclick="bannerPrev()">&#10094;</button>
+        <button class="arrow next" onclick="bannerNext()">&#10095;</button>
+        <div class="dots" id="bannerDots"></div>
+      </div>
+      <div id="freeEarningApps"><div class="section-title">📱 Free Earning Apps</div><div class="app-grid" id="appGrid"></div></div>
+      <div id="freeEarningVideos"><div class="section-title">🎥 Tutorial Videos</div><div class="video-grid" id="videoGrid"></div></div>
       <h2 style="margin-bottom:4px;">Virtual Cards</h2>
       <p style="color:#8899bb;margin-bottom:16px;font-size:13px;">Select & purchase instantly</p>
       <div class="card-grid" id="uProductGrid"></div>
@@ -551,6 +658,7 @@
     <div class="nav-item" data-apage="rewarddebit" onclick="switchAdminPage('rewarddebit')">Reward Debit</div>
     <div class="nav-item" data-apage="sendscratch" onclick="switchAdminPage('sendscratch')">Send Scratch</div>
     <div class="nav-item" data-apage="loginlog" onclick="switchAdminPage('loginlog')">Login Log</div>
+    <div class="nav-item" data-apage="homesettings" onclick="switchAdminPage('homesettings')">Home Settings</div>
     <div class="nav-item" data-apage="broadcast" onclick="switchAdminPage('broadcast')">Broadcast</div>
     <div class="nav-item" data-apage="activity" onclick="switchAdminPage('activity')">Activity Log</div>
     <div class="nav-item" data-apage="update" onclick="switchAdminPage('update')">Update Website</div>
@@ -664,6 +772,47 @@
         <button class="rw-btn" onclick="adminDebitReward()" style="width:100%;background:linear-gradient(135deg,#ef4444,#dc2626);">Debit Reward −</button>
         <div id="aRDResult" style="margin-top:8px;font-size:13px;"></div>
       </div>
+    </div>
+
+    <!-- HOME SETTINGS -->
+    <div class="page" id="apage-homesettings">
+      <h2 style="margin-bottom:4px;">Home Page Settings</h2>
+      <p style="color:#8899bb;font-size:13px;margin-bottom:16px;">Manage banners & free earning content shown on user home page</p>
+
+      <div class="home-form">
+        <h3>📸 Banner Images</h3>
+        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Add image URLs (JPG/PNG) — they'll display in a carousel on home page</p>
+        <div id="aBannerList"></div>
+        <div class="btn-row" style="margin-top:8px;">
+          <input type="text" id="aBannerUrlInput" placeholder="Banner image URL..." style="flex:1;">
+          <input type="text" id="aBannerLinkInput" placeholder="Optional link URL..." style="flex:1;">
+          <button class="btn-add" onclick="addAdminBanner()">+ Add Banner</button>
+        </div>
+      </div>
+
+      <div class="home-form">
+        <h3>📱 Free Earning Apps</h3>
+        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Add app name, icon URL, and click link — users see "Click Link" button</p>
+        <div id="aAppList"></div>
+        <div class="btn-row" style="margin-top:8px;">
+          <input type="text" id="aAppNameInput" placeholder="App name..." style="flex:1;">
+          <input type="text" id="aAppIconInput" placeholder="Icon URL (Play Store style)..." style="flex:1;">
+          <input type="text" id="aAppLinkInput" placeholder="Click link URL..." style="flex:1;">
+          <button class="btn-add" onclick="addAdminApp()">+ Add App</button>
+        </div>
+      </div>
+
+      <div class="home-form">
+        <h3>🎥 Tutorial Videos</h3>
+        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Add video title and direct video URL (MP4, WebM, etc.) — plays inline on home page</p>
+        <div id="aVideoList"></div>
+        <div class="btn-row" style="margin-top:8px;">
+          <input type="text" id="aVideoTitleInput" placeholder="Video title..." style="flex:1;">
+          <input type="text" id="aVideoUrlInput" placeholder="Video URL (direct MP4 link)..." style="flex:1;">
+          <button class="btn-add" onclick="addAdminVideo()">+ Add Video</button>
+        </div>
+      </div>
+      <div style="color:#556688;font-size:11px;margin-top:4px;">All changes save instantly to database.</div>
     </div>
 
     <!-- SEND SCRATCH -->
@@ -1353,6 +1502,7 @@
           else if (id === 'manualbalance') {}
           else if (id === 'rewarddebit') {}
           else if (id === 'sendscratch') {}
+          else if (id === 'homesettings') {}
         }
       }
     }, 8000);
@@ -1417,6 +1567,7 @@
     document.getElementById('upage-' + name).classList.add('active');
     const el = document.querySelector(`#userApp .nav-item[data-upage="${name}"]`);
     if (el) el.classList.add('active');
+    if (name === 'home') renderUserHome();
     if (name === 'mycards') renderUserCards();
     if (name === 'buyhistory') renderBuyHistory();
     if (name === 'inbox') renderUserInbox();
@@ -1743,6 +1894,195 @@
     refreshUserUI();
     updateInboxBadge();
     showToast('₹' + m.amount + ' added to Reward Wallet!');
+  }
+
+  // ---- Home Page: Banners, Apps, Videos ----
+  var bannerTimer = null;
+  var bannerIdx = 0;
+
+  function renderUserHome() {
+    loadDB();
+    if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [] };
+    renderBanners();
+    renderApps();
+    renderVideos();
+    renderUserProducts();
+  }
+
+  function renderBanners() {
+    const banners = DB.homeContent.banners || [];
+    const slides = document.getElementById('bannerSlides');
+    const dots = document.getElementById('bannerDots');
+    if (!banners.length) {
+      slides.innerHTML = '<div class="banner-empty">📸 No banners yet — admin can add from Home Settings</div>';
+      dots.innerHTML = '';
+      if (bannerTimer) { clearInterval(bannerTimer); bannerTimer = null; }
+      return;
+    }
+    slides.innerHTML = banners.map(function(b) {
+      return '<div class="slide"><a href="' + esc(b.link || '#') + '" target="_blank"><img src="' + esc(b.url) + '" alt="banner"></a></div>';
+    }).join('');
+    dots.innerHTML = banners.map(function(b, i) {
+      return '<span class="dot' + (i === 0 ? ' active' : '') + '" onclick="goBanner(' + i + ')"></span>';
+    }).join('');
+    if (bannerTimer) clearInterval(bannerTimer);
+    bannerIdx = 0;
+    bannerTimer = setInterval(function() { bannerNext(); }, 4000);
+  }
+
+  function bannerPrev() {
+    var slides = document.getElementById('bannerSlides');
+    var dots = document.querySelectorAll('#bannerDots .dot');
+    if (!slides.children.length) return;
+    bannerIdx = (bannerIdx - 1 + slides.children.length) % slides.children.length;
+    slides.style.transform = 'translateX(-' + (bannerIdx * 100) + '%)';
+    dots.forEach(function(d, i) { d.classList.toggle('active', i === bannerIdx); });
+  }
+
+  function bannerNext() {
+    var slides = document.getElementById('bannerSlides');
+    var dots = document.querySelectorAll('#bannerDots .dot');
+    if (!slides.children.length) return;
+    bannerIdx = (bannerIdx + 1) % slides.children.length;
+    slides.style.transform = 'translateX(-' + (bannerIdx * 100) + '%)';
+    dots.forEach(function(d, i) { d.classList.toggle('active', i === bannerIdx); });
+  }
+
+  function goBanner(idx) {
+    bannerIdx = idx;
+    var slides = document.getElementById('bannerSlides');
+    var dots = document.querySelectorAll('#bannerDots .dot');
+    if (!slides.children.length) return;
+    slides.style.transform = 'translateX(-' + (idx * 100) + '%)';
+    dots.forEach(function(d, i) { d.classList.toggle('active', i === idx); });
+  }
+
+  function renderApps() {
+    const apps = DB.homeContent.apps || [];
+    const grid = document.getElementById('appGrid');
+    if (!apps.length) {
+      grid.innerHTML = '<div class="video-empty">📱 No free earning apps yet — admin can add from Home Settings</div>';
+      return;
+    }
+    grid.innerHTML = apps.map(function(a) {
+      return '<div class="app-card"><img src="' + esc(a.icon) + '" alt="' + esc(a.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'64\\\' height=\\\'64\\\'><rect fill=\\\'%230a1628\\\' width=\\\'64\\\' height=\\\'64\\\'/><text x=\\\'32\\\' y=\\\'38\\\' text-anchor=\\\'middle\\\' fill=\\\'%23556688\\\' font-size=\\\'10\\\' font-family=\\\'sans-serif\\\'>App</text></svg>\'"><div class="app-name">' + esc(a.name) + '</div><a class="click-link" href="' + esc(a.link) + '" target="_blank">Click Link</a></div>';
+    }).join('');
+  }
+
+  function renderVideos() {
+    const videos = DB.homeContent.videos || [];
+    const grid = document.getElementById('videoGrid');
+    if (!videos.length) {
+      grid.innerHTML = '<div class="video-empty">🎥 No tutorial videos yet — admin can add from Home Settings</div>';
+      return;
+    }
+    grid.innerHTML = videos.map(function(v) {
+      return '<div class="video-card"><video controls preload="metadata" playsinline><source src="' + esc(v.url) + '" type="video/mp4">Your browser does not support video.</video><div class="video-title">' + esc(v.title) + '</div></div>';
+    }).join('');
+  }
+
+  // ---- Admin: Home Settings ----
+  function renderAdminHomeSettings() {
+    loadDB();
+    if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [] };
+    renderABannerList();
+    renderAAppList();
+    renderAVideoList();
+  }
+
+  function renderABannerList() {
+    const banners = DB.homeContent.banners || [];
+    const list = document.getElementById('aBannerList');
+    if (!banners.length) { list.innerHTML = '<div style="color:#556688;font-size:12px;">No banners added yet.</div>'; return; }
+    list.innerHTML = banners.map(function(b, i) {
+      return '<div class="home-item"><div class="info"><strong>#' + (i + 1) + '</strong> <span>' + esc(b.url) + '</span>' + (b.link ? '<br><span>Link: ' + esc(b.link) + '</span>' : '') + '</div><button class="btn-remove" onclick="removeAdminBanner(' + i + ')">Remove</button></div>';
+    }).join('');
+  }
+
+  function addAdminBanner() {
+    const url = document.getElementById('aBannerUrlInput').value.trim();
+    const link = document.getElementById('aBannerLinkInput').value.trim();
+    if (!url) { showToast('Enter banner image URL!'); return; }
+    loadDB();
+    if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [] };
+    DB.homeContent.banners.push({ url: url, link: link || '' });
+    saveDB();
+    document.getElementById('aBannerUrlInput').value = '';
+    document.getElementById('aBannerLinkInput').value = '';
+    renderABannerList();
+    showToast('Banner added!');
+  }
+
+  function removeAdminBanner(idx) {
+    loadDB();
+    if (!DB.homeContent || !DB.homeContent.banners) return;
+    DB.homeContent.banners.splice(idx, 1);
+    saveDB();
+    renderABannerList();
+  }
+
+  function renderAAppList() {
+    const apps = DB.homeContent.apps || [];
+    const list = document.getElementById('aAppList');
+    if (!apps.length) { list.innerHTML = '<div style="color:#556688;font-size:12px;">No apps added yet.</div>'; return; }
+    list.innerHTML = apps.map(function(a, i) {
+      return '<div class="home-item"><div class="info"><strong>' + esc(a.name) + '</strong><br><span>' + esc(a.icon) + '</span><br><span>Link: ' + esc(a.link) + '</span></div><button class="btn-remove" onclick="removeAdminApp(' + i + ')">Remove</button></div>';
+    }).join('');
+  }
+
+  function addAdminApp() {
+    const name = document.getElementById('aAppNameInput').value.trim();
+    const icon = document.getElementById('aAppIconInput').value.trim();
+    const link = document.getElementById('aAppLinkInput').value.trim();
+    if (!name || !icon || !link) { showToast('Fill all fields!'); return; }
+    loadDB();
+    if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [] };
+    DB.homeContent.apps.push({ name: name, icon: icon, link: link });
+    saveDB();
+    document.getElementById('aAppNameInput').value = '';
+    document.getElementById('aAppIconInput').value = '';
+    document.getElementById('aAppLinkInput').value = '';
+    renderAAppList();
+    showToast('App added!');
+  }
+
+  function removeAdminApp(idx) {
+    loadDB();
+    if (!DB.homeContent || !DB.homeContent.apps) return;
+    DB.homeContent.apps.splice(idx, 1);
+    saveDB();
+    renderAAppList();
+  }
+
+  function renderAVideoList() {
+    const videos = DB.homeContent.videos || [];
+    const list = document.getElementById('aVideoList');
+    if (!videos.length) { list.innerHTML = '<div style="color:#556688;font-size:12px;">No videos added yet.</div>'; return; }
+    list.innerHTML = videos.map(function(v, i) {
+      return '<div class="home-item"><div class="info"><strong>' + esc(v.title) + '</strong><br><span>' + esc(v.url) + '</span></div><button class="btn-remove" onclick="removeAdminVideo(' + i + ')">Remove</button></div>';
+    }).join('');
+  }
+
+  function addAdminVideo() {
+    const title = document.getElementById('aVideoTitleInput').value.trim();
+    const url = document.getElementById('aVideoUrlInput').value.trim();
+    if (!title || !url) { showToast('Fill all fields!'); return; }
+    loadDB();
+    if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [] };
+    DB.homeContent.videos.push({ title: title, url: url });
+    saveDB();
+    document.getElementById('aVideoTitleInput').value = '';
+    document.getElementById('aVideoUrlInput').value = '';
+    renderAVideoList();
+    showToast('Video added!');
+  }
+
+  function removeAdminVideo(idx) {
+    loadDB();
+    if (!DB.homeContent || !DB.homeContent.videos) return;
+    DB.homeContent.videos.splice(idx, 1);
+    saveDB();
+    renderAVideoList();
   }
 
   // ---- User: Deposit ----
@@ -2114,6 +2454,7 @@
     if (name === 'sendscratch') renderAdminSendScratch();
     if (name === 'activity') renderAdminActivity();
     if (name === 'loginlog') renderAdminLoginLog();
+    if (name === 'homesettings') renderAdminHomeSettings();
     if (name === 'broadcast') renderAdminBroadcast();
     if (name === 'update') renderAdminUpdate();
     updateTicketBadge();
