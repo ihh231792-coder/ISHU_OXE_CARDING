@@ -1629,11 +1629,14 @@
       div.innerHTML = '<p class="empty-msg">Your inbox is empty.</p>'; return;
     }
     // ensure every scratch card has _id (for legacy data)
+    var _saveNeeded = false;
     for (var _si = 0; _si < u.mailbox.length; _si++) {
       if (u.mailbox[_si].type === 'scratch_card' && !u.mailbox[_si]._id) {
         u.mailbox[_si]._id = 'sc_' + Date.now() + '_' + _si;
+        _saveNeeded = true;
       }
     }
+    if (_saveNeeded) saveDB();
     div.innerHTML = u.mailbox.slice().reverse().map(function(m) {
       if (m.type === 'scratch_card') {
         if (m.claimed) {
