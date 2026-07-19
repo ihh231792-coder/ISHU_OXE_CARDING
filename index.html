@@ -444,14 +444,13 @@
     </div>
     <!-- Scratch Card Overlay (for Inbox) -->
     <div class="scratch-overlay" id="inboxScratchOverlay">
-      <div class="scratch-card">
+      <div class="scratch-card" onclick="event.stopPropagation()">
         <div class="sparkle"></div>
         <button class="close-scratch" onclick="closeInboxScratch()">&times;</button>
         <div style="font-size:40px;margin:8px 0;">🎉</div>
-        <div class="reward-label">You Won a Scratch Reward!</div>
+        <div class="reward-label">Congrats, you received</div>
         <div class="reward-amount" id="inboxScratchAmount">₹0</div>
-        <div style="color:#556688;font-size:12px;margin:8px 0;">Click "Claim Reward" to add to your Reward Wallet</div>
-        <button class="claim-btn" id="inboxScratchClaimBtn" onclick="doClaimScratch()">Claim Reward</button>
+        <div style="color:#22c55e;font-size:13px;margin:10px 0;">🎊 Added to your Reward Wallet! 🎊</div>
       </div>
     </div>
     <div class="page" id="upage-deposit">
@@ -1620,7 +1619,6 @@
   }
 
   // ---- User: Inbox ----
-  var _claimScratchId = null; // global for claim flow
 
   function renderUserInbox() {
     const u = DB.users[currentUser];
@@ -1641,9 +1639,7 @@
     div.innerHTML = u.mailbox.slice().reverse().map(function(m) {
       if (m.type === 'scratch_card') {
         if (m.claimed) {
-          return '<div class="inbox-item"><div class="inbox-icon">🎉</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg" style="color:#22c55e;">Scratch reward claimed — ₹' + m.amount + '</div></div></div>';
-        } else if (m.scratched) {
-          return '<div class="inbox-item"><div class="inbox-icon">🎉</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">Scratch card worth <strong style="color:#eab308;">₹' + m.amount + '</strong> — <button class="action-btn btn-success" onclick="doClaimScratch(\'' + m._id + '\')" style="font-size:9px;padding:2px 8px;">Claim</button></div></div></div>';
+          return '<div class="inbox-item"><div class="inbox-icon">🎉</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg" style="color:#22c55e;">🎊 Reward claimed — ₹' + m.amount + '</div></div></div>';
         } else {
           return '<div class="inbox-item"><div class="inbox-icon">🎁</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">You received a Scratch Card! <button class="action-btn btn-primary" onclick="openInboxScratch(\'' + m._id + '\')" style="font-size:9px;padding:2px 8px;background:#7c3aed;">Open Scratch Card</button></div></div></div>';
         }
@@ -1667,36 +1663,20 @@
     if (idx === -1) return;
     const u = DB.users[currentUser];
     var m = u.mailbox[idx];
-    if (m.claimed || m.scratched) return;
+    if (m.claimed) return;
+    m.claimed = true;
     m.scratched = true;
-    _claimScratchId = id;
+    u.rewardBalance = (u.rewardBalance || 0) + m.amount;
     saveDB();
     document.getElementById('inboxScratchAmount').textContent = '₹' + m.amount;
     document.getElementById('inboxScratchOverlay').style.display = 'flex';
+    renderUserInbox();
+    refreshUserUI();
+    updateInboxBadge();
   }
 
   function closeInboxScratch() {
     document.getElementById('inboxScratchOverlay').style.display = 'none';
-  }
-
-  function doClaimScratch(id) {
-    if (!id) id = _claimScratchId;
-    if (!id) { showToast('Error!'); return; }
-    var idx = findScratchIdx(id);
-    if (idx === -1) { showToast('Scratch card not found!'); return; }
-    const u = DB.users[currentUser];
-    var m = u.mailbox[idx];
-    if (!m || m.type !== 'scratch_card' || m.claimed) return;
-    m.claimed = true;
-    m.scratched = true;
-    u.rewardBalance = (u.rewardBalance || 0) + m.amount;
-    closeInboxScratch();
-    _claimScratchId = null;
-    saveDB();
-    renderUserInbox();
-    refreshUserUI();
-    updateInboxBadge();
-    showToast('₹' + m.amount + ' added to Reward Wallet!');
   }
 
   // ---- User: Deposit ----
