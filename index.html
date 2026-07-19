@@ -2298,6 +2298,26 @@
     if (!link) return;
     // If already a direct image URL, skip
     if (link.match(/\.(jpg|jpeg|png|gif|webp|ico|svg|bmp)(\?|$)/i) || link.startsWith('data:') || link.match(/googleusercontent\.com/) || link.match(/fbcdn\.net/)) return;
+
+    // ---- IMMEDIATE FALLBACK (fires right away, proxy response overwrites later) ----
+    var playMatch = link.match(/[?&]id=([a-zA-Z0-9._-]+)/);
+    if (playMatch) {
+      // Play Store: guess icon + name immediately from fallback
+      document.getElementById(iconInputId).value = 'https://play-lh.googleusercontent.com/' + playMatch[1];
+      var nameParts = link.match(/details\?id=([a-zA-Z0-9._-]+)/);
+      if (!nameParts) nameParts = link.match(/store\/apps\/details\?id=([a-zA-Z0-9._-]+)/);
+      if (nameParts) {
+        var raw = nameParts[1].split('.').pop() || nameParts[1];
+        document.getElementById(nameInputId).value = raw.charAt(0).toUpperCase() + raw.slice(1).replace(/_/g, ' ');
+      }
+    } else {
+      // Non-Play Store: quick domain-based fallback name
+      var parts = link.replace(/https?:\/\//, '').split('/')[0].split('.');
+      var domain = parts.filter(function(p) { return p !== 'www' && p !== 'm'; }).pop() || parts[0];
+      if (domain) document.getElementById(nameInputId).value = domain.charAt(0).toUpperCase() + domain.slice(1);
+    }
+
+    // ---- Try proxy to get real name + icon (async) ----
     fetchViaProxy(link, function(html) {
       var name = extractMetaContent(html, 'og:title') || extractMetaContent(html, 'twitter:title') || extractTitle(html) || extractPlayStoreName(html);
       var icon = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || extractImageSrc(html) || '';
@@ -2308,19 +2328,6 @@
       }
       if (name) document.getElementById(nameInputId).value = name;
       if (icon) document.getElementById(iconInputId).value = icon;
-      if (!icon || !name) {
-        // Fallback: for Play Store, guess icon from package ID
-        var playMatch = link.match(/[?&]id=([a-zA-Z0-9._-]+)/);
-        if (playMatch && !icon) {
-          document.getElementById(iconInputId).value = 'https://play-lh.googleusercontent.com/' + playMatch[1];
-        }
-        // Fallback: extract name from URL
-        if (!name) {
-          var parts = link.replace(/https?:\/\//, '').split('/')[0].split('.');
-          var domain = parts.length > 1 ? parts[parts.length - 2] : parts[0];
-          document.getElementById(nameInputId).value = domain.charAt(0).toUpperCase() + domain.slice(1);
-        }
-      }
     });
   }
 
