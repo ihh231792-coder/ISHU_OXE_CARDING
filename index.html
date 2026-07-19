@@ -2292,39 +2292,57 @@
     input.value = '';
   }
 
-  // ---- Play Store Auto Fetch Icon ----
   // ---- Auto Fetch App Info from Link ----
   function autoFetchAppInfo(linkInputId, nameInputId, iconInputId) {
     var link = document.getElementById(linkInputId).value.trim();
     if (!link) return;
-    // Play Store link
-    var playMatch = link.match(/[?&]id=([a-zA-Z0-9._-]+)/);
-    if (playMatch) {
-      var pkg = playMatch[1];
-      var iconUrl = 'https://play-lh.googleusercontent.com/' + pkg;
-      document.getElementById(iconInputId).value = iconUrl;
-      // Try to fetch app name from Play Store
-      fetchViaProxy(link, function(html) {
-        var name = extractMetaContent(html, 'og:title') || extractMetaContent(html, 'title') || extractPlayStoreName(html);
-        if (name) document.getElementById(nameInputId).value = name;
-      });
-      return;
-    }
-    // Any other URL — try to fetch OG tags
+    // If already a direct image URL, skip
+    if (link.match(/\.(jpg|jpeg|png|gif|webp|ico|svg|bmp)(\?|$)/i) || link.startsWith('data:') || link.match(/googleusercontent\.com/) || link.match(/fbcdn\.net/)) return;
     fetchViaProxy(link, function(html) {
-      var name = extractMetaContent(html, 'og:title') || extractMetaContent(html, 'twitter:title') || extractTitle(html);
-      var icon = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || '';
+      var name = extractMetaContent(html, 'og:title') || extractMetaContent(html, 'twitter:title') || extractTitle(html) || extractPlayStoreName(html);
+      var icon = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || extractImageSrc(html) || '';
+      // If Play Store, also extract JSON-LD app icon
+      if (!icon && link.match(/play\.google\.com/)) {
+        var jd = extractJsonLd(html, 'application/ld+json');
+        if (jd && jd.image) icon = jd.image;
+      }
       if (name) document.getElementById(nameInputId).value = name;
       if (icon) document.getElementById(iconInputId).value = icon;
+      if (!icon || !name) {
+        // Fallback: for Play Store, guess icon from package ID
+        var playMatch = link.match(/[?&]id=([a-zA-Z0-9._-]+)/);
+        if (playMatch && !icon) {
+          document.getElementById(iconInputId).value = 'https://play-lh.googleusercontent.com/' + playMatch[1];
+        }
+        // Fallback: extract name from URL
+        if (!name) {
+          var parts = link.replace(/https?:\/\//, '').split('/')[0].split('.');
+          var domain = parts.length > 1 ? parts[parts.length - 2] : parts[0];
+          document.getElementById(nameInputId).value = domain.charAt(0).toUpperCase() + domain.slice(1);
+        }
+      }
     });
+  }
+
+  function extractImageSrc(html) {
+    var m = html.match(/<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["']/i);
+    if (m) return m[1];
+    m = html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']image_src["']/i);
+    return m ? m[1] : null;
+  }
+
+  function extractJsonLd(html, type) {
+    var m = html.match(new RegExp('<script[^>]+type=["\']' + type + '["\'][^>]*>(.*?)<\\/script>', 'is'));
+    if (!m) return null;
+    try { var j = JSON.parse(m[1]); if (Array.isArray(j)) j = j[0]; return j; } catch(e) { return null; }
   }
 
   // ---- Auto Fetch Banner Image from URL ----
   function autoFetchBanner() {
     var url = document.getElementById('aBannerUrlInput').value.trim();
     if (!url || url.startsWith('data:')) return;
-    // If it's a direct image URL (jpg/png etc), use as-is — already done
-    if (url.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i)) return;
+    // If it's a direct image URL (known CDN, file extension, or data), use as-is
+    if (url.match(/\.(jpg|jpeg|png|gif|webp|ico|svg)(\?|$)/i) || url.match(/googleusercontent\.com/) || url.match(/lh[0-9]?\.googleusercontent\.com/) || url.match(/fbcdn\.net/) || url.match(/cloudinary\.com/) || url.match(/img[0-9]?\.blogspot\.com/)) return;
     // Not a direct image URL — try to fetch OG image from the page
     fetchViaProxy(url, function(html) {
       var img = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || '';
