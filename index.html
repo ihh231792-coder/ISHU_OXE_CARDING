@@ -857,11 +857,11 @@
 
       <div class="home-form">
         <h3>📸 Banner Images</h3>
-        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Add image URLs or upload from gallery</p>
+        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Paste image URL, website URL (auto-fetch banner), or upload from gallery</p>
         <div id="aBannerList"></div>
         <div class="btn-row" style="margin-top:8px;">
-          <input type="text" id="aBannerUrlInput" placeholder="Banner image URL..." style="flex:1;">
-          <input type="text" id="aBannerLinkInput" placeholder="Optional link URL..." style="flex:1;">
+          <input type="text" id="aBannerUrlInput" placeholder="Image URL or website link (auto-fetch)..." style="flex:1;">
+          <input type="text" id="aBannerLinkInput" placeholder="Optional click link URL..." style="flex:1;">
           <button class="btn-add" onclick="addAdminBanner()">+ Add Banner</button>
           <label class="btn-add" style="background:#7c3aed;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('bannerFileInput').click()">📁 Upload</label>
           <input type="file" id="bannerFileInput" accept="image/*" style="display:none;" onchange="uploadBannerFile(this)">
@@ -2319,6 +2319,23 @@
     });
   }
 
+  // ---- Auto Fetch Banner Image from URL ----
+  function autoFetchBanner() {
+    var url = document.getElementById('aBannerUrlInput').value.trim();
+    if (!url || url.startsWith('data:')) return;
+    // If it's a direct image URL (jpg/png etc), use as-is — already done
+    if (url.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i)) return;
+    // Not a direct image URL — try to fetch OG image from the page
+    fetchViaProxy(url, function(html) {
+      var img = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || '';
+      if (img) {
+        if (img.startsWith('/')) { var a = url.match(/^https?:\/\/[^\/]+/); if (a) img = a[0] + img; }
+        document.getElementById('aBannerUrlInput').value = img;
+        showToast('Banner image auto-fetched from website!');
+      }
+    });
+  }
+
   function fetchViaProxy(url, callback) {
     var proxies = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?url='];
     var idx = 0;
@@ -2373,6 +2390,11 @@
   setTimeout(function() {
     setupAutoFetch('aAppLinkInput', 'aAppNameInput', 'aAppIconInput');
     setupAutoFetch('aPAppLinkInput', 'aPAppNameInput', 'aPAppIconInput');
+    var bannerLink = document.getElementById('aBannerUrlInput');
+    if (bannerLink) {
+      bannerLink.addEventListener('input', function() { autoFetchBanner(); });
+      bannerLink.addEventListener('change', function() { autoFetchBanner(); });
+    }
   }, 100);
 
   // ---- Admin: Premium Apps ----
