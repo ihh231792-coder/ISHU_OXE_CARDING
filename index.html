@@ -406,6 +406,49 @@
     }
     .app-card .click-link:hover { background: linear-gradient(135deg,#3b82f6,#2563eb); }
 
+    /* ===== PREMIUM APPS ===== */
+    .premium-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px; margin-bottom: 24px;
+    }
+    .premium-card {
+      background: linear-gradient(135deg,#1a2a1e,#0d2f1a); border-radius: 10px;
+      padding: 14px; text-align: center; border: 1px solid #22c55e;
+      transition: 0.3s; position: relative; overflow: hidden;
+    }
+    .premium-card::before {
+      content: '⭐'; position: absolute; top: 4px; right: 6px; font-size: 12px; opacity: 0.5;
+    }
+    .premium-card:hover { border-color: #4ade80; transform: translateY(-2px); box-shadow: 0 4px 20px rgba(34,197,94,0.15); }
+    .premium-card img {
+      width: 64px; height: 64px; border-radius: 12px; object-fit: cover;
+      margin-bottom: 6px; background: #0a1628; border: 1px solid #1a3a6a;
+    }
+    .premium-card .p-name { font-size: 12px; color: #c8d6e5; margin-bottom: 2px; font-weight: bold; }
+    .premium-card .p-reward { font-size: 13px; color: #eab308; font-weight: bold; margin-bottom: 6px; }
+    .premium-card .p-desc { font-size: 10px; color: #8899bb; margin-bottom: 8px; }
+    .premium-card .p-btn {
+      display: inline-block; padding: 5px 14px; border-radius: 6px;
+      border: none; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.3s;
+    }
+    .premium-card .p-btn-start { background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; text-decoration: none; }
+    .premium-card .p-btn-start:hover { background: linear-gradient(135deg,#4ade80,#22c55e); }
+    .premium-card .p-btn-done { background: linear-gradient(135deg,#eab308,#a16207); color: #000; }
+    .premium-card .p-btn-done:hover { background: linear-gradient(135deg,#facc15,#eab308); }
+    .premium-card .p-btn-completed { background: #1a3a6a; color: #556688; cursor: default; }
+    .premium-card .p-badge {
+      display: inline-block; font-size: 9px; padding: 2px 8px; border-radius: 4px;
+    }
+    .p-badge-success { background: rgba(34,197,94,0.15); color: #22c55e; }
+    .p-badge-pending { background: rgba(234,179,8,0.15); color: #eab308; }
+    .task-log-item {
+      background: #0a1628; border-radius: 6px; padding: 8px; margin-bottom: 4px;
+      border: 1px solid #1a3a6a; font-size: 11px; display: flex;
+      justify-content: space-between; align-items: center; gap: 6px;
+    }
+    .task-log-item .info { flex: 1; min-width: 0; }
+    .task-log-item .info span { color: #8899bb; }
+
     /* ===== VIDEOS ===== */
     .video-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -530,6 +573,7 @@
         <div class="dots" id="bannerDots"></div>
       </div>
       <div id="freeEarningApps"><div class="section-title">📱 Free Earning Apps</div><div class="app-grid" id="appGrid"></div></div>
+      <div id="premiumEarningApps"><div class="section-title">⭐ Premium Free Earning</div><div class="premium-grid" id="premiumAppGrid"></div></div>
       <div id="freeEarningVideos"><div class="section-title">🎥 Tutorial Videos</div><div class="video-grid" id="videoGrid"></div></div>
       <h2 style="margin-bottom:4px;">Virtual Cards</h2>
       <p style="color:#8899bb;margin-bottom:16px;font-size:13px;">Select & purchase instantly</p>
@@ -810,6 +854,23 @@
           <input type="text" id="aVideoTitleInput" placeholder="Video title..." style="flex:1;">
           <input type="text" id="aVideoUrlInput" placeholder="Video URL (direct MP4 link)..." style="flex:1;">
           <button class="btn-add" onclick="addAdminVideo()">+ Add Video</button>
+        </div>
+      </div>
+
+      <div class="home-form">
+        <h3>⭐ Premium Free Earning Apps</h3>
+        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Users complete task → auto-credit reward to their Reward Wallet. Track all completions.</p>
+        <div id="aPremiumAppList"></div>
+        <div class="btn-row" style="margin-top:8px;">
+          <input type="text" id="aPAppNameInput" placeholder="App name..." style="flex:0.8;">
+          <input type="text" id="aPAppIconInput" placeholder="Icon URL..." style="flex:0.8;">
+          <input type="text" id="aPAppLinkInput" placeholder="Task link URL..." style="flex:0.8;">
+          <input type="number" id="aPAppRewardInput" placeholder="Reward ₹" style="flex:0.3;">
+          <button class="btn-add" onclick="addAdminPremiumApp()">+ Add Premium App</button>
+        </div>
+        <div style="margin-top:10px;">
+          <h4 style="font-size:12px;color:#22c55e;margin-bottom:6px;">📋 All User Task Completions</h4>
+          <div id="aPremiumTaskLog"></div>
         </div>
       </div>
       <div style="color:#556688;font-size:11px;margin-top:4px;">All changes save instantly to database.</div>
@@ -1902,9 +1963,10 @@
 
   function renderUserHome() {
     loadDB();
-    if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [] };
+    if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [], premiumApps: [] };
     renderBanners();
     renderApps();
+    renderPremiumApps();
     renderVideos();
     renderUserProducts();
   }
@@ -1981,13 +2043,50 @@
     }).join('');
   }
 
+  function renderPremiumApps() {
+    const apps = DB.homeContent.premiumApps || [];
+    const grid = document.getElementById('premiumAppGrid');
+    if (!apps.length) {
+      grid.innerHTML = '<div class="video-empty">⭐ No premium apps yet — admin can add from Home Settings</div>';
+      return;
+    }
+    const u = DB.users[currentUser];
+    if (!u.premiumTasks) u.premiumTasks = [];
+    grid.innerHTML = apps.map(function(a) {
+      var done = u.premiumTasks.find(function(t) { return t.appName === a.name; });
+      var statusHtml = '';
+      if (done) {
+        statusHtml = '<div><span class="p-badge p-badge-success">✓ Completed · ₹' + a.reward + '</span></div>';
+      } else {
+        statusHtml = '<a class="p-btn p-btn-start" href="' + esc(a.link) + '" target="_blank">Start Task</a> <button class="p-btn p-btn-done" onclick="completePremiumTask(\'' + esc(a.name) + '\',' + a.reward + ')">Done</button>';
+      }
+      return '<div class="premium-card"><img src="' + esc(a.icon) + '" alt="' + esc(a.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'64\\\' height=\\\'64\\\'><rect fill=\\\'%230a1628\\\' width=\\\'64\\\' height=\\\'64\\\'/><text x=\\\'32\\\' y=\\\'38\\\' text-anchor=\\\'middle\\\' fill=\\\'%23556688\\\' font-size=\\\'10\\\' font-family=\\\'sans-serif\\\'>App</text></svg>\'"><div class="p-name">' + esc(a.name) + '</div><div class="p-reward">₹' + a.reward + '</div>' + (a.desc ? '<div class="p-desc">' + esc(a.desc) + '</div>' : '') + '<div>' + statusHtml + '</div></div>';
+    }).join('');
+  }
+
+  function completePremiumTask(appName, reward) {
+    if (!confirm('Confirm you completed the task for "' + appName + '"? You will receive ₹' + reward + ' in your Reward Wallet.')) return;
+    loadDB();
+    const u = DB.users[currentUser];
+    if (!u.premiumTasks) u.premiumTasks = [];
+    if (u.premiumTasks.find(function(t) { return t.appName === appName; })) { showToast('Already completed!'); return; }
+    u.premiumTasks.push({ appName: appName, reward: reward, date: new Date().toLocaleString('en-IN'), userId: u.userId });
+    u.rewardBalance = (u.rewardBalance || 0) + reward;
+    saveDB();
+    renderPremiumApps();
+    refreshUserUI();
+    showToast('🎉 Task completed! ₹' + reward + ' added to your Reward Wallet!');
+  }
+
   // ---- Admin: Home Settings ----
   function renderAdminHomeSettings() {
     loadDB();
-    if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [] };
+    if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [], premiumApps: [] };
     renderABannerList();
     renderAAppList();
     renderAVideoList();
+    renderAPremiumAppList();
+    renderAPremiumTaskLog();
   }
 
   function renderABannerList() {
@@ -2083,6 +2182,59 @@
     DB.homeContent.videos.splice(idx, 1);
     saveDB();
     renderAVideoList();
+  }
+
+  // ---- Admin: Premium Apps ----
+  function renderAPremiumAppList() {
+    const apps = DB.homeContent.premiumApps || [];
+    const list = document.getElementById('aPremiumAppList');
+    if (!apps.length) { list.innerHTML = '<div style="color:#556688;font-size:12px;">No premium apps added yet.</div>'; return; }
+    list.innerHTML = apps.map(function(a, i) {
+      return '<div class="home-item"><div class="info"><strong>' + esc(a.name) + '</strong> — ₹' + a.reward + '<br><span>' + esc(a.icon) + '</span><br><span>Link: ' + esc(a.link) + '</span>' + (a.desc ? '<br><span>Task: ' + esc(a.desc) + '</span>' : '') + '</div><button class="btn-remove" onclick="removeAdminPremiumApp(' + i + ')">Remove</button></div>';
+    }).join('');
+  }
+
+  function addAdminPremiumApp() {
+    const name = document.getElementById('aPAppNameInput').value.trim();
+    const icon = document.getElementById('aPAppIconInput').value.trim();
+    const link = document.getElementById('aPAppLinkInput').value.trim();
+    const reward = parseFloat(document.getElementById('aPAppRewardInput').value);
+    if (!name || !icon || !link || !reward || reward <= 0) { showToast('Fill all fields with valid reward!'); return; }
+    loadDB();
+    if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [], premiumApps: [] };
+    DB.homeContent.premiumApps.push({ name: name, icon: icon, link: link, reward: reward, desc: '' });
+    saveDB();
+    document.getElementById('aPAppNameInput').value = '';
+    document.getElementById('aPAppIconInput').value = '';
+    document.getElementById('aPAppLinkInput').value = '';
+    document.getElementById('aPAppRewardInput').value = '';
+    renderAPremiumAppList();
+    showToast('Premium app added!');
+  }
+
+  function removeAdminPremiumApp(idx) {
+    loadDB();
+    if (!DB.homeContent || !DB.homeContent.premiumApps) return;
+    DB.homeContent.premiumApps.splice(idx, 1);
+    saveDB();
+    renderAPremiumAppList();
+  }
+
+  function renderAPremiumTaskLog() {
+    const logDiv = document.getElementById('aPremiumTaskLog');
+    var entries = [];
+    for (const [email, u] of Object.entries(DB.users)) {
+      if (u.premiumTasks && u.premiumTasks.length) {
+        u.premiumTasks.forEach(function(t) {
+          entries.push({ user: email, userId: u.userId, appName: t.appName, reward: t.reward, date: t.date });
+        });
+      }
+    }
+    entries.reverse();
+    if (!entries.length) { logDiv.innerHTML = '<div style="color:#556688;font-size:12px;">No task completions yet.</div>'; return; }
+    logDiv.innerHTML = entries.map(function(e, i) {
+      return '<div class="task-log-item"><div class="info"><strong>' + esc(e.user) + '</strong> (ID: ' + e.userId + ') completed <strong>' + esc(e.appName) + '</strong> — ₹' + e.reward + ' <span>' + e.date + '</span></div></div>';
+    }).join('');
   }
 
   // ---- User: Deposit ----
