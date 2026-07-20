@@ -138,9 +138,10 @@
     .login-box .links { margin-top: 18px; font-size: 13px; color: rgba(255,255,255,0.2); }
     .login-box .links a { color: rgba(255,255,255,0.4); text-decoration: none; cursor: pointer; transition: 0.25s; }
     .login-box .links a:hover { color: #fff; }
-    .remember-me { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; cursor: pointer; user-select: none; }
-    .remember-me input { width: 16px; height: 16px; accent-color: #2563eb; cursor: pointer; margin: 0; flex-shrink: 0; }
-    .remember-me .rm-text { font-size: 13px; color: rgba(255,255,255,0.45); font-weight: 400; }
+    .pass-wrap { position: relative; display: flex; align-items: center; margin-bottom: 14px; }
+    .pass-wrap input { margin-bottom: 0 !important; padding-right: 36px !important; }
+    .rm-check { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; cursor: pointer; z-index: 2; }
+    .rm-check input { width: 16px; height: 16px; accent-color: #2563eb; cursor: pointer; margin: 0; }
     .login-error { color: #f87171; font-size: 13px; margin-bottom: 10px; display: none; background: rgba(248,113,113,0.06); padding: 8px; border-radius: 6px; border: 1px solid rgba(248,113,113,0.08); }
     .login-selector {
       display: flex; gap: 0; margin: 14px 0 18px; border-radius: 8px; overflow: hidden;
@@ -1195,11 +1196,12 @@
     <div class="user-type" id="loginRoleLabel">User Login</div>
     <div class="login-error" id="loginError"></div>
     <input type="text" id="loginUser" placeholder="Username / Email">
-    <input type="password" id="loginPass" placeholder="Password">
-    <label class="remember-me" id="rememberMeWrap">
-      <input type="checkbox" id="rememberMe">
-      <span class="rm-text">Remember me</span>
-    </label>
+    <div class="pass-wrap">
+      <input type="password" id="loginPass" placeholder="Password">
+      <label class="rm-check" id="rememberMeWrap">
+        <input type="checkbox" id="rememberMe">
+      </label>
+    </div>
     <div id="loginCaptchaArea" style="display:none;background:#0a0d12;border-radius:6px;padding:10px;margin-bottom:14px;text-align:center;border:1px solid rgba(255,255,255,0.04);">
       <div style="font-size:13px;color:rgba(255,255,255,0.6);font-weight:500;" id="loginCaptchaQuestion">5 + 3 = ?</div>
       <input type="number" id="loginCaptchaInput" placeholder="Your answer" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:#070a0e;color:#fff;font-size:13px;text-align:center;outline:none;margin-top:6px;">
