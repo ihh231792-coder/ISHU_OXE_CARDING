@@ -165,6 +165,7 @@
       background-clip: text; animation: shimmer 4s linear infinite;
     }
     .topbar .right { display: flex; align-items: center; gap: 16px; font-size: 13px; }
+    .topbar-right-wrap { display: flex; align-items: center; gap: 4px; margin-left: auto; }
     .topbar .right .role {
       color: #fbbf24; font-size: 10px; background: rgba(251,191,36,0.1);
       padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(251,191,36,0.15);
@@ -1236,10 +1237,12 @@
       <span style="color:#eab308;font-weight:bold;font-size:12px;">🎁 ₹<span id="uRewardBal">0</span></span>
       <button class="logout-btn" onclick="userLogout()">Logout</button>
     </div>
-    <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleProfileDrawer()">☰</button>
-    <div class="topbar-profile" onclick="toggleProfileDrawer()">
-      <img class="topbar-avatar" id="topbarAvatar" src="" alt="">
-      <span class="topbar-username" id="topbarUsername">user</span>
+    <div class="topbar-right-wrap">
+      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleProfileDrawer()">☰</button>
+      <div class="topbar-profile" onclick="toggleProfileDrawer()">
+        <img class="topbar-avatar" id="topbarAvatar" src="" alt="">
+        <span class="topbar-username" id="topbarUsername">user</span>
+      </div>
     </div>
   </div>
   <!-- ===== PROFILE DRAWER (MOBILE) ===== -->
