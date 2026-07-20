@@ -2403,7 +2403,7 @@
     });
     // Fallback: if none respond in 8 seconds, try sequential fallback
     setTimeout(function() {
-      if (!done) { fetchViaProxy(url, callback); }
+      if (!done) { done = true; fetchViaProxy(url, callback); }
     }, 8000);
   }
 
