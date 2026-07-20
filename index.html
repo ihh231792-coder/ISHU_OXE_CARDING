@@ -404,8 +404,7 @@
     .banner-autoplay-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 4; cursor: pointer; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); }
     .banner-autoplay-overlay .sound-btn { position: absolute; bottom: 40px; right: 10px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; }
     .banner-autoplay-overlay .sound-btn:hover { background: rgba(0,0,0,0.8); }
-    .banner-autoplay-overlay.hidden { display: none; }
-    .banner-autoplay-wrapper:hover .banner-autoplay-overlay { display: flex; }
+    .banner-autoplay-overlay { display: flex; }
     /* Preview area in admin */
     .banner-preview { display: flex; gap: 6px; margin-top: 8px; overflow-x: auto; padding: 4px 0; }
     .banner-preview img { height: 60px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
@@ -1434,6 +1433,27 @@
     } catch(e) {}
   }
 
+  // Sync save for critical operations (blocks UI until GitHub confirms)
+  function saveDBSync() {
+    try { localStorage.setItem('ishu_oxe_db', JSON.stringify(DB)); } catch(e) {}
+    try {
+      var jsonStr = JSON.stringify(DB);
+      var encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+      var body = { message: 'DB sync update', content: encoded, branch: 'main' };
+      if (_dbSha) body.sha = _dbSha;
+      var xhr = new XMLHttpRequest();
+      xhr.open('PUT', 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + DB_FILE, false);
+      xhr.setRequestHeader('Authorization', 'Bearer ' + _getToken());
+      xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify(body));
+      if (xhr.status === 200 || xhr.status === 201) {
+        var resp = JSON.parse(xhr.responseText);
+        _dbSha = resp.content.sha;
+      }
+    } catch(e) {}
+  }
+
   function logActivity(user, action, details) {
     DB.activity.unshift({ time: new Date().toLocaleString('en-IN'), user, action, details });
     if (DB.activity.length > 500) DB.activity.length = 500;
@@ -1629,39 +1649,59 @@
   // ============================================
   let currentUser = null;
   var _autoSyncTimer = null;
+  var _autoSyncVisHandler = null;
+  var _autoSyncFocusHandler = null;
+
+  function checkMaintenanceAndRefresh() {
+    loadDB();
+    if (currentUser) refreshUserUI();
+    else if (document.getElementById('adminApp').style.display === 'block') {
+      var active = document.querySelector('#adminApp .page.active');
+      if (active) {
+        var id = active.id.replace('apage-', '');
+        if (id === 'dashboard') renderAdminDashboard();
+        else if (id === 'users') renderAdminUsers();
+        else if (id === 'cards') renderAdminCards();
+        else if (id === 'cardrequests') renderAdminCardRequests();
+        else if (id === 'deposits') renderAdminDeposits();
+        else if (id === 'tickets') renderAdminTickets();
+        else if (id === 'withdrawals') renderAdminWithdrawals();
+        else if (id === 'queries') renderAdminQueries();
+        else if (id === 'activity') renderAdminActivity();
+        else if (id === 'loginlog') renderAdminLoginLog();
+        else if (id === 'broadcast') renderAdminBroadcast();
+        else if (id === 'manualbalance') {}
+        else if (id === 'rewarddebit') {}
+        else if (id === 'sendscratch') {}
+        else if (id === 'homesettings') {}
+      }
+    }
+  }
 
   function startAutoSync() {
     stopAutoSync();
-    _autoSyncTimer = setInterval(function() {
-      loadDB();
-      if (currentUser) refreshUserUI();
-      else if (document.getElementById('adminApp').style.display === 'block') {
-        var active = document.querySelector('#adminApp .page.active');
-        if (active) {
-          var id = active.id.replace('apage-', '');
-          if (id === 'dashboard') renderAdminDashboard();
-          else if (id === 'users') renderAdminUsers();
-          else if (id === 'cards') renderAdminCards();
-          else if (id === 'cardrequests') renderAdminCardRequests();
-          else if (id === 'deposits') renderAdminDeposits();
-          else if (id === 'tickets') renderAdminTickets();
-          else if (id === 'withdrawals') renderAdminWithdrawals();
-          else if (id === 'queries') renderAdminQueries();
-          else if (id === 'activity') renderAdminActivity();
-          else if (id === 'loginlog') renderAdminLoginLog();
-          else if (id === 'broadcast') renderAdminBroadcast();
-          else if (id === 'manualbalance') {}
-          else if (id === 'rewarddebit') {}
-          else if (id === 'sendscratch') {}
-          else if (id === 'homesettings') {}
-        }
+    checkMaintenanceAndRefresh();
+    _autoSyncTimer = setInterval(checkMaintenanceAndRefresh, 3000);
+    _autoSyncVisHandler = function() {
+      if (!document.hidden && (currentUser || document.getElementById('adminApp').style.display === 'block')) {
+        checkMaintenanceAndRefresh();
       }
-    }, 8000);
+    };
+    _autoSyncFocusHandler = function() {
+      if (currentUser || document.getElementById('adminApp').style.display === 'block') {
+        checkMaintenanceAndRefresh();
+      }
+    };
+    document.addEventListener('visibilitychange', _autoSyncVisHandler);
+    window.addEventListener('focus', _autoSyncFocusHandler);
   }
 
   function stopAutoSync() {
     if (_autoSyncTimer) { clearInterval(_autoSyncTimer); _autoSyncTimer = null; }
+    if (_autoSyncVisHandler) { document.removeEventListener('visibilitychange', _autoSyncVisHandler); _autoSyncVisHandler = null; }
+    if (_autoSyncFocusHandler) { window.removeEventListener('focus', _autoSyncFocusHandler); _autoSyncFocusHandler = null; }
   }
+
 
   function launchUser(user) {
     if (DB.maintenance === true) {
@@ -2155,35 +2195,24 @@
     }
   }
 
-  // Click on autoplay video banner: first click unmutes, then opens YouTube
+  // Click on autoplay video banner: toggle mute/unmute (no YouTube redirect)
   function bannerClick(overlayEl, bannerIdx) {
     try {
       var btn = overlayEl ? overlayEl.querySelector('.sound-btn') : null;
       if (!btn) return;
+      var wrapper = overlayEl.parentNode;
+      if (!wrapper) return;
+      var iframe = wrapper.querySelector('iframe');
       var isMuted = btn.textContent === '🔇';
-      if (isMuted) {
-        var wrapper = overlayEl.parentNode;
-        if (wrapper) {
-          var iframe = wrapper.querySelector('iframe');
-          try {
-            var cmd = JSON.stringify({event:'command',func:'unMute',args:''});
-            if (iframe && iframe.contentWindow) {
-              iframe.contentWindow.postMessage(cmd, '*');
-              setTimeout(function() { try { iframe.contentWindow.postMessage(cmd, '*'); } catch(e) {} }, 800);
-            }
-          } catch(e) {}
+      try {
+        var func = isMuted ? 'unMute' : 'mute';
+        var cmd = JSON.stringify({event:'command',func:func,args:''});
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage(cmd, '*');
+          setTimeout(function() { try { iframe.contentWindow.postMessage(cmd, '*'); } catch(e) {} }, 300);
         }
-        btn.textContent = '🔊';
-        overlayEl.classList.add('hidden');
-        return;
-      }
-      // Already unmuted: open YouTube video page
-      var b = (DB && DB.homeContent && DB.homeContent.banners) ? DB.homeContent.banners[bannerIdx] : null;
-      if (b && b.video) {
-        var vid = b.video.match(/embed\/([a-zA-Z0-9_-]+)/);
-        if (vid) { window.open('https://www.youtube.com/watch?v=' + vid[1], '_blank'); return; }
-      }
-      if (b && b.link) window.open(b.link, '_blank');
+      } catch(e) {}
+      btn.textContent = isMuted ? '🔊' : '🔇';
     } catch(e) {}
   }
 
@@ -4011,8 +4040,8 @@
     loadDB();
     DB.maintenance = true;
     localStorage.removeItem('opencode_login');
-    saveDB();
-    showToast('Maintenance mode ON — users logged out');
+    saveDBSync();
+    showToast('Maintenance mode ON — all users logged out');
     logActivity('ishu (owner)', 'Maintenance ON', 'Website under maintenance');
     renderAdminUpdate();
   }
@@ -4021,7 +4050,7 @@
     if (!confirm('Disable maintenance mode? Users will be able to log in again.')) return;
     loadDB();
     DB.maintenance = false;
-    saveDB();
+    saveDBSync();
     showToast('Maintenance mode OFF — users can log in');
     logActivity('ishu (owner)', 'Maintenance OFF', 'Update complete');
     renderAdminUpdate();
