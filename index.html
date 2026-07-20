@@ -515,6 +515,14 @@
       padding: 8px 12px; font-size: 12px; color: #c8d6e5;
       border-top: 1px solid #1a3a6a; text-align: center;
     }
+    .video-card.tutorial-card { cursor: pointer; }
+    .video-card.tutorial-card:hover { border-color: #f0c040; }
+    .tutorial-thumb-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #000; }
+    .tutorial-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .tutorial-play-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 56px; height: 56px; border-radius: 50%; background: rgba(0,0,0,0.75); color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center; border: 3px solid rgba(255,255,255,0.35); transition: 0.2s; }
+    .video-card.tutorial-card:hover .tutorial-play-btn { background: rgba(220,50,50,0.85); transform: translate(-50%,-50%) scale(1.1); }
+    .tutorial-video-wrap { width: 100%; aspect-ratio: 16 / 9; background: #000; }
+    .tutorial-iframe { width: 100%; height: 100%; border: none; }
     .video-empty { text-align: center; padding: 30px; color: #556688; font-size: 13px; }
 
     /* ===== ADMIN HOME SETTINGS ===== */
@@ -2262,9 +2270,33 @@
       grid.innerHTML = '<div class="video-empty">🎥 No tutorial videos yet — admin can add from Home Settings</div>';
       return;
     }
-    grid.innerHTML = videos.map(function(v) {
-      return '<div class="video-card"><video controls preload="metadata" playsinline><source src="' + esc(v.url) + '" type="video/mp4">Your browser does not support video.</video><div class="video-title">' + esc(v.title) + '</div></div>';
+    grid.innerHTML = videos.map(function(v, i) {
+      var url = v.url;
+      var isYT = url && url.match(/youtube\.com\/embed\//);
+      if (isYT) {
+        var vi = url.match(/embed\/([a-zA-Z0-9_-]+)/);
+        var thumb = vi ? 'https://img.youtube.com/vi/' + vi[1] + '/mqdefault.jpg' : '';
+        return '<div class="video-card tutorial-card" onclick="playTutorialVideo(this,' + i + ')">'
+          + '<div class="tutorial-thumb-wrap">'
+          + '<img src="' + esc(thumb) + '" alt="" class="tutorial-thumb" onerror="this.style.display=\'none\'">'
+          + '<div class="tutorial-play-btn">▶</div>'
+          + '</div>'
+          + '<div class="video-title">' + esc(v.title) + '</div>'
+          + '</div>';
+      }
+      return '<div class="video-card"><video controls preload="metadata" playsinline><source src="' + esc(url) + '" type="video/mp4">Your browser does not support video.</video><div class="video-title">' + esc(v.title) + '</div></div>';
     }).join('');
+  }
+
+  function playTutorialVideo(cardEl, idx) {
+    try {
+      var v = DB.homeContent.videos[idx];
+      if (!v) return;
+      var url = v.url;
+      if (url.indexOf('autoplay=') < 0) url += (url.indexOf('?') < 0 ? '?' : '&') + 'autoplay=1';
+      if (url.indexOf('enablejsapi=') < 0) url += '&enablejsapi=1';
+      cardEl.innerHTML = '<div class="tutorial-video-wrap"><iframe src="' + esc(url) + '" class="tutorial-iframe" allow="autoplay; encrypted-media" frameborder="0" allowfullscreen></iframe></div><div class="video-title" onclick="event.stopPropagation();renderVideos()" style="cursor:pointer;color:#4a8af4;">← Back to tutorials</div>';
+    } catch(e) {}
   }
 
   function renderPremiumApps() {
@@ -2426,8 +2458,11 @@
 
   function addAdminVideo() {
     const title = document.getElementById('aVideoTitleInput').value.trim();
-    const url = document.getElementById('aVideoUrlInput').value.trim();
+    var url = document.getElementById('aVideoUrlInput').value.trim();
     if (!title || !url) { showToast('Fill all fields!'); return; }
+    // Auto-convert YouTube watch/share URLs to embed
+    var ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+    if (ytMatch) url = 'https://www.youtube.com/embed/' + ytMatch[1];
     loadDB();
     if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [] };
     DB.homeContent.videos.push({ title: title, url: url });
