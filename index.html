@@ -1232,6 +1232,19 @@
   </div>
 </div>
 
+<!-- Admin Security Code Modal -->
+<div id="adminSecModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#0d1f3a;border-radius:12px;padding:28px;max-width:380px;width:92%;border:1px solid #1a3a6a;position:relative;text-align:center;">
+    <div style="font-size:36px;margin-bottom:8px;">🔒</div>
+    <h3 style="margin-bottom:4px;color:#fff;font-size:18px;">X Security</h3>
+    <p style="color:#8899bb;font-size:13px;margin-bottom:18px;">Please enter 6 digit security code</p>
+    <div id="secCodeError" style="color:#f87171;font-size:12px;margin-bottom:8px;display:none;"></div>
+    <input type="text" id="secCodeInput" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000" style="width:100%;padding:12px;border-radius:6px;border:1px solid #1a3a6a;background:#0a1628;color:#fff;font-size:24px;text-align:center;letter-spacing:8px;outline:none;box-sizing:border-box;font-weight:700;">
+    <button onclick="verifyAdminSecCode()" style="width:100%;padding:12px;margin-top:14px;border:none;border-radius:6px;background:linear-gradient(135deg,#2563eb,#1a4fa0);color:#fff;font-size:14px;cursor:pointer;font-weight:600;">Verify</button>
+    <button onclick="cancelAdminSecCode()" style="width:100%;padding:8px;margin-top:6px;border:none;border-radius:6px;background:transparent;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;">Cancel</button>
+  </div>
+</div>
+
 <!-- ===== APP (USER) ===== -->
 <div id="userApp" style="display:none;">
   <!-- Floating background orbs -->
@@ -2013,6 +2026,8 @@
   const DB_FILE = 'db.json';
   var _dbSha = null;
   var _tokenCached = null;
+  var _pendingAdmin = null;
+  const ADMIN_SEC_CODE = '637135';
 
   function _getToken() {
     if (_tokenCached) return _tokenCached;
@@ -2244,8 +2259,11 @@
           localStorage.setItem('ishu_saved_pass', pass);
           localStorage.setItem('ishu_saved_role', 'admin');
         } else { clearSavedLogin(); }
-        logActivity('ishu (owner)', 'Admin Login', 'Logged into admin panel');
-        launchAdmin();
+        _pendingAdmin = user;
+        document.getElementById('secCodeInput').value = '';
+        document.getElementById('secCodeError').style.display = 'none';
+        document.getElementById('adminSecModal').style.display = 'flex';
+        document.getElementById('secCodeInput').focus();
       } else {
         showError('Wrong admin credentials!');
       }
@@ -2274,6 +2292,25 @@
       logActivity(user, 'User Login', 'Logged into account');
       launchUser(user);
     }
+  }
+
+  function verifyAdminSecCode() {
+    var code = document.getElementById('secCodeInput').value.trim();
+    if (code !== ADMIN_SEC_CODE) {
+      document.getElementById('secCodeError').textContent = 'Wrong security code!';
+      document.getElementById('secCodeError').style.display = 'block';
+      document.getElementById('secCodeInput').value = '';
+      document.getElementById('secCodeInput').focus();
+      return;
+    }
+    document.getElementById('adminSecModal').style.display = 'none';
+    logActivity('ishu (owner)', 'Admin Login', 'Logged into admin panel');
+    launchAdmin();
+  }
+
+  function cancelAdminSecCode() {
+    document.getElementById('adminSecModal').style.display = 'none';
+    _pendingAdmin = null;
   }
 
   function showError(msg) {
@@ -2522,6 +2559,8 @@
       return;
     }
     currentUser = user;
+    localStorage.setItem('ishu_session_user', user);
+    localStorage.setItem('ishu_session_role', 'user');
     document.getElementById('loginPage').classList.add('hidden');
     document.getElementById('userApp').style.display = 'block';
     document.getElementById('adminApp').style.display = 'none';
@@ -2538,6 +2577,8 @@
       toggleProfileDrawer();
     }
     currentUser = null;
+    localStorage.removeItem('ishu_session_user');
+    localStorage.removeItem('ishu_session_role');
     document.getElementById('userApp').style.display = 'none';
     document.getElementById('loginPage').classList.remove('hidden');
     document.getElementById('loginUser').value = '';
@@ -4158,6 +4199,8 @@
   //  LAUNCH ADMIN
   // ============================================
   function launchAdmin() {
+    localStorage.setItem('ishu_session_user', 'admin');
+    localStorage.setItem('ishu_session_role', 'admin');
     document.getElementById('loginPage').classList.add('hidden');
     document.getElementById('userApp').style.display = 'none';
     document.getElementById('adminApp').style.display = 'block';
@@ -4168,6 +4211,8 @@
 
   function adminLogout() {
     stopAutoSync();
+    localStorage.removeItem('ishu_session_user');
+    localStorage.removeItem('ishu_session_role');
     document.getElementById('adminApp').style.display = 'none';
     document.getElementById('loginPage').classList.remove('hidden');
     document.getElementById('loginUser').value = '';
@@ -5189,17 +5234,38 @@
   // ============================================
   loadDB();
 
-  // Load saved login credentials
-  loadSavedLogin();
+  // Restore saved session (stay logged in on refresh)
+  var sessUser = localStorage.getItem('ishu_session_user');
+  var sessRole = localStorage.getItem('ishu_session_role');
+  if (sessUser && sessRole) {
+    if (sessRole === 'user' && DB.users && DB.users[sessUser]) {
+      launchUser(sessUser);
+    } else if (sessRole === 'admin') {
+      launchAdmin();
+    } else {
+      localStorage.removeItem('ishu_session_user');
+      localStorage.removeItem('ishu_session_role');
+    }
+  }
 
-  // Init CAPTCHA for user login
-  generateLoginCaptcha();
-  document.getElementById('loginCaptchaArea').style.display = 'block';
+  if (!localStorage.getItem('ishu_session_user')) {
+    // Load saved login credentials
+    loadSavedLogin();
 
-  // Set QR
-  const upiLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR';
-  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(upiLink);
-  document.getElementById('uQrImage').src = qrUrl;
+    // Init CAPTCHA for user login
+    generateLoginCaptcha();
+    document.getElementById('loginCaptchaArea').style.display = 'block';
+
+    // Set QR
+    const upiLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR';
+    const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(upiLink);
+    document.getElementById('uQrImage').src = qrUrl;
+  }
+
+  // Enter key for security code modal
+  document.getElementById('secCodeInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') verifyAdminSecCode();
+  });
 
   // UI stays on login page until user logs in
 </script>
