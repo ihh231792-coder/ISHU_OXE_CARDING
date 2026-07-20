@@ -2310,17 +2310,23 @@
       if (domain) document.getElementById(nameInputId).value = domain.charAt(0).toUpperCase() + domain.slice(1);
     }
     // Show fetching indicator
-    document.getElementById(iconInputId).placeholder = '⏳ Fetching...';
+    if (!document.getElementById(iconInputId).value) document.getElementById(iconInputId).placeholder = '⏳ Fetching...';
     showToast('Fetching real app icon...');
 
-    // ---- ASYNC: Try ALL proxies IN PARALLEL for fastest response ----
+    // ---- ASYNC: Try ALL proxies + Microlink API IN PARALLEL ----
     fetchViaProxyParallel(link, function(html) {
-      var name = extractMetaContent(html, 'og:title') || extractMetaContent(html, 'twitter:title') || extractTitle(html) || extractPlayStoreName(html);
-      var icon = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || extractImageSrc(html) || '';
-      // Play Store: try JSON-LD for better icon
-      if ((!icon || !icon.match(/play-lh\.googleusercontent\.com/)) && link.match(/play\.google\.com/)) {
-        var jd = extractJsonLd(html, 'application/ld+json');
-        if (jd && jd.image) icon = jd.image;
+      var name, icon;
+      // Microlink returns JSON, other proxies return HTML
+      if (typeof html === 'string' && html.charAt(0) === '{') {
+        try { var j = JSON.parse(html); if (j.status === 'success' && j.data) { name = j.data.title; if (j.data.image && j.data.image.url) icon = j.data.image.url; } } catch(e) {}
+      } else {
+        name = extractMetaContent(html, 'og:title') || extractMetaContent(html, 'twitter:title') || extractTitle(html) || extractPlayStoreName(html);
+        icon = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || extractImageSrc(html) || '';
+        // Play Store: try JSON-LD for better icon
+        if ((!icon || !icon.match(/play-lh\.googleusercontent\.com/)) && link.match(/play\.google\.com/)) {
+          var jd = extractJsonLd(html, 'application/ld+json');
+          if (jd && jd.image) icon = jd.image;
+        }
       }
       // Ensure Play Store CDN images get the supporting format
       if (icon && icon.match(/play-lh\.googleusercontent\.com/)) icon = convertToPlayStoreFormat(icon);
@@ -2329,7 +2335,7 @@
         document.getElementById(iconInputId).value = icon;
         document.getElementById(iconInputId).placeholder = 'Icon URL';
       } else {
-        document.getElementById(iconInputId).placeholder = 'Icon URL (fetch failed)';
+        document.getElementById(iconInputId).placeholder = 'Icon URL (not found)';
       }
     });
   }
@@ -2365,12 +2371,17 @@
 
     showToast('⏳ Fetching banner image...');
 
-    // ---- ASYNC: Try ALL proxies IN PARALLEL for fastest response ----
+    // ---- ASYNC: Try ALL proxies + Microlink API IN PARALLEL ----
     fetchViaProxyParallel(url, function(html) {
-      var img = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || '';
-      if (!img && url.match(/play\.google\.com/)) {
-        var jd = extractJsonLd(html, 'application/ld+json');
-        if (jd && jd.image) img = jd.image;
+      var img;
+      if (typeof html === 'string' && html.charAt(0) === '{') {
+        try { var j = JSON.parse(html); if (j.status === 'success' && j.data && j.data.image) img = j.data.image.url; } catch(e) {}
+      } else {
+        img = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || '';
+        if (!img && url.match(/play\.google\.com/)) {
+          var jd = extractJsonLd(html, 'application/ld+json');
+          if (jd && jd.image) img = jd.image;
+        }
       }
       if (img) {
         if (img.startsWith('/')) { var a = url.match(/^https?:\/\/[^\/]+/); if (a) img = a[0] + img; }
@@ -2383,7 +2394,7 @@
     });
   }
 
-  // Try ALL proxies in parallel — first one to respond wins
+  // Try ALL proxies + Microlink API in parallel — first one to respond wins
   function fetchViaProxyParallel(url, callback) {
     var proxies = [
       'https://api.allorigins.win/raw?url=',
@@ -2392,6 +2403,7 @@
       'https://cors-anywhere.herokuapp.com/'
     ];
     var done = false;
+    // Try HTML proxies
     proxies.forEach(function(proxy) {
       var xhr = new XMLHttpRequest();
       xhr.open('GET', proxy + encodeURIComponent(url), true);
@@ -2401,29 +2413,14 @@
       xhr.ontimeout = function() {};
       xhr.send();
     });
-    // Fallback: if none respond in 8 seconds, try sequential fallback
-    setTimeout(function() {
-      if (!done) { done = true; fetchViaProxy(url, callback); }
-    }, 8000);
-  }
-
-  function fetchViaProxy(url, callback) {
-    var proxies = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?url='];
-    var idx = 0;
-    function tryNext() {
-      if (idx >= proxies.length) { return; }
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', proxies[idx] + encodeURIComponent(url), true);
-      xhr.timeout = 8000;
-      xhr.onload = function() {
-        if (xhr.status === 200 && xhr.responseText) { callback(xhr.responseText); }
-        else { idx++; tryNext(); }
-      };
-      xhr.onerror = function() { idx++; tryNext(); };
-      xhr.ontimeout = function() { idx++; tryNext(); };
-      xhr.send();
-    }
-    tryNext();
+    // Try Microlink API (JSON — directly returns OG data)
+    var microlink = new XMLHttpRequest();
+    microlink.open('GET', 'https://api.microlink.io/?url=' + encodeURIComponent(url) + '&meta=true', true);
+    microlink.timeout = 8000;
+    microlink.onload = function() { if (!done && microlink.status === 200 && microlink.responseText) { done = true; callback(microlink.responseText); } };
+    microlink.onerror = function() {};
+    microlink.ontimeout = function() {};
+    microlink.send();
   }
 
   function extractMetaContent(html, property) {
