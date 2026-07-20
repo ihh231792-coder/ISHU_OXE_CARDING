@@ -356,31 +356,61 @@
     /* ===== BANNER CAROUSEL ===== */
     .banner-carousel {
       position: relative; width: 100%; max-width: 900px; margin: 0 auto 20px;
-      border-radius: 12px; overflow: hidden; aspect-ratio: 16/7;
-      background: #0d1f3a; box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+      border-radius: 14px; overflow: hidden; aspect-ratio: 16/7;
+      background: #0d1f3a; box-shadow: 0 8px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
     }
-    .banner-carousel .slides { display: flex; transition: transform 0.5s ease; height: 100%; }
-    .banner-carousel .slide { min-width: 100%; height: 100%; }
-    .banner-carousel .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .banner-carousel .slides { display: flex; transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94); height: 100%; }
+    .banner-carousel .slide { min-width: 100%; height: 100%; position: relative; overflow: hidden; }
+    .banner-carousel .slide img { width: 100%; height: 100%; object-fit: cover; display: block; animation: bannerFadeIn 0.6s ease; }
+    @keyframes bannerFadeIn { from { opacity: 0; transform: scale(1.05); } to { opacity: 1; transform: scale(1); } }
+    .banner-carousel .slide::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 40%; background: linear-gradient(transparent, rgba(0,0,0,0.5)); pointer-events: none; z-index: 1; }
     .banner-carousel .dots {
       position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
       display: flex; gap: 6px; z-index: 2;
     }
     .banner-carousel .dots .dot {
-      width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4);
-      cursor: pointer; transition: 0.3s;
+      width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.35);
+      cursor: pointer; transition: all 0.4s ease; border: 1px solid rgba(255,255,255,0.1);
     }
-    .banner-carousel .dots .dot.active { background: #eab308; width: 20px; border-radius: 4px; }
+    .banner-carousel .dots .dot.active { background: #eab308; width: 22px; border-radius: 4px; border-color: #eab308; box-shadow: 0 0 8px rgba(234,179,8,0.4); }
     .banner-carousel .arrow {
       position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
       background: rgba(0,0,0,0.5); color: #fff; border: none; width: 32px; height: 32px;
       border-radius: 50%; font-size: 16px; cursor: pointer; display: flex;
       align-items: center; justify-content: center; transition: 0.3s;
     }
-    .banner-carousel .arrow:hover { background: rgba(0,0,0,0.8); }
+    .banner-carousel .arrow:hover { background: rgba(0,0,0,0.85); transform: translateY(-50%) scale(1.1); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     .banner-carousel .arrow.prev { left: 6px; }
     .banner-carousel .arrow.next { right: 6px; }
     .banner-empty { text-align: center; padding: 40px; color: #556688; font-size: 13px; }
+
+    /* Play Store screenshot + video carousel inside banner */
+    .banner-carousel .slide { position: relative; }
+    .banner-carousel .slide .sub-slides { display: flex; transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); height: 100%; }
+    .banner-carousel .slide .sub-slide { min-width: 100%; height: 100%; position: relative; }
+    .banner-carousel .slide .sub-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .banner-carousel .slide .sub-dots { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 3; }
+    .banner-carousel .slide .sub-dots span { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; transition: 0.3s; }
+    .banner-carousel .slide .sub-dots span.sub-active { background: #eab308; width: 14px; border-radius: 3px; }
+    .banner-video-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); z-index: 2; cursor: pointer; }
+    .banner-video-overlay .play-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(234,179,8,0.9); border: none; font-size: 28px; color: #000; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+    .banner-video-overlay .play-btn:hover { transform: scale(1.1); }
+    .banner-video-active .banner-video-overlay { display: none; }
+    .banner-video-active iframe { width: 100%; height: 100%; border: none; }
+    /* Autoplay video banner */
+    .banner-autoplay-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    .banner-autoplay-iframe { width: 100%; height: 100%; border: none; }
+    .banner-autoplay-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 4; cursor: pointer; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.15); }
+    .banner-autoplay-overlay .sound-btn { position: absolute; bottom: 40px; right: 10px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; }
+    .banner-autoplay-overlay .sound-btn:hover { background: rgba(0,0,0,0.8); }
+    .banner-autoplay-overlay.hidden { display: none; }
+    .banner-autoplay-wrapper:hover .banner-autoplay-overlay { display: flex; }
+    /* Preview area in admin */
+    .banner-preview { display: flex; gap: 6px; margin-top: 8px; overflow-x: auto; padding: 4px 0; }
+    .banner-preview img { height: 60px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
+    .banner-preview img:hover { border-color: #eab308; }
+    .banner-preview .video-badge { position: relative; height: 60px; width: 40px; background: #0d1f3a; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; border: 2px solid transparent; }
 
     /* ===== FREE EARNING APPS ===== */
     .section-title { font-size: 16px; margin-bottom: 12px; color: #eab308; display: flex; align-items: center; gap: 8px; }
@@ -859,13 +889,17 @@
         <h3>📸 Banner Images</h3>
         <p style="color:#556688;font-size:11px;margin-bottom:8px;">Paste image URL, website URL (auto-fetch banner), or upload from gallery</p>
         <div id="aBannerList"></div>
-        <div class="btn-row" style="margin-top:8px;">
-          <input type="text" id="aBannerUrlInput" placeholder="Image URL or website link (auto-fetch)..." style="flex:1;">
-          <input type="text" id="aBannerLinkInput" placeholder="Optional click link URL..." style="flex:1;">
-          <button class="btn-add" onclick="addAdminBanner()">+ Add Banner</button>
+        <div class="btn-row" style="margin-top:8px;gap:6px;flex-wrap:wrap;">
+          <input type="text" id="aBannerUrlInput" placeholder="📸 Image URL or website link..." style="flex:1;min-width:120px;">
+          <input type="text" id="aBannerLinkInput" placeholder="🔗 Optional click link..." style="flex:0.8;min-width:100px;">
           <label class="btn-add" style="background:#7c3aed;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('bannerFileInput').click()">📁 Upload</label>
           <input type="file" id="bannerFileInput" accept="image/*" style="display:none;" onchange="uploadBannerFile(this)">
+          <button class="btn-add" onclick="addAdminBanner()">+ Add</button>
         </div>
+        <div class="btn-row" style="margin-top:4px;">
+          <input type="text" id="aBannerYtInput" placeholder="▶️ YT video URL (autoplay in banner)..." style="flex:1;">
+        </div>
+        <div class="banner-preview" id="aBannerPreview" style="display:none;"></div>
       </div>
 
       <div class="home-form">
@@ -2018,6 +2052,7 @@
   // ---- Home Page: Banners, Apps, Videos ----
   var bannerTimer = null;
   var bannerIdx = 0;
+  var _pendingBannerMedia = null; // {screenshots:[], video:''} for Play Store banners
 
   function renderUserHome() {
     loadDB();
@@ -2039,15 +2074,117 @@
       if (bannerTimer) { clearInterval(bannerTimer); bannerTimer = null; }
       return;
     }
-    slides.innerHTML = banners.map(function(b) {
-      return '<div class="slide"><a href="' + esc(b.link || '#') + '" target="_blank"><img src="' + esc(b.url) + '" alt="banner"></a></div>';
+    slides.innerHTML = banners.map(function(b, bi) {
+      var v = b.video ? b.video.replace(/'/g, '\\x27') : '';
+      var isYT = v && v.match(/youtube\.com\/embed/);
+      var h = '<div class="slide">';
+      if (isYT) {
+        // Autoplay muted YouTube video as the banner
+        var autoSrc = v;
+        if (autoSrc.indexOf('autoplay=') < 0) autoSrc += '&autoplay=1';
+        if (autoSrc.indexOf('mute=') < 0) autoSrc += '&mute=1';
+        if (autoSrc.indexOf('controls=') < 0) autoSrc += '&controls=0';
+        if (autoSrc.indexOf('enablejsapi=') < 0) autoSrc += '&enablejsapi=1';
+        if (autoSrc.indexOf('playsinline=') < 0) autoSrc += '&playsinline=1';
+        if (autoSrc.indexOf('loop=') < 0) { autoSrc += '&loop=1'; var vi = autoSrc.match(/embed\/([a-zA-Z0-9_-]+)/); if (vi) autoSrc += '&playlist=' + vi[1]; }
+        h += '<div class="banner-autoplay-wrapper">';
+        h += '<iframe src="' + autoSrc + '" class="banner-autoplay-iframe" allow="autoplay; encrypted-media" frameborder="0"></iframe>';
+        h += '<div class="banner-autoplay-overlay" onclick="bannerClick(this,' + bi + ')"><button class="sound-btn">🔇</button></div>';
+        h += '</div>';
+      } else if (b.screenshots && b.screenshots.length > 1) {
+        h += '<div class="sub-slides">';
+        b.screenshots.forEach(function(s, si) {
+          h += '<div class="sub-slide">';
+          h += '<a href="' + esc(b.link || '#') + '" target="_blank"><img src="' + esc(s) + '" alt="screenshot" onerror="this.style.display=\'none\'"></a>';
+          h += '</div>';
+        });
+        h += '</div>';
+        h += '<div class="sub-dots">';
+        b.screenshots.forEach(function(s, si) {
+          h += '<span class="' + (si === 0 ? 'sub-active' : '') + '" onclick="goSubBanner(' + bi + ',' + si + ')"></span>';
+        });
+        h += '</div>';
+      } else {
+        h += '<a href="' + esc(b.link || '#') + '" target="_blank"><img src="' + esc(b.url) + '" alt="banner" onerror="this.parentNode.innerHTML=\'<div style=display:flex;align-items:center;justify-content:center;height:100%;background:#0d1f3a;color:#556688;font-size:13px>Image not loaded</div>\'"></a>';
+      }
+      if (v && !isYT) {
+        h += '<div class="banner-video-overlay" onclick="playBannerVideo(this,\'' + v + '\')"><button class="play-btn">▶</button></div>';
+      }
+      h += '</div>';
+      return h;
     }).join('');
     dots.innerHTML = banners.map(function(b, i) {
       return '<span class="dot' + (i === 0 ? ' active' : '') + '" onclick="goBanner(' + i + ')"></span>';
     }).join('');
     if (bannerTimer) clearInterval(bannerTimer);
     bannerIdx = 0;
-    bannerTimer = setInterval(function() { bannerNext(); }, 4000);
+    bannerTimer = setInterval(function() { bannerNext(); }, 10000);
+  }
+
+  // Sub-carousel navigation for screenshots within a banner
+  function goSubBanner(bannerIdx, subIdx) {
+    var slides = document.getElementById('bannerSlides');
+    var slide = slides.children[bannerIdx];
+    if (!slide) return;
+    var container = slide.querySelector('.sub-slides');
+    if (!container) return;
+    container.style.transform = 'translateX(-' + (subIdx * 100) + '%)';
+    var subDots = slide.querySelectorAll('.sub-dots span');
+    subDots.forEach(function(d, i) { d.classList.toggle('sub-active', i === subIdx); });
+  }
+
+  // Play video in banner
+  function playBannerVideo(el, videoUrl) {
+    var slide = el.closest('.slide');
+    if (!slide) return;
+    // Remove overlay
+    var overlays = slide.querySelectorAll('.banner-video-overlay');
+    overlays.forEach(function(o) { o.style.display = 'none'; });
+    // Add iframe
+    var target = slide.querySelector('.sub-slide:first-child') || slide;
+    if (target) {
+      var iframe = document.createElement('iframe');
+      iframe.src = videoUrl;
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.border = 'none';
+      iframe.allow = 'autoplay; encrypted-media';
+      iframe.allowFullscreen = true;
+      target.innerHTML = '';
+      target.appendChild(iframe);
+    }
+  }
+
+  // Click on autoplay video banner: first click unmutes, then opens YouTube
+  function bannerClick(overlayEl, bannerIdx) {
+    try {
+      var btn = overlayEl ? overlayEl.querySelector('.sound-btn') : null;
+      if (!btn) return;
+      var isMuted = btn.textContent === '🔇';
+      if (isMuted) {
+        var wrapper = overlayEl.parentNode;
+        if (wrapper) {
+          var iframe = wrapper.querySelector('iframe');
+          try {
+            var cmd = JSON.stringify({event:'command',func:'unMute',args:''});
+            if (iframe && iframe.contentWindow) {
+              iframe.contentWindow.postMessage(cmd, '*');
+              setTimeout(function() { try { iframe.contentWindow.postMessage(cmd, '*'); } catch(e) {} }, 800);
+            }
+          } catch(e) {}
+        }
+        btn.textContent = '🔊';
+        overlayEl.classList.add('hidden');
+        return;
+      }
+      // Already unmuted: open YouTube video page
+      var b = (DB && DB.homeContent && DB.homeContent.banners) ? DB.homeContent.banners[bannerIdx] : null;
+      if (b && b.video) {
+        var vid = b.video.match(/embed\/([a-zA-Z0-9_-]+)/);
+        if (vid) { window.open('https://www.youtube.com/watch?v=' + vid[1], '_blank'); return; }
+      }
+      if (b && b.link) window.open(b.link, '_blank');
+    } catch(e) {}
   }
 
   function bannerPrev() {
@@ -2153,22 +2290,59 @@
     const list = document.getElementById('aBannerList');
     if (!banners.length) { list.innerHTML = '<div style="color:#556688;font-size:12px;">No banners added yet.</div>'; return; }
     list.innerHTML = banners.map(function(b, i) {
-      return '<div class="home-item"><div class="info"><strong>#' + (i + 1) + '</strong> <span>' + esc(b.url) + '</span>' + (b.link ? '<br><span>Link: ' + esc(b.link) + '</span>' : '') + '</div><button class="btn-remove" onclick="removeAdminBanner(' + i + ')">Remove</button></div>';
+      var thumbHtml = '';
+      if (b.screenshots && b.screenshots.length) {
+        thumbHtml = '<div style="display:flex;gap:4px;margin-top:4px;overflow-x:auto;">';
+        b.screenshots.slice(0, 5).forEach(function(s) {
+          thumbHtml += '<img src="' + esc(s) + '" style="height:40px;border-radius:4px;">';
+        });
+        if (b.screenshots.length > 5) thumbHtml += '<span style="color:#8899bb;font-size:11px;align-self:center;">+' + (b.screenshots.length - 5) + '</span>';
+        thumbHtml += '</div>';
+      }
+      var badge = b.video ? '<span style="color:#eab308;font-size:16px;margin-left:6px;">▶</span>' : '';
+      return '<div class="home-item"><div class="info"><strong>#' + (i + 1) + '</strong> <span>' + esc(b.url) + '</span>' + badge + (b.link ? '<br><span>Link: ' + esc(b.link) + '</span>' : '') + thumbHtml + '</div><button class="btn-remove" onclick="removeAdminBanner(' + i + ')">Remove</button></div>';
     }).join('');
   }
 
   function addAdminBanner() {
-    const url = document.getElementById('aBannerUrlInput').value.trim();
-    const link = document.getElementById('aBannerLinkInput').value.trim();
-    if (!url) { showToast('Enter banner image URL!'); return; }
+    var url = document.getElementById('aBannerUrlInput').value.trim();
+    var ytUrl = document.getElementById('aBannerYtInput').value.trim();
+    var link = document.getElementById('aBannerLinkInput').value.trim();
+    if (!url && !ytUrl) { showToast('Enter image URL or YT video URL!'); return; }
     loadDB();
-    if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [] };
-    DB.homeContent.banners.push({ url: url, link: link || '' });
+    if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [], premiumApps: [] };
+    var banner = { url: url || '', link: link || '' };
+    // If YT video URL provided, extract embed URL
+    if (ytUrl) {
+      var yt = ytUrl.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|m\.youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (yt) {
+        var vid = yt[1];
+        banner.video = 'https://www.youtube.com/embed/' + vid + '?autoplay=1&mute=1&controls=0&enablejsapi=1&loop=1&playlist=' + vid + '&playsinline=1&modestbranding=1';
+        if (!banner.url) banner.url = 'https://img.youtube.com/vi/' + vid + '/maxresdefault.jpg';
+      } else {
+        // Direct video URL
+        banner.video = ytUrl;
+      }
+    }
+    // If we have Play Store media data, save it too
+    if (_pendingBannerMedia) {
+      if (_pendingBannerMedia.screenshots && _pendingBannerMedia.screenshots.length) {
+        banner.screenshots = _pendingBannerMedia.screenshots;
+      }
+      if (_pendingBannerMedia.video) {
+        banner.video = _pendingBannerMedia.video;
+      }
+    }
+    DB.homeContent.banners.push(banner);
     saveDB();
     document.getElementById('aBannerUrlInput').value = '';
+    document.getElementById('aBannerYtInput').value = '';
     document.getElementById('aBannerLinkInput').value = '';
+    document.getElementById('aBannerPreview').style.display = 'none';
+    document.getElementById('aBannerPreview').innerHTML = '';
+    _pendingBannerMedia = null;
     renderABannerList();
-    showToast('Banner added!');
+    showToast('Banner added!' + (banner.video ? ' with video' : ''));
   }
 
   function removeAdminBanner(idx) {
@@ -2313,22 +2487,23 @@
     if (!document.getElementById(iconInputId).value) document.getElementById(iconInputId).placeholder = '⏳ Fetching...';
     showToast('Fetching real app icon...');
 
-    // ---- ASYNC: Try ALL proxies + Microlink API IN PARALLEL ----
+    // ---- ASYNC: Try OG APIs IN PARALLEL ----
     fetchViaProxyParallel(link, function(html) {
       var name, icon;
-      // Microlink returns JSON, other proxies return HTML
-      if (typeof html === 'string' && html.charAt(0) === '{') {
-        try { var j = JSON.parse(html); if (j.status === 'success' && j.data) { name = j.data.title; if (j.data.image && j.data.image.url) icon = j.data.image.url; } } catch(e) {}
-      } else {
-        name = extractMetaContent(html, 'og:title') || extractMetaContent(html, 'twitter:title') || extractTitle(html) || extractPlayStoreName(html);
-        icon = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || extractImageSrc(html) || '';
-        // Play Store: try JSON-LD for better icon
-        if ((!icon || !icon.match(/play-lh\.googleusercontent\.com/)) && link.match(/play\.google\.com/)) {
-          var jd = extractJsonLd(html, 'application/ld+json');
-          if (jd && jd.image) icon = jd.image;
-        }
+      if (html && html.charAt(0) === '{') {
+        try {
+          var j = JSON.parse(html);
+          // Microlink: {status, data: {title, image: {url}}}
+          if (j.data) { name = j.data.title; if (j.data.image && j.data.image.url) icon = j.data.image.url; }
+          // OpenUnfurl: {title, image}  (direct)
+          if (!name) name = j.title;
+          if (!icon && typeof j.image === 'string') icon = j.image;
+          // OGIo: {og: {title, image}}
+          if (!name && j.og) name = j.og.title;
+          if (!icon && j.og) icon = j.og.image;
+          if (!name && j.standard) name = j.standard.title;
+        } catch(e) {}
       }
-      // Ensure Play Store CDN images get the supporting format
       if (icon && icon.match(/play-lh\.googleusercontent\.com/)) icon = convertToPlayStoreFormat(icon);
       if (name) document.getElementById(nameInputId).value = name;
       if (icon) {
@@ -2349,39 +2524,54 @@
     return url;
   }
 
-  function extractImageSrc(html) {
-    var m = html.match(/<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["']/i);
-    if (m) return m[1];
-    m = html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']image_src["']/i);
-    return m ? m[1] : null;
-  }
 
-  function extractJsonLd(html, type) {
-    var m = html.match(new RegExp('<script[^>]+type=["\']' + type + '["\'][^>]*>(.*?)<\\/script>', 'is'));
-    if (!m) return null;
-    try { var j = JSON.parse(m[1]); if (Array.isArray(j)) j = j[0]; return j; } catch(e) { return null; }
-  }
 
   // ---- Auto Fetch Banner Image from URL ----
   function autoFetchBanner() {
     var url = document.getElementById('aBannerUrlInput').value.trim();
     if (!url || url.startsWith('data:')) return;
     // If it's a direct image URL (known CDN, file extension), use as-is
-    if (url.match(/\.(jpg|jpeg|png|gif|webp|ico|svg)(\?|$)/i) || url.match(/googleusercontent\.com/) || url.match(/fbcdn\.net/) || url.match(/cloudinary\.com/)) return;
+    if (url.match(/\.(jpg|jpeg|png|gif|webp|ico|svg|avif|bmp|tiff?)(\?|$)/i) || url.match(/googleusercontent\.com/) || url.match(/fbcdn\.net/) || url.match(/cloudinary\.com/)) return;
 
+    // Clear any previous pending media
+    _pendingBannerMedia = null;
+    document.getElementById('aBannerPreview').style.display = 'none';
+    document.getElementById('aBannerPreview').innerHTML = '';
+
+    // If Play Store link: ONLY fetch showcase screenshots, NOT app icon
+    if (url.match(/play\.google\.com/)) {
+      // Clear any old icon URL so user sees fetching state
+      document.getElementById('aBannerUrlInput').value = '';
+      document.getElementById('aBannerUrlInput').placeholder = '⏳ Fetching Play Store screenshots...';
+      showToast('⏳ Fetching Play Store screenshots...');
+      fetchPlayStoreMedia(url);
+      return;
+    }
+
+    // If YouTube link: use thumbnail as banner + autoplay muted video
+    var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|m\.youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (ytMatch) {
+      var vid = ytMatch[1];
+      var thumbUrl = 'https://img.youtube.com/vi/' + vid + '/maxresdefault.jpg';
+      var embedUrl = 'https://www.youtube.com/embed/' + vid + '?autoplay=1&mute=1&controls=0&enablejsapi=1&loop=1&playlist=' + vid + '&playsinline=1&modestbranding=1';
+      _pendingBannerMedia = { screenshots: [], video: embedUrl };
+      document.getElementById('aBannerUrlInput').value = thumbUrl;
+      showBannerPreview([thumbUrl], embedUrl);
+      showToast('YouTube video detected! Autoplay muted.');
+      return;
+    }
+
+    // ---- Non-Play-Store: use OG API normally ----
     showToast('⏳ Fetching banner image...');
-
-    // ---- ASYNC: Try ALL proxies + Microlink API IN PARALLEL ----
     fetchViaProxyParallel(url, function(html) {
       var img;
-      if (typeof html === 'string' && html.charAt(0) === '{') {
-        try { var j = JSON.parse(html); if (j.status === 'success' && j.data && j.data.image) img = j.data.image.url; } catch(e) {}
-      } else {
-        img = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || '';
-        if (!img && url.match(/play\.google\.com/)) {
-          var jd = extractJsonLd(html, 'application/ld+json');
-          if (jd && jd.image) img = jd.image;
-        }
+      if (html && html.charAt(0) === '{') {
+        try {
+          var j = JSON.parse(html);
+          if (j.data && j.data.image) img = j.data.image.url;
+          if (!img && typeof j.image === 'string') img = j.image;
+          if (!img && j.og) img = j.og.image;
+        } catch(e) {}
       }
       if (img) {
         if (img.startsWith('/')) { var a = url.match(/^https?:\/\/[^\/]+/); if (a) img = a[0] + img; }
@@ -2394,57 +2584,157 @@
     });
   }
 
-  // Try ALL proxies + Microlink API in parallel — first one to respond wins
+  // Fetch ALL screenshots and video trailer from Play Store page
+  function fetchPlayStoreMedia(playUrl) {
+    // Try to fetch Play Store HTML via OG-Io
+    var encodedUrl = encodeURIComponent(playUrl);
+    var apiUrl = 'https://og-io.vercel.app/api/og?url=' + encodedUrl + '&includeHtml=true';
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', apiUrl, true);
+    xhr.timeout = 15000;
+    xhr.onload = function() {
+      if (xhr.status === 200 && xhr.responseText) {
+        try {
+          var j = JSON.parse(xhr.responseText);
+          var rawHtml = j.html || '';
+          if (!rawHtml) { fallbackOG(playUrl); return; }
+          // Extract screenshot image URLs from the HTML
+          var screenshots = [];
+          var seen = {};
+          // Extract ALL screenshots: scan for data-screenshot-index, find enclosing <img>, extract src
+          var pos = 0;
+          while (pos < rawHtml.length) {
+            var idx = rawHtml.indexOf('data-screenshot-index=', pos);
+            if (idx < 0) break;
+            var start = rawHtml.lastIndexOf('<img', idx);
+            if (start < 0) { pos = idx + 1; continue; }
+            var end = rawHtml.indexOf('>', idx);
+            if (end < 0) break;
+            var tag = rawHtml.substring(start, end + 1);
+            var s = tag.match(/src=["']([^"']+?)["']/i);
+            if (s && s[1].match(/play-lh\.googleusercontent\.com/)) {
+              var src = convertToPlayStoreFormat(s[1].split('=')[0]);
+              if (!seen[src]) { seen[src] = true; screenshots.push(src); }
+            }
+            pos = idx + 1;
+          }
+          // Method 2: Try itemprop="image" with "Screenshot" alt text (fallback)
+          if (!screenshots.length) {
+            pos = 0;
+            while (pos < rawHtml.length) {
+              var idx2 = rawHtml.indexOf('alt="Screenshot', pos);
+              if (idx2 < 0) idx2 = rawHtml.indexOf("alt='Screenshot", pos);
+              if (idx2 < 0) break;
+              var start2 = rawHtml.lastIndexOf('<img', idx2);
+              if (start2 < 0) { pos = idx2 + 1; continue; }
+              var end2 = rawHtml.indexOf('>', idx2);
+              if (end2 < 0) break;
+              var tag2 = rawHtml.substring(start2, end2 + 1);
+              var s2 = tag2.match(/src=["']([^"']+?)["']/i);
+              if (s2 && s2[1].match(/play-lh\.googleusercontent\.com/)) {
+                var src = convertToPlayStoreFormat(s2[1].split('=')[0]);
+                if (!seen[src]) { seen[src] = true; screenshots.push(src); }
+              }
+              pos = idx2 + 1;
+            }
+          }
+          // Method 3: Grab ALL unique play-lh URLs (exclude the icon size 512)
+          if (!screenshots.length) {
+            var allUrls = rawHtml.match(/https:\/\/play-lh\.googleusercontent\.com\/[a-zA-Z0-9_-]+/g) || [];
+            allUrls.forEach(function(u) {
+              if (u.match(/https:\/\/play-lh\.googleusercontent\.com\/[a-zA-Z0-9_-]{20,}/) && !seen[u]) {
+                seen[u] = true;
+                screenshots.push(convertToPlayStoreFormat(u));
+              }
+            });
+          }
+          // Extract YouTube video
+          var video = '';
+          var vRe = /youtube\.com\/embed\/([a-zA-Z0-9_-]+)/i;
+          var vM = rawHtml.match(vRe);
+          if (vM) video = 'https://www.youtube.com/embed/' + vM[1] + '?autoplay=1&rel=0';
+
+          if (screenshots.length) {
+            _pendingBannerMedia = { screenshots: screenshots, video: video };
+            var el = document.getElementById('aBannerUrlInput');
+            el.value = screenshots[0];
+            el.placeholder = 'Image URL or website link (auto-fetch)...';
+            showBannerPreview(screenshots, video);
+          } else {
+            fallbackOG(playUrl);
+          }
+        } catch(e) { fallbackOG(playUrl); }
+      } else {
+        fallbackOG(playUrl);
+      }
+    };
+    xhr.onerror = function() { fallbackOG(playUrl); };
+    xhr.ontimeout = function() { fallbackOG(playUrl); };
+    xhr.send();
+  }
+
+  // Fallback: use normal OG fetch if Play Store screenshot fetch fails
+  function fallbackOG(url) {
+    var el = document.getElementById('aBannerUrlInput');
+    el.placeholder = 'Image URL or website link (auto-fetch)...';
+    fetchViaProxyParallel(url, function(html) {
+      var img;
+      if (html && html.charAt(0) === '{') {
+        try {
+          var j = JSON.parse(html);
+          if (j.data && j.data.image) img = j.data.image.url;
+          if (!img && typeof j.image === 'string') img = j.image;
+          if (!img && j.og) img = j.og.image;
+        } catch(e) {}
+      }
+      if (img) {
+        if (img.startsWith('/')) { var a = url.match(/^https?:\/\/[^\/]+/); if (a) img = a[0] + img; }
+        if (img.match(/play-lh\.googleusercontent\.com/)) img = convertToPlayStoreFormat(img);
+        el.value = img;
+        showToast('Banner image auto-fetched (OG fallback)');
+      } else {
+        showToast('Could not fetch from this link');
+      }
+    });
+  }
+
+  // Show screenshot preview strip in admin panel
+  function showBannerPreview(screenshots, video) {
+    var div = document.getElementById('aBannerPreview');
+    var html = '';
+    screenshots.forEach(function(s) {
+      html += '<img src="' + esc(s) + '" alt="screenshot" title="Screenshot" onclick="this.scrollIntoView({behavior:\'smooth\',inline:\"center\"})">';
+    });
+    if (video) {
+      html += '<div class="video-badge" title="Video trailer">▶️</div>';
+    }
+    div.innerHTML = html;
+    div.style.display = 'flex';
+    showToast(video ? 'Video attached! Click + Add Banner to save.' : screenshots.length + ' screenshots fetched!');
+  }
+
+  // Try OG APIs in parallel — first one to respond wins (all support CORS via *)
   function fetchViaProxyParallel(url, callback) {
-    var proxies = [
-      'https://api.allorigins.win/raw?url=',
-      'https://corsproxy.io/?url=',
-      'https://api.codetabs.com/v1/proxy?quest=',
-      'https://cors-anywhere.herokuapp.com/'
-    ];
     var done = false;
-    // Try HTML proxies
-    proxies.forEach(function(proxy) {
+    var apis = [
+      { name: 'OpenUnfurl', url: 'https://openunfurl.vercel.app/api/unfurl?url=' + encodeURIComponent(url), timeout: 8000 },
+      { name: 'OGIo',       url: 'https://og-io.vercel.app/api/og?url=' + encodeURIComponent(url),           timeout: 8000 },
+      { name: 'Microlink',  url: 'https://api.microlink.io/?url=' + encodeURIComponent(url) + '&meta=true', timeout: 10000 }
+    ];
+    apis.forEach(function(api) {
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', proxy + encodeURIComponent(url), true);
-      xhr.timeout = 6000;
+      xhr.open('GET', api.url, true);
+      xhr.timeout = api.timeout;
       xhr.onload = function() { if (!done && xhr.status === 200 && xhr.responseText) { done = true; callback(xhr.responseText); } };
       xhr.onerror = function() {};
       xhr.ontimeout = function() {};
       xhr.send();
     });
-    // Try Microlink API (JSON — directly returns OG data)
-    var microlink = new XMLHttpRequest();
-    microlink.open('GET', 'https://api.microlink.io/?url=' + encodeURIComponent(url) + '&meta=true', true);
-    microlink.timeout = 8000;
-    microlink.onload = function() { if (!done && microlink.status === 200 && microlink.responseText) { done = true; callback(microlink.responseText); } };
-    microlink.onerror = function() {};
-    microlink.ontimeout = function() {};
-    microlink.send();
+    // Global fallback: if nothing works, still resolve after 12s
+    setTimeout(function() { if (!done) { done = true; callback(''); } }, 12000);
   }
 
-  function extractMetaContent(html, property) {
-    var regex = new RegExp('<meta[^>]+(?:property|name)=["\']' + property + '["\'][^>]*content=["\']([^"\']+)["\']', 'i');
-    var m = html.match(regex);
-    if (!m) {
-      regex = new RegExp('<meta[^>]*content=["\']([^"\']+)["\'][^>]*(?:property|name)=["\']' + property + '["\']', 'i');
-      m = html.match(regex);
-    }
-    return m ? m[1] : null;
-  }
 
-  function extractTitle(html) {
-    var m = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-    return m ? m[1].replace(/[_-].*$/, '').trim() : null;
-  }
-
-  function extractPlayStoreName(html) {
-    var m = html.match(/<h1[^>]*itemprop="name"[^>]*>([^<]+)<\/h1>/i);
-    if (m) return m[1].trim();
-    m = html.match(/<title[^>]*>([^<]+) - Apps on Google Play<\/title>/i);
-    if (m) return m[1].trim();
-    return null;
-  }
 
   // ---- Auto fetch on paste/input/change ----
   function setupAutoFetch(linkId, nameId, iconId) {
