@@ -919,6 +919,10 @@
           <input type="text" id="aAppLinkInput" placeholder="Play Store / app link..." style="flex:0.8;">
           <label class="btn-add" style="background:#22c55e;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('appIconFile').click()">📁 Icon</label>
           <input type="file" id="appIconFile" accept="image/*" style="display:none;" onchange="uploadAppIconFile(this)">
+          <label class="btn-add" style="background:#a855f7;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('appApkFile').click()">📦 APK</label>
+          <input type="file" id="appApkFile" accept=".apk,application/vnd.android.package-archive" style="display:none;" onchange="uploadFreeAppApk(this)">
+          <input type="hidden" id="aAppApkUrl" value="">
+          <span id="aAppApkStatus" style="font-size:10px;color:#888;"></span>
           <button class="btn-add" onclick="addAdminApp()">+ Add</button>
         </div>
       </div>
@@ -947,6 +951,10 @@
           <input type="number" id="aPAppRewardInput" placeholder="Reward ₹" style="flex:0.2;">
           <label class="btn-add" style="background:#22c55e;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('pAppIconFile').click()">📁</label>
           <input type="file" id="pAppIconFile" accept="image/*" style="display:none;" onchange="uploadPremiumAppIconFile(this)">
+          <label class="btn-add" style="background:#a855f7;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('pAppApkFile').click()">📦 APK</label>
+          <input type="file" id="pAppApkFile" accept=".apk,application/vnd.android.package-archive" style="display:none;" onchange="uploadPremiumAppApk(this)">
+          <input type="hidden" id="aPAppApkUrl" value="">
+          <span id="aPAppApkStatus" style="font-size:10px;color:#888;"></span>
           <button class="btn-add" onclick="addAdminPremiumApp()">+ Add</button>
         </div>
         <div style="margin-top:10px;">
@@ -2219,7 +2227,13 @@
       return;
     }
     grid.innerHTML = apps.map(function(a) {
-      return '<div class="app-card"><img src="' + esc(a.icon) + '" alt="' + esc(a.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'64\\\' height=\\\'64\\\'><rect fill=\\\'%230a1628\\\' width=\\\'64\\\' height=\\\'64\\\'/><text x=\\\'32\\\' y=\\\'38\\\' text-anchor=\\\'middle\\\' fill=\\\'%23556688\\\' font-size=\\\'10\\\' font-family=\\\'sans-serif\\\'>App</text></svg>\'"><div class="app-name">' + esc(a.name) + '</div><a class="click-link" href="' + esc(a.link) + '" target="_blank">Click Link</a></div>';
+      var linkBtn;
+      if (a.apkUrl) {
+        linkBtn = '<a class="click-link" href="javascript:void(0)" onclick="downloadApk(\'' + esc(a.apkUrl) + '\',\'' + esc(a.name.replace(/'/g, "\\'").replace(/\s+/g, '_')) + '.apk\')">Download APK</a>';
+      } else {
+        linkBtn = '<a class="click-link" href="' + esc(a.link) + '" target="_blank">Click Link</a>';
+      }
+      return '<div class="app-card"><img src="' + esc(a.icon) + '" alt="' + esc(a.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'64\\\' height=\\\'64\\\'><rect fill=\\\'%230a1628\\\' width=\\\'64\\\' height=\\\'64\\\'/><text x=\\\'32\\\' y=\\\'38\\\' text-anchor=\\\'middle\\\' fill=\\\'%23556688\\\' font-size=\\\'10\\\' font-family=\\\'sans-serif\\\'>App</text></svg>\'"><div class="app-name">' + esc(a.name) + '</div>' + linkBtn + '</div>';
     }).join('');
   }
 
@@ -2274,7 +2288,13 @@
       if (done) {
         statusHtml = '<div><span class="p-badge p-badge-success">✓ Completed · ₹' + a.reward + '</span></div>';
       } else {
-        statusHtml = '<a class="p-btn p-btn-start" href="' + esc(a.link) + '" target="_blank">Start Task</a> <button class="p-btn p-btn-done" onclick="completePremiumTask(\'' + esc(a.name) + '\',' + a.reward + ')">Done</button>';
+        var startBtn;
+        if (a.apkUrl) {
+          startBtn = '<a class="p-btn p-btn-start" href="javascript:void(0)" onclick="downloadApk(\'' + esc(a.apkUrl) + '\',\'' + esc(a.name.replace(/'/g, "\\'").replace(/\s+/g, '_')) + '.apk\')">Download APK</a>';
+        } else {
+          startBtn = '<a class="p-btn p-btn-start" href="' + esc(a.link) + '" target="_blank">Start Task</a>';
+        }
+        statusHtml = startBtn + ' <button class="p-btn p-btn-done" onclick="completePremiumTask(\'' + esc(a.name) + '\',' + a.reward + ')">Done</button>';
       }
       return '<div class="premium-card"><img src="' + esc(a.icon) + '" alt="' + esc(a.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'64\\\' height=\\\'64\\\'><rect fill=\\\'%230a1628\\\' width=\\\'64\\\' height=\\\'64\\\'/><text x=\\\'32\\\' y=\\\'38\\\' text-anchor=\\\'middle\\\' fill=\\\'%23556688\\\' font-size=\\\'10\\\' font-family=\\\'sans-serif\\\'>App</text></svg>\'"><div class="p-name">' + esc(a.name) + '</div><div class="p-reward">₹' + a.reward + '</div>' + (a.desc ? '<div class="p-desc">' + esc(a.desc) + '</div>' : '') + '<div>' + statusHtml + '</div></div>';
     }).join('');
@@ -2379,7 +2399,8 @@
     const list = document.getElementById('aAppList');
     if (!apps.length) { list.innerHTML = '<div style="color:#556688;font-size:12px;">No apps added yet.</div>'; return; }
     list.innerHTML = apps.map(function(a, i) {
-      return '<div class="home-item"><div class="info"><strong>' + esc(a.name) + '</strong><br><span>' + esc(a.icon) + '</span><br><span>Link: ' + esc(a.link) + '</span></div><button class="btn-remove" onclick="removeAdminApp(' + i + ')">Remove</button></div>';
+      var apkInfo = a.apkUrl ? '<br><span style="color:#a855f7;">📦 APK uploaded</span>' : '';
+      return '<div class="home-item"><div class="info"><strong>' + esc(a.name) + '</strong>' + apkInfo + '<br><span>' + esc(a.icon) + '</span><br><span>Link: ' + esc(a.link) + '</span></div><button class="btn-remove" onclick="removeAdminApp(' + i + ')">Remove</button></div>';
     }).join('');
   }
 
@@ -2388,13 +2409,18 @@
     const icon = document.getElementById('aAppIconInput').value.trim();
     const link = document.getElementById('aAppLinkInput').value.trim();
     if (!name || !icon || !link) { showToast('Fill all fields!'); return; }
+    var apkUrl = document.getElementById('aAppApkUrl').value.trim();
     loadDB();
     if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [] };
-    DB.homeContent.apps.push({ name: name, icon: icon, link: link });
+    var appObj = { name: name, icon: icon, link: link };
+    if (apkUrl) appObj.apkUrl = apkUrl;
+    DB.homeContent.apps.push(appObj);
     saveDB();
     document.getElementById('aAppNameInput').value = '';
     document.getElementById('aAppIconInput').value = '';
     document.getElementById('aAppLinkInput').value = '';
+    document.getElementById('aAppApkUrl').value = '';
+    document.getElementById('aAppApkStatus').textContent = '';
     renderAAppList();
     showToast('App added!');
   }
@@ -2439,6 +2465,18 @@
     DB.homeContent.videos.splice(idx, 1);
     saveDB();
     renderAVideoList();
+  }
+
+  // ---- Download APK Helper ----
+  function downloadApk(url, filename) {
+    if (!url) return;
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename || 'app.apk';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   // ---- File Upload Helpers ----
@@ -2487,6 +2525,67 @@
       showToast('Video loaded! Add title, then click "+ Add".');
     };
     reader.readAsDataURL(file);
+    input.value = '';
+  }
+
+  // ---- APK Upload to GitHub ----
+  function uploadApkToGithub(file, doneCb) {
+    if (!file) return;
+    if (file.size > 90 * 1024 * 1024) { showToast('APK too large! Max 90MB.'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var base64 = e.target.result.split(',')[1];
+      var safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      var fileName = 'apks/apk_' + Date.now() + '_' + safeName;
+      var body = { message: 'Upload APK: ' + file.name, content: base64, branch: 'main' };
+      var xhr = new XMLHttpRequest();
+      xhr.open('PUT', 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + fileName, true);
+      xhr.setRequestHeader('Authorization', 'Bearer ' + _getToken());
+      xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+        if (xhr.status === 200 || xhr.status === 201) {
+          var resp = JSON.parse(xhr.responseText);
+          var rawUrl = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/main/' + fileName;
+          doneCb(null, rawUrl, file.name);
+        } else {
+          doneCb('Upload failed (HTTP ' + xhr.status + ')');
+        }
+      };
+      xhr.onerror = function() { doneCb('Network error'); };
+      xhr.send(JSON.stringify(body));
+    };
+    reader.onerror = function() { doneCb('File read error'); };
+    reader.readAsDataURL(file);
+  }
+
+  function uploadFreeAppApk(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var statusEl = document.getElementById('aAppApkStatus');
+    statusEl.textContent = '⏳ Uploading ' + file.name + '...';
+    document.getElementById('aAppApkUrl').value = '';
+    uploadApkToGithub(file, function(err, url, name) {
+      if (err) { statusEl.textContent = '❌ ' + err; return; }
+      document.getElementById('aAppApkUrl').value = url;
+      statusEl.textContent = '✅ ' + name + ' uploaded!';
+      showToast('APK ready! Click "+ Add" to save.');
+    });
+    input.value = '';
+  }
+
+  function uploadPremiumAppApk(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var statusEl = document.getElementById('aPAppApkStatus');
+    statusEl.textContent = '⏳ Uploading ' + file.name + '...';
+    document.getElementById('aPAppApkUrl').value = '';
+    uploadApkToGithub(file, function(err, url, name) {
+      if (err) { statusEl.textContent = '❌ ' + err; return; }
+      document.getElementById('aPAppApkUrl').value = url;
+      statusEl.textContent = '✅ ' + name + ' uploaded!';
+      showToast('APK ready! Click "+ Add" to save.');
+    });
     input.value = '';
   }
 
@@ -2791,7 +2890,8 @@
     const list = document.getElementById('aPremiumAppList');
     if (!apps.length) { list.innerHTML = '<div style="color:#556688;font-size:12px;">No premium apps added yet.</div>'; return; }
     list.innerHTML = apps.map(function(a, i) {
-      return '<div class="home-item"><div class="info"><strong>' + esc(a.name) + '</strong> — ₹' + a.reward + '<br><span>' + esc(a.icon) + '</span><br><span>Link: ' + esc(a.link) + '</span>' + (a.desc ? '<br><span>Task: ' + esc(a.desc) + '</span>' : '') + '</div><button class="btn-remove" onclick="removeAdminPremiumApp(' + i + ')">Remove</button></div>';
+      var apkInfo = a.apkUrl ? '<br><span style="color:#a855f7;">📦 APK uploaded</span>' : '';
+      return '<div class="home-item"><div class="info"><strong>' + esc(a.name) + '</strong> — ₹' + a.reward + apkInfo + '<br><span>' + esc(a.icon) + '</span><br><span>Link: ' + esc(a.link) + '</span>' + (a.desc ? '<br><span>Task: ' + esc(a.desc) + '</span>' : '') + '</div><button class="btn-remove" onclick="removeAdminPremiumApp(' + i + ')">Remove</button></div>';
     }).join('');
   }
 
@@ -2801,14 +2901,19 @@
     const link = document.getElementById('aPAppLinkInput').value.trim();
     const reward = parseFloat(document.getElementById('aPAppRewardInput').value);
     if (!name || !icon || !link || !reward || reward <= 0) { showToast('Fill all fields with valid reward!'); return; }
+    var apkUrl = document.getElementById('aPAppApkUrl').value.trim();
     loadDB();
     if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [], premiumApps: [] };
-    DB.homeContent.premiumApps.push({ name: name, icon: icon, link: link, reward: reward, desc: '' });
+    var appObj = { name: name, icon: icon, link: link, reward: reward, desc: '' };
+    if (apkUrl) appObj.apkUrl = apkUrl;
+    DB.homeContent.premiumApps.push(appObj);
     saveDB();
     document.getElementById('aPAppNameInput').value = '';
     document.getElementById('aPAppIconInput').value = '';
     document.getElementById('aPAppLinkInput').value = '';
     document.getElementById('aPAppRewardInput').value = '';
+    document.getElementById('aPAppApkUrl').value = '';
+    document.getElementById('aPAppApkStatus').textContent = '';
     renderAPremiumAppList();
     showToast('Premium app added!');
   }
