@@ -2185,12 +2185,10 @@
   function loadSavedLogin() {
     var u = localStorage.getItem('ishu_saved_user');
     var p = localStorage.getItem('ishu_saved_pass');
-    var r = localStorage.getItem('ishu_saved_role');
     if (u && p) {
       document.getElementById('loginUser').value = u;
       document.getElementById('loginPass').value = p;
       document.getElementById('rememberMe').checked = true;
-      if (r === 'admin') selectLoginRole('admin');
     }
   }
 
