@@ -138,6 +138,12 @@
     .login-box .links { margin-top: 18px; font-size: 13px; color: rgba(255,255,255,0.2); }
     .login-box .links a { color: rgba(255,255,255,0.4); text-decoration: none; cursor: pointer; transition: 0.25s; }
     .login-box .links a:hover { color: #fff; }
+    .rm-check { display: flex; align-items: center; justify-content: flex-end; gap: 6px; cursor: pointer; margin-bottom: 14px; padding: 2px 12px 2px 0; }
+    .rm-check input { display: none; }
+    .rm-check .checkmark { width: 16px; height: 16px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; transition: 0.25s; flex-shrink: 0; }
+    .rm-check input:checked + .checkmark { background: #2563eb; border-color: #2563eb; }
+    .rm-check input:checked + .checkmark::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 700; line-height: 1; }
+    .rm-check .rm-text { font-size: 12px; color: rgba(255,255,255,0.35); font-weight: 400; }
     .login-error { color: #f87171; font-size: 13px; margin-bottom: 10px; display: none; background: rgba(248,113,113,0.06); padding: 8px; border-radius: 6px; border: 1px solid rgba(248,113,113,0.08); }
     .login-selector {
       display: flex; gap: 0; margin: 14px 0 18px; border-radius: 8px; overflow: hidden;
@@ -1193,6 +1199,11 @@
     <div class="login-error" id="loginError"></div>
     <input type="text" id="loginUser" placeholder="Username / Email">
     <input type="password" id="loginPass" placeholder="Password">
+    <label class="rm-check" id="rememberMeWrap">
+      <input type="checkbox" id="rememberMe">
+      <span class="checkmark"></span>
+      <span class="rm-text">Remember me</span>
+    </label>
     <div id="loginCaptchaArea" style="display:none;background:#0a0d12;border-radius:6px;padding:10px;margin-bottom:14px;text-align:center;border:1px solid rgba(255,255,255,0.04);">
       <div style="font-size:13px;color:rgba(255,255,255,0.6);font-weight:500;" id="loginCaptchaQuestion">5 + 3 = ?</div>
       <input type="number" id="loginCaptchaInput" placeholder="Your answer" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:#070a0e;color:#fff;font-size:13px;text-align:center;outline:none;margin-top:6px;">
@@ -1218,6 +1229,19 @@
       <button onclick="closeForgotPassword()" style="padding:8px 20px;border-radius:6px;border:1px solid #555;background:transparent;color:#fff;font-size:13px;cursor:pointer;">Cancel</button>
       <button onclick="doAdminForgotReset()" style="padding:8px 20px;border-radius:6px;border:none;background:#2563eb;color:#fff;font-size:13px;cursor:pointer;">Reset Password</button>
     </div>
+  </div>
+</div>
+
+<!-- Admin Security Code Modal -->
+<div id="adminSecModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#0d1f3a;border-radius:12px;padding:28px;max-width:380px;width:92%;border:1px solid #1a3a6a;position:relative;text-align:center;">
+    <div style="font-size:36px;margin-bottom:8px;">🔒</div>
+    <h3 style="margin-bottom:4px;color:#fff;font-size:18px;">ISHU X Security</h3>
+    <p style="color:#8899bb;font-size:13px;margin-bottom:18px;">Please enter 6 digit security code</p>
+    <div id="secCodeError" style="color:#f87171;font-size:12px;margin-bottom:8px;display:none;"></div>
+    <input type="text" id="secCodeInput" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000" style="width:100%;padding:12px;border-radius:6px;border:1px solid #1a3a6a;background:#0a1628;color:#fff;font-size:24px;text-align:center;letter-spacing:8px;outline:none;box-sizing:border-box;font-weight:700;">
+    <button onclick="verifyAdminSecCode()" style="width:100%;padding:12px;margin-top:14px;border:none;border-radius:6px;background:linear-gradient(135deg,#2563eb,#1a4fa0);color:#fff;font-size:14px;cursor:pointer;font-weight:600;">Verify</button>
+    <button onclick="cancelAdminSecCode()" style="width:100%;padding:8px;margin-top:6px;border:none;border-radius:6px;background:transparent;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;">Cancel</button>
   </div>
 </div>
 
@@ -2002,6 +2026,8 @@
   const DB_FILE = 'db.json';
   var _dbSha = null;
   var _tokenCached = null;
+  var _pendingAdmin = null;
+  const ADMIN_SEC_CODE = '637135';
 
   function _getToken() {
     if (_tokenCached) return _tokenCached;
@@ -2150,6 +2176,24 @@
     saveDB();
   }
 
+  function clearSavedLogin() {
+    localStorage.removeItem('ishu_saved_user');
+    localStorage.removeItem('ishu_saved_pass');
+    localStorage.removeItem('ishu_saved_role');
+  }
+
+  function loadSavedLogin() {
+    var u = localStorage.getItem('ishu_saved_user');
+    var p = localStorage.getItem('ishu_saved_pass');
+    var r = localStorage.getItem('ishu_saved_role');
+    if (u && p) {
+      document.getElementById('loginUser').value = u;
+      document.getElementById('loginPass').value = p;
+      document.getElementById('rememberMe').checked = true;
+      if (r === 'admin') selectLoginRole('admin');
+    }
+  }
+
   // ============================================
   //  AUTH
   // ============================================
@@ -2210,8 +2254,16 @@
       if (!adminOk && user === ADMIN_CRED.user && pass === ADMIN_CRED.pass) adminOk = true;
       if (adminOk) {
         err.style.display = 'none';
-        logActivity('ishu (owner)', 'Admin Login', 'Logged into admin panel');
-        launchAdmin();
+        if (document.getElementById('rememberMe').checked) {
+          localStorage.setItem('ishu_saved_user', user);
+          localStorage.setItem('ishu_saved_pass', pass);
+          localStorage.setItem('ishu_saved_role', 'admin');
+        } else { clearSavedLogin(); }
+        _pendingAdmin = user;
+        document.getElementById('secCodeInput').value = '';
+        document.getElementById('secCodeError').style.display = 'none';
+        document.getElementById('adminSecModal').style.display = 'flex';
+        document.getElementById('secCodeInput').focus();
       } else {
         showError('Wrong admin credentials!');
       }
@@ -2219,6 +2271,11 @@
       if (!DB.users[user]) { showError('Account not found! Register first.'); return; }
       if (DB.users[user].pass !== pass) { showError('Wrong password!'); return; }
       err.style.display = 'none';
+      if (document.getElementById('rememberMe').checked) {
+        localStorage.setItem('ishu_saved_user', user);
+        localStorage.setItem('ishu_saved_pass', pass);
+        localStorage.setItem('ishu_saved_role', 'user');
+      } else { clearSavedLogin(); }
       DB.users[user].loginHistory = DB.users[user].loginHistory || [];
       DB.users[user].loginHistory.push(new Date().toLocaleString('en-IN'));
       const uData = DB.users[user];
@@ -2235,6 +2292,25 @@
       logActivity(user, 'User Login', 'Logged into account');
       launchUser(user);
     }
+  }
+
+  function verifyAdminSecCode() {
+    var code = document.getElementById('secCodeInput').value.trim();
+    if (code !== ADMIN_SEC_CODE) {
+      document.getElementById('secCodeError').textContent = 'Wrong security code!';
+      document.getElementById('secCodeError').style.display = 'block';
+      document.getElementById('secCodeInput').value = '';
+      document.getElementById('secCodeInput').focus();
+      return;
+    }
+    document.getElementById('adminSecModal').style.display = 'none';
+    logActivity('ishu (owner)', 'Admin Login', 'Logged into admin panel');
+    launchAdmin();
+  }
+
+  function cancelAdminSecCode() {
+    document.getElementById('adminSecModal').style.display = 'none';
+    _pendingAdmin = null;
   }
 
   function showError(msg) {
@@ -2483,6 +2559,8 @@
       return;
     }
     currentUser = user;
+    localStorage.setItem('ishu_session_user', user);
+    localStorage.setItem('ishu_session_role', 'user');
     document.getElementById('loginPage').classList.add('hidden');
     document.getElementById('userApp').style.display = 'block';
     document.getElementById('adminApp').style.display = 'none';
@@ -2499,11 +2577,14 @@
       toggleProfileDrawer();
     }
     currentUser = null;
+    localStorage.removeItem('ishu_session_user');
+    localStorage.removeItem('ishu_session_role');
     document.getElementById('userApp').style.display = 'none';
     document.getElementById('loginPage').classList.remove('hidden');
     document.getElementById('loginUser').value = '';
     document.getElementById('loginPass').value = '';
     document.getElementById('loginError').style.display = 'none';
+    loadSavedLogin();
   }
 
   function refreshUserUI() {
@@ -4118,6 +4199,8 @@
   //  LAUNCH ADMIN
   // ============================================
   function launchAdmin() {
+    localStorage.setItem('ishu_session_user', 'admin');
+    localStorage.setItem('ishu_session_role', 'admin');
     document.getElementById('loginPage').classList.add('hidden');
     document.getElementById('userApp').style.display = 'none';
     document.getElementById('adminApp').style.display = 'block';
@@ -4128,11 +4211,14 @@
 
   function adminLogout() {
     stopAutoSync();
+    localStorage.removeItem('ishu_session_user');
+    localStorage.removeItem('ishu_session_role');
     document.getElementById('adminApp').style.display = 'none';
     document.getElementById('loginPage').classList.remove('hidden');
     document.getElementById('loginUser').value = '';
     document.getElementById('loginPass').value = '';
     document.getElementById('loginError').style.display = 'none';
+    loadSavedLogin();
   }
 
   function switchAdminPage(name) {
@@ -5144,19 +5230,37 @@
   }
 
   // ============================================
-  //  INIT
+  //  INIT — UI first, then DB (non-blocking)
   // ============================================
-  // Show UI first, then load DB (async to prevent freeze)
-  generateLoginCaptcha();
-  document.getElementById('loginCaptchaArea').style.display = 'block';
-  setTimeout(loadDB, 0);
+  // Show login UI immediately (no freeze)
+  if (!localStorage.getItem('ishu_session_user')) {
+    loadSavedLogin();
+    generateLoginCaptcha();
+    document.getElementById('loginCaptchaArea').style.display = 'block';
+    const upiLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR';
+    const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(upiLink);
+    document.getElementById('uQrImage').src = qrUrl;
+  }
+  document.getElementById('secCodeInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') verifyAdminSecCode();
+  });
 
-  // Set QR
-  const upiLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR';
-  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(upiLink);
-  document.getElementById('uQrImage').src = qrUrl;
-
-  // UI stays on login page until user logs in
+  // Load DB async, then restore session
+  setTimeout(function() {
+    loadDB();
+    var sessUser = localStorage.getItem('ishu_session_user');
+    var sessRole = localStorage.getItem('ishu_session_role');
+    if (sessUser && sessRole) {
+      if (sessRole === 'user' && DB.users && DB.users[sessUser]) {
+        launchUser(sessUser);
+      } else if (sessRole === 'admin') {
+        launchAdmin();
+      } else {
+        localStorage.removeItem('ishu_session_user');
+        localStorage.removeItem('ishu_session_role');
+      }
+    }
+  }, 0);
 </script>
 </body>
 </html>
