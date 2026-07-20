@@ -1010,6 +1010,136 @@
       background: rgba(37,99,235,0.3);
       color: #fff;
     }
+
+    /* ===== 📱 PROFILE DRAWER ===== */
+    .hamburger-btn {
+      display: none; background: none; border: none; color: #fff;
+      font-size: 24px; cursor: pointer; padding: 4px 8px;
+      transition: 0.3s; border-radius: 8px; line-height: 1;
+    }
+    .hamburger-btn:hover { background: rgba(255,255,255,0.05); }
+    .hamburger-btn:active { transform: scale(0.9); }
+
+    .profile-drawer-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      z-index: 9997; display: none; opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .profile-drawer-overlay.active { display: block; opacity: 1; }
+
+    .profile-drawer {
+      position: fixed; top: 0; right: -340px; width: 320px; max-width: 85vw;
+      height: 100%; background: #0b0e14; z-index: 9998;
+      border-left: 1px solid rgba(37,99,235,0.08);
+      box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+      transition: right 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      display: flex; flex-direction: column; overflow-y: auto;
+      backdrop-filter: blur(20px);
+      padding: 20px 16px;
+    }
+    .profile-drawer.open { right: 0; }
+
+    .drawer-close {
+      position: absolute; top: 12px; right: 12px;
+      background: none; border: none; color: rgba(255,255,255,0.3);
+      font-size: 28px; cursor: pointer; transition: 0.3s; line-height: 1;
+    }
+    .drawer-close:hover { color: #fff; transform: rotate(90deg); }
+
+    .drawer-header { text-align: center; padding: 10px 0 16px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; }
+    .drawer-avatar { font-size: 40px; margin-bottom: 8px; }
+    .drawer-name { font-size: 18px; font-weight: 700; background: linear-gradient(135deg,#60a5fa,#a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .drawer-id { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+    .drawer-id span { color: #60a5fa; }
+
+    .drawer-section { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .drawer-section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.25); font-weight: 600; margin-bottom: 10px; }
+
+    .drawer-wallet-row { display: flex; gap: 10px; margin-bottom: 10px; }
+    .drawer-wallet-item {
+      flex: 1; background: rgba(7,13,26,0.4); border-radius: 10px;
+      padding: 12px; text-align: center;
+      border: 1px solid rgba(37,99,235,0.06);
+    }
+    .dwl-label { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .dwl-value { font-size: 20px; font-weight: 700; }
+
+    .drawer-withdraw-btn {
+      width: 100%; padding: 10px; border: none; border-radius: 8px;
+      background: linear-gradient(135deg,#fbbf24,#f59e0b); color: #000;
+      font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.3s;
+    }
+    .drawer-withdraw-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(251,191,36,0.2); }
+
+    .drawer-input {
+      width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(37,99,235,0.08);
+      background: rgba(7,13,26,0.4); color: #fff; font-size: 13px; outline: none;
+      margin-bottom: 8px; transition: 0.3s; box-sizing: border-box;
+    }
+    .drawer-input:focus { border-color: rgba(96,165,250,0.3); box-shadow: 0 0 15px rgba(37,99,235,0.05); }
+    .drawer-input::placeholder { color: rgba(255,255,255,0.15); }
+
+    .drawer-change-btn {
+      width: 100%; padding: 10px; border: none; border-radius: 8px;
+      background: linear-gradient(135deg,#2563eb,#7c3aed); color: #fff;
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.3s;
+    }
+    .drawer-change-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.2); }
+    .drawer-pass-msg { font-size: 12px; margin-top: 6px; text-align: center; min-height: 18px; }
+
+    .drawer-footer { margin-top: auto; text-align: center; padding-top: 8px; }
+    .drawer-logout-btn {
+      width: 100%; padding: 10px; border: 1px solid rgba(248,113,113,0.2); border-radius: 8px;
+      background: transparent; color: #f87171; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: 0.3s; margin-bottom: 12px;
+    }
+    .drawer-logout-btn:hover { background: rgba(248,113,113,0.1); }
+    .drawer-version { font-size: 11px; color: rgba(255,255,255,0.15); margin-bottom: 2px; }
+    .drawer-dev { font-size: 11px; color: rgba(255,255,255,0.2); }
+    .drawer-dev strong { color: rgba(96,165,250,0.5); }
+
+    /* --- Mobile: hide topbar right, show hamburger --- */
+    @media (max-width: 768px) {
+      #topbarRight { display: none !important; }
+      .hamburger-btn { display: flex; align-items: center; justify-content: center; }
+      .topbar { padding: 10px 14px; }
+      .content { padding: 14px; }
+      .nav { padding: 4px 8px; gap: 0; overflow-x: auto; }
+      .nav-item { padding: 6px 10px; font-size: 11px; }
+      .stats-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+      .card-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+      .app-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+      .premium-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+      .video-grid { grid-template-columns: 1fr; }
+      .banner-carousel { aspect-ratio: 16/9; border-radius: 12px; }
+      .home-section-row { flex-direction: column; }
+      .home-section-col { min-width: 100%; }
+      .deposit-box, .rw-box, .support-box, .refer-box { padding: 16px; }
+      .stat-card { padding: 14px; }
+      .stat-card .num { font-size: 22px; }
+      .table-wrap { border-radius: 8px; }
+      table { font-size: 11px; }
+      th, td { padding: 8px 10px; }
+      .search-bar input { font-size: 12px; padding: 8px 12px; }
+      .login-box { padding: 28px 20px; }
+      .login-box h1 { font-size: 24px; }
+      .modal-box { padding: 20px; }
+    }
+    @media (max-width: 480px) {
+      .topbar .logo { font-size: 16px; }
+      .nav-item { padding: 5px 8px; font-size: 10px; }
+      .content { padding: 10px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .stat-card { padding: 10px; }
+      .stat-card .num { font-size: 18px; }
+      .card-grid { grid-template-columns: 1fr; }
+      .app-grid { grid-template-columns: repeat(2, 1fr); }
+      .premium-grid { grid-template-columns: 1fr; }
+      .product-card { padding: 14px; }
+      .card-visual { height: 110px; }
+      .deposit-box .qr-area { width: 140px; height: 140px; }
+    }
   </style>
 </head>
 <body>
@@ -1072,12 +1202,50 @@
   </div>
   <div class="topbar">
     <div class="logo"><span class="hl">ISHU_OXE</span> CARDING</div>
-    <div class="right">
+    <div class="right" id="topbarRight">
       <span id="uDisplayEmail">user</span>
       <span style="color:#8899bb;font-size:11px;">ID: <span id="uDisplayId" style="color:#4a8af4;">-</span></span>
       <span style="color:#4a8af4;font-weight:bold;">₹<span id="uBalance">0.00</span></span>
       <span style="color:#eab308;font-weight:bold;font-size:12px;">🎁 ₹<span id="uRewardBal">0</span></span>
       <button class="logout-btn" onclick="userLogout()">Logout</button>
+    </div>
+    <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleProfileDrawer()">☰</button>
+  </div>
+  <!-- ===== PROFILE DRAWER (MOBILE) ===== -->
+  <div class="profile-drawer-overlay" id="profileDrawerOverlay" onclick="toggleProfileDrawer()"></div>
+  <div class="profile-drawer" id="profileDrawer">
+    <button class="drawer-close" onclick="toggleProfileDrawer()">&times;</button>
+    <div class="drawer-header">
+      <div class="drawer-avatar">👤</div>
+      <div class="drawer-name" id="drawerName">user</div>
+      <div class="drawer-id">ID: <span id="drawerId">-</span></div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">Wallet</div>
+      <div class="drawer-wallet-row">
+        <div class="drawer-wallet-item">
+          <div class="dwl-label">Balance</div>
+          <div class="dwl-value" style="color:#60a5fa;">₹<span id="drawerBalance">0.00</span></div>
+        </div>
+        <div class="drawer-wallet-item">
+          <div class="dwl-label">Reward</div>
+          <div class="dwl-value" style="color:#fbbf24;">₹<span id="drawerRewardBal">0.00</span></div>
+        </div>
+      </div>
+      <button class="drawer-withdraw-btn" onclick="closeDrawerAndGoWithdraw()">💳 Withdraw</button>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">Change Password</div>
+      <input type="password" class="drawer-input" id="drawerOldPass" placeholder="Old password">
+      <input type="password" class="drawer-input" id="drawerNewPass" placeholder="New password">
+      <input type="password" class="drawer-input" id="drawerNewPass2" placeholder="Confirm new password">
+      <button class="drawer-change-btn" onclick="drawerChangePass()">Change Password</button>
+      <div class="drawer-pass-msg" id="drawerPassMsg"></div>
+    </div>
+    <div class="drawer-footer">
+      <button class="drawer-logout-btn" onclick="userLogout()">🚪 Logout</button>
+      <div class="drawer-version">v1.110</div>
+      <div class="drawer-dev">Developer by <strong>ISHU_OXE</strong></div>
     </div>
   </div>
   <div class="nav">
@@ -2153,6 +2321,54 @@
   }
 
 
+  function toggleProfileDrawer() {
+    var overlay = document.getElementById('profileDrawerOverlay');
+    var drawer = document.getElementById('profileDrawer');
+    overlay.classList.toggle('active');
+    drawer.classList.toggle('open');
+    if (drawer.classList.contains('open')) {
+      var u = DB.users[currentUser];
+      if (u) {
+        document.getElementById('drawerName').textContent = currentUser;
+        document.getElementById('drawerId').textContent = u.userId || '-';
+        document.getElementById('drawerBalance').textContent = (u.balance || 0).toFixed(2);
+        document.getElementById('drawerRewardBal').textContent = (u.rewardBalance || 0).toFixed(2);
+      }
+    }
+  }
+
+  function drawerChangePass() {
+    var msgEl = document.getElementById('drawerPassMsg');
+    var oldPass = document.getElementById('drawerOldPass').value;
+    var newPass = document.getElementById('drawerNewPass').value;
+    var newPass2 = document.getElementById('drawerNewPass2').value;
+    if (!oldPass || !newPass || !newPass2) { msgEl.innerHTML = '<span style="color:#f87171;">Fill all fields!</span>'; return; }
+    if (newPass !== newPass2) { msgEl.innerHTML = '<span style="color:#f87171;">New passwords do not match!</span>'; return; }
+    if (newPass.length < 4) { msgEl.innerHTML = '<span style="color:#f87171;">Password too short (min 4)!</span>'; return; }
+    loadDB();
+    var u = DB.users[currentUser];
+    if (!u) { msgEl.innerHTML = '<span style="color:#f87171;">User not found!</span>'; return; }
+    if (u.pass !== oldPass) { msgEl.innerHTML = '<span style="color:#f87171;">Old password is wrong!</span>'; return; }
+    u.pass = newPass;
+    saveDB();
+    logActivity(currentUser, 'Password Changed', 'User password updated');
+    msgEl.innerHTML = '<span style="color:#4ade80;">Password changed successfully!</span>';
+    document.getElementById('drawerOldPass').value = '';
+    document.getElementById('drawerNewPass').value = '';
+    document.getElementById('drawerNewPass2').value = '';
+  }
+
+  function closeDrawerAndGoWithdraw() {
+    if (document.getElementById('profileDrawer').classList.contains('open')) {
+      toggleProfileDrawer();
+    }
+    switchUserPage('reward');
+    setTimeout(function() {
+      var el = document.querySelector('#upage-reward .rw-btn');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  }
+
   function launchUser(user) {
     if (DB.maintenance === true) {
       document.getElementById('loginError').textContent = 'Website under maintenance, please wait 30 minutes.';
@@ -2171,6 +2387,9 @@
 
   function userLogout() {
     stopAutoSync();
+    if (document.getElementById('profileDrawer').classList.contains('open')) {
+      toggleProfileDrawer();
+    }
     currentUser = null;
     document.getElementById('userApp').style.display = 'none';
     document.getElementById('loginPage').classList.remove('hidden');
@@ -2200,6 +2419,12 @@
     renderUserCards();
     renderBuyHistory();
     renderUserTickets();
+    if (document.getElementById('profileDrawer').classList.contains('open')) {
+      document.getElementById('drawerName').textContent = currentUser;
+      document.getElementById('drawerId').textContent = u.userId || '-';
+      document.getElementById('drawerBalance').textContent = (u.balance || 0).toFixed(2);
+      document.getElementById('drawerRewardBal').textContent = (u.rewardBalance || 0).toFixed(2);
+    }
   }
 
   function switchUserPage(name) {
