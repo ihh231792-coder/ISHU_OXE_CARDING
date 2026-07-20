@@ -1050,7 +1050,7 @@
     }
     .drawer-close:hover { color: #fff; transform: rotate(90deg); }
 
-    .topbar-profile { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: 0.3s; }
+    .topbar-profile { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: 0.3s; margin-left: 2px; }
     .topbar-profile:hover { background: rgba(255,255,255,0.05); }
     .topbar-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(96,165,250,0.3); background: rgba(7,13,26,0.5); }
     .topbar-username { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.85); }
@@ -1236,11 +1236,11 @@
       <span style="color:#eab308;font-weight:bold;font-size:12px;">🎁 ₹<span id="uRewardBal">0</span></span>
       <button class="logout-btn" onclick="userLogout()">Logout</button>
     </div>
+    <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleProfileDrawer()">☰</button>
     <div class="topbar-profile" onclick="toggleProfileDrawer()">
       <img class="topbar-avatar" id="topbarAvatar" src="" alt="">
       <span class="topbar-username" id="topbarUsername">user</span>
     </div>
-    <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleProfileDrawer()">☰</button>
   </div>
   <!-- ===== PROFILE DRAWER (MOBILE) ===== -->
   <div class="profile-drawer-overlay" id="profileDrawerOverlay" onclick="toggleProfileDrawer()"></div>
