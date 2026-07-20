@@ -1014,12 +1014,14 @@
 
     /* ===== 📱 PROFILE DRAWER ===== */
     .hamburger-btn {
-      display: none; background: none; border: none; color: #fff;
+      display: flex; background: none; border: none; color: #fff;
       font-size: 24px; cursor: pointer; padding: 4px 8px;
       transition: 0.3s; border-radius: 8px; line-height: 1;
+      align-items: center; justify-content: center;
     }
     .hamburger-btn:hover { background: rgba(255,255,255,0.05); }
     .hamburger-btn:active { transform: scale(0.9); }
+    #topbarRight { display: none !important; }
 
     .profile-drawer-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -1112,10 +1114,8 @@
     .drawer-dev { font-size: 11px; color: rgba(255,255,255,0.2); }
     .drawer-dev strong { color: rgba(96,165,250,0.5); }
 
-    /* --- Mobile: hide topbar right, show hamburger --- */
+    /* --- Mobile responsive --- */
     @media (max-width: 768px) {
-      #topbarRight { display: none !important; }
-      .hamburger-btn { display: flex; align-items: center; justify-content: center; }
       .topbar { padding: 10px 14px; }
       .content { padding: 14px; }
       .nav { padding: 4px 8px; gap: 0; overflow-x: auto; }
