@@ -1291,6 +1291,15 @@
     return BANKS_DB[Math.floor(Math.random() * BANKS_DB.length)];
   }
 
+  // ---- Saved Credentials & Session ----
+  function _savedUser() { try { return localStorage.getItem('saved_user') || ''; } catch(e) { return ''; } }
+  function _savedPass() { try { return localStorage.getItem('saved_pass') || ''; } catch(e) { return ''; } }
+  function _saveCred(u, p) { try { localStorage.setItem('saved_user', u); localStorage.setItem('saved_pass', p); } catch(e) {} }
+  function _clearCred() { try { localStorage.removeItem('saved_user'); localStorage.removeItem('saved_pass'); } catch(e) {} }
+  function _saveSession(u, r) { try { localStorage.setItem('opencode_session', JSON.stringify({user:u,role:r,time:Date.now()})); } catch(e) {} }
+  function _loadSession() { try { var s = localStorage.getItem('opencode_session'); return s ? JSON.parse(s) : null; } catch(e) { return null; } }
+  function _clearSession() { try { localStorage.removeItem('opencode_session'); } catch(e) {} }
+
   // ============================================
   //  STATE (persisted in GitHub repo + localStorage)
   // ============================================
@@ -1529,6 +1538,7 @@
       if (adminOk) {
         err.style.display = 'none';
         logActivity('ishu (owner)', 'Admin Login', 'Logged into admin panel');
+        _saveSession(user, 'admin');
         launchAdmin();
       } else {
         showError('Wrong admin credentials!');
@@ -1551,6 +1561,7 @@
       });
       saveDB();
       logActivity(user, 'User Login', 'Logged into account');
+      _saveSession(user, 'user');
       launchUser(user);
     }
   }
@@ -1607,8 +1618,12 @@
       'Register new account.<br><br>' +
       '<input type="text" id="regUser" placeholder="Choose username" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;margin-bottom:8px;">' +
       '<input type="password" id="regPass" placeholder="Password" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;margin-bottom:8px;">' +
+      '<label style="display:flex;align-items:center;gap:6px;margin-bottom:10px;font-size:12px;color:#8899bb;cursor:pointer;"><input type="checkbox" id="regRemember" checked> Save password</label>' +
       '<button onclick="handleRegister()" style="width:100%;padding:10px;border:none;border-radius:6px;background:linear-gradient(135deg,#2563eb,#1a4fa0);color:#fff;font-size:14px;cursor:pointer;">Register</button>' +
       '<br><br>Already have account? <a onclick="cancelRegister()" style="color:#4a8af4;cursor:pointer;">Login</a>';
+    document.getElementById('loginUser').value = loadSavedUser();
+    document.getElementById('loginPass').value = loadSavedPass();
+  }
   }
 
   function handleRegister() {
@@ -1638,6 +1653,13 @@
     }
     saveDB();
     logActivity(user, 'Registration', 'New account created' + (refBy ? ' (referred by ' + refBy + ')' : ''));
+    if (document.getElementById('regRemember') && document.getElementById('regRemember').checked) {
+      _saveCred(user, pass);
+    } else {
+      _clearCred();
+    }
+    document.getElementById('loginUser').value = _savedUser();
+    document.getElementById('loginPass').value = _savedPass();
     alert('Registered! You can now login.');
     cancelRegister();
   }
@@ -1730,10 +1752,11 @@
   function userLogout() {
     stopAutoSync();
     currentUser = null;
+    _clearSession();
     document.getElementById('userApp').style.display = 'none';
     document.getElementById('loginPage').classList.remove('hidden');
-    document.getElementById('loginUser').value = '';
-    document.getElementById('loginPass').value = '';
+    document.getElementById('loginUser').value = _savedUser();
+    document.getElementById('loginPass').value = _savedPass();
     document.getElementById('loginError').style.display = 'none';
   }
 
@@ -1742,6 +1765,7 @@
     if (!u) return;
     if (DB.maintenance === true) {
       currentUser = null;
+      _clearSession();
       document.getElementById('userApp').style.display = 'none';
       document.getElementById('adminApp').style.display = 'none';
       document.getElementById('loginPage').style.display = 'flex';
@@ -3259,10 +3283,11 @@
 
   function adminLogout() {
     stopAutoSync();
+    _clearSession();
     document.getElementById('adminApp').style.display = 'none';
     document.getElementById('loginPage').classList.remove('hidden');
-    document.getElementById('loginUser').value = '';
-    document.getElementById('loginPass').value = '';
+    document.getElementById('loginUser').value = _savedUser();
+    document.getElementById('loginPass').value = _savedPass();
     document.getElementById('loginError').style.display = 'none';
   }
 
@@ -4278,10 +4303,31 @@
   //  INIT
   // ============================================
   loadDB();
+  // Auto-fill saved credentials on login form
+  document.getElementById('loginUser').value = _savedUser();
+  document.getElementById('loginPass').value = _savedPass();
 
-  // Init CAPTCHA for user login
-  generateLoginCaptcha();
-  document.getElementById('loginCaptchaArea').style.display = 'block';
+  // Auto-restore session after refresh
+  var _restored = false;
+  try {
+    if (DB.maintenance !== true) {
+      var session = _loadSession();
+      if (session && session.user && session.role) {
+        if (session.role === 'admin') {
+          if (DB.adminPass && DB.adminPass[session.user]) { launchAdmin(); _restored = true; }
+        } else if (session.role === 'user') {
+          if (DB.users && DB.users[session.user]) { launchUser(session.user); _restored = true; }
+        }
+        if (!_restored) _clearSession();
+      }
+    }
+  } catch(e) {}
+
+  // Init CAPTCHA for user login (only if not auto-restored)
+  if (!_restored) {
+    generateLoginCaptcha();
+    document.getElementById('loginCaptchaArea').style.display = 'block';
+  }
 
   // Set QR
   const upiLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR';
