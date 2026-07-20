@@ -2408,8 +2408,9 @@
     const name = document.getElementById('aAppNameInput').value.trim();
     const icon = document.getElementById('aAppIconInput').value.trim();
     const link = document.getElementById('aAppLinkInput').value.trim();
-    if (!name || !icon || !link) { showToast('Fill all fields!'); return; }
     var apkUrl = document.getElementById('aAppApkUrl').value.trim();
+    if (!name || !icon) { showToast('App name & icon required!'); return; }
+    if (!link && !apkUrl) { showToast('Enter a link or upload APK!'); return; }
     loadDB();
     if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [] };
     var appObj = { name: name, icon: icon, link: link };
@@ -2900,8 +2901,9 @@
     const icon = document.getElementById('aPAppIconInput').value.trim();
     const link = document.getElementById('aPAppLinkInput').value.trim();
     const reward = parseFloat(document.getElementById('aPAppRewardInput').value);
-    if (!name || !icon || !link || !reward || reward <= 0) { showToast('Fill all fields with valid reward!'); return; }
     var apkUrl = document.getElementById('aPAppApkUrl').value.trim();
+    if (!name || !icon || !reward || reward <= 0) { showToast('Name, icon & valid reward required!'); return; }
+    if (!link && !apkUrl) { showToast('Enter a link or upload APK!'); return; }
     loadDB();
     if (!DB.homeContent) DB.homeContent = { banners: [], apps: [], videos: [], premiumApps: [] };
     var appObj = { name: name, icon: icon, link: link, reward: reward, desc: '' };
