@@ -2299,17 +2299,14 @@
     // If already a direct image URL, skip
     if (link.match(/\.(jpg|jpeg|png|gif|webp|ico|svg|bmp)(\?|$)/i) || link.startsWith('data:') || link.match(/googleusercontent\.com/) || link.match(/fbcdn\.net/)) return;
 
-    // ---- IMMEDIATE FALLBACK (fires right away, proxy response overwrites later) ----
+    // ---- INSTANT FILL (0 seconds — no proxy needed) ----
     var playMatch = link.match(/[?&]id=([a-zA-Z0-9._-]+)/);
     if (playMatch) {
-      // Play Store: guess icon + name immediately from fallback
+      // Play Store: CDN icon from package ID (100% instant, real Google CDN)
       document.getElementById(iconInputId).value = 'https://play-lh.googleusercontent.com/' + playMatch[1];
-      var nameParts = link.match(/details\?id=([a-zA-Z0-9._-]+)/);
-      if (!nameParts) nameParts = link.match(/store\/apps\/details\?id=([a-zA-Z0-9._-]+)/);
-      if (nameParts) {
-        var raw = nameParts[1].split('.').pop() || nameParts[1];
-        document.getElementById(nameInputId).value = raw.charAt(0).toUpperCase() + raw.slice(1).replace(/_/g, ' ');
-      }
+      // Extract app name from package ID (clean fallback)
+      var raw = playMatch[1].split('.').pop() || playMatch[1];
+      document.getElementById(nameInputId).value = raw.charAt(0).toUpperCase() + raw.slice(1).replace(/[_.]/g, ' ');
     } else {
       // Non-Play Store: quick domain-based fallback name
       var parts = link.replace(/https?:\/\//, '').split('/')[0].split('.');
@@ -2317,18 +2314,33 @@
       if (domain) document.getElementById(nameInputId).value = domain.charAt(0).toUpperCase() + domain.slice(1);
     }
 
-    // ---- Try proxy to get real name + icon (async) ----
+    // ---- ASYNC: Try proxy to get REAL name + icon (overwrites if better) ----
     fetchViaProxy(link, function(html) {
       var name = extractMetaContent(html, 'og:title') || extractMetaContent(html, 'twitter:title') || extractTitle(html) || extractPlayStoreName(html);
       var icon = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || extractImageSrc(html) || '';
       // If Play Store, also extract JSON-LD app icon
-      if (!icon && link.match(/play\.google\.com/)) {
+      if ((!icon || !icon.match(/play-lh\.googleusercontent\.com/)) && link.match(/play\.google\.com/)) {
         var jd = extractJsonLd(html, 'application/ld+json');
-        if (jd && jd.image) icon = jd.image;
+        if (jd && jd.image) icon = convertToPlayStoreFormat(jd.image);
+      }
+      // Ensure icon is in Play Store CDN format if it's a Play Store link
+      if (icon && link.match(/play\.google\.com/) && !icon.match(/play-lh\.googleusercontent\.com/)) {
+        icon = convertToPlayStoreFormat(icon);
       }
       if (name) document.getElementById(nameInputId).value = name;
       if (icon) document.getElementById(iconInputId).value = icon;
     });
+  }
+
+  // Convert any image URL to Play Store CDN "supporting format"
+  function convertToPlayStoreFormat(url) {
+    // If already Play Store CDN, ensure it has proper size params
+    if (url.match(/play-lh\.googleusercontent\.com/)) {
+      // Remove existing size params and add standard format
+      url = url.replace(/=.*$/, '');
+      return url + '=w600-h300-pc0xffffff-pd';
+    }
+    return url;
   }
 
   function extractImageSrc(html) {
@@ -2349,12 +2361,26 @@
     var url = document.getElementById('aBannerUrlInput').value.trim();
     if (!url || url.startsWith('data:')) return;
     // If it's a direct image URL (known CDN, file extension, or data), use as-is
-    if (url.match(/\.(jpg|jpeg|png|gif|webp|ico|svg)(\?|$)/i) || url.match(/googleusercontent\.com/) || url.match(/lh[0-9]?\.googleusercontent\.com/) || url.match(/fbcdn\.net/) || url.match(/cloudinary\.com/) || url.match(/img[0-9]?\.blogspot\.com/)) return;
-    // Not a direct image URL — try to fetch OG image from the page
+    if (url.match(/\.(jpg|jpeg|png|gif|webp|ico|svg)(\?|$)/i) || url.match(/googleusercontent\.com/) || url.match(/fbcdn\.net/) || url.match(/cloudinary\.com/) || url.match(/img[0-9]?\.blogspot\.com/)) return;
+
+    // ---- INSTANT FALLBACK for Play Store links ----
+    var playMatch = url.match(/[?&]id=([a-zA-Z0-9._-]+)/);
+    if (playMatch) {
+      document.getElementById('aBannerUrlInput').value = 'https://play-lh.googleusercontent.com/' + playMatch[1] + '=w600-h300-pc0xffffff-pd';
+    }
+
+    // ---- ASYNC: Try proxy to get REAL OG image (overwrites if found) ----
     fetchViaProxy(url, function(html) {
       var img = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || '';
+      if (!img && url.match(/play\.google\.com/)) {
+        // Play Store: try JSON-LD for image
+        var jd = extractJsonLd(html, 'application/ld+json');
+        if (jd && jd.image) img = jd.image;
+      }
       if (img) {
         if (img.startsWith('/')) { var a = url.match(/^https?:\/\/[^\/]+/); if (a) img = a[0] + img; }
+        // Convert to supporting format if Play Store image
+        if (img.match(/play-lh\.googleusercontent\.com/)) img = convertToPlayStoreFormat(img);
         document.getElementById('aBannerUrlInput').value = img;
         showToast('Banner image auto-fetched from website!');
       }
@@ -2403,12 +2429,15 @@
     return null;
   }
 
-  // ---- Auto fetch on paste/input ----
+  // ---- Auto fetch on paste/input/change ----
   function setupAutoFetch(linkId, nameId, iconId) {
     var el = document.getElementById(linkId);
     if (!el) return;
-    el.addEventListener('input', function() { autoFetchAppInfo(linkId, nameId, iconId); });
-    el.addEventListener('change', function() { autoFetchAppInfo(linkId, nameId, iconId); });
+    function fire() { autoFetchAppInfo(linkId, nameId, iconId); }
+    el.addEventListener('input', fire);
+    el.addEventListener('change', fire);
+    el.addEventListener('paste', function() { setTimeout(fire, 10); });
+    el.addEventListener('drop', function() { setTimeout(fire, 10); });
   }
 
   // Wire up auto-fetch for link inputs
@@ -2417,8 +2446,11 @@
     setupAutoFetch('aPAppLinkInput', 'aPAppNameInput', 'aPAppIconInput');
     var bannerLink = document.getElementById('aBannerUrlInput');
     if (bannerLink) {
-      bannerLink.addEventListener('input', function() { autoFetchBanner(); });
-      bannerLink.addEventListener('change', function() { autoFetchBanner(); });
+      function fireBanner() { autoFetchBanner(); }
+      bannerLink.addEventListener('input', fireBanner);
+      bannerLink.addEventListener('change', fireBanner);
+      bannerLink.addEventListener('paste', function() { setTimeout(fireBanner, 10); });
+      bannerLink.addEventListener('drop', function() { setTimeout(fireBanner, 10); });
     }
   }, 100);
 
