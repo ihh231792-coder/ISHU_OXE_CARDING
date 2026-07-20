@@ -697,6 +697,319 @@
     }
     .home-form .home-item .info { flex: 1; min-width: 0; word-break: break-all; }
     .home-form .home-item .info span { color: rgba(255,255,255,0.3); }
+
+    /* ===== 🚀 PREMIUM ENHANCEMENTS ===== */
+
+    /* --- Premium Background Orbs (inside app area) --- */
+    #userApp, #adminApp {
+      position: relative;
+    }
+    #userApp::before, #adminApp::before {
+      content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(ellipse 600px 400px at 10% 20%, rgba(37,99,235,0.04) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 500px at 90% 30%, rgba(139,92,246,0.03) 0%, transparent 70%),
+        radial-gradient(ellipse 400px 400px at 50% 80%, rgba(6,182,212,0.02) 0%, transparent 70%);
+    }
+    #userApp .content, #adminApp .content { position: relative; z-index: 1; }
+    .topbar, .nav { position: relative; z-index: 2; }
+
+    /* --- Glass morphism base --- */
+    .stat-card, .product-card, .my-card, .deposit-box, .rw-box,
+    .support-box, .refer-box, .inbox-item, .home-form, .app-card,
+    .premium-card, .video-card, .banner-carousel, .modal-box,
+    .card-visual, .rw-hist-item, .refer-hist-item, .task-log-item,
+    .home-item, .ticket-msg, .scratch-card {
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+    }
+
+    /* --- Premium stat cards with animated border glow --- */
+    .stat-card {
+      position: relative;
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease, border-color 0.4s ease;
+    }
+    .stat-card::after {
+      content: ''; position: absolute; inset: -1px; border-radius: 14px;
+      background: linear-gradient(135deg, rgba(37,99,235,0.2), transparent 40%, rgba(139,92,246,0.15), transparent 60%);
+      z-index: -1; opacity: 0; transition: opacity 0.5s ease;
+    }
+    .stat-card:hover::after { opacity: 1; }
+    .stat-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(37,99,235,0.15), 0 0 60px rgba(37,99,235,0.05);
+      border-color: rgba(96,165,250,0.25);
+    }
+    .stat-card .num {
+      background: linear-gradient(135deg,#60a5fa,#a78bfa,#38bdf8);
+      background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; animation: shimmer 4s linear infinite;
+    }
+
+    /* --- Premium product cards with shine hover --- */
+    .product-card {
+      position: relative; overflow: hidden;
+      transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.5s ease, border-color 0.4s ease;
+    }
+    .product-card::after {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 60%);
+      opacity: 0; transition: opacity 0.6s ease; pointer-events: none;
+    }
+    .product-card:hover::after { opacity: 1; }
+    .product-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 16px 48px rgba(37,99,235,0.12), 0 0 0 1px rgba(96,165,250,0.15);
+    }
+    .product-card .buy-btn {
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg,#2563eb,#7c3aed,#2563eb);
+      background-size: 200% auto; transition: 0.4s ease;
+    }
+    .product-card .buy-btn:hover {
+      background-position: right center;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(37,99,235,0.3);
+    }
+
+    /* --- Premium card visual with enhanced glass & glow --- */
+    .card-visual {
+      transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.5s ease;
+    }
+    .card-visual:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 0 50px rgba(37,99,235,0.2), 0 16px 40px rgba(0,0,0,0.4);
+    }
+
+    /* --- Premium section/page heading gradient --- */
+    .content h2:not(.modal-box h2):not(.deposit-box h2):not(.rw-box h2) {
+      background: linear-gradient(135deg, #e0e7ff, #a78bfa, #60a5fa);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite;
+      font-weight: 800;
+    }
+
+    /* --- Premium nav with animated underline --- */
+    .nav-item {
+      position: relative; transition: 0.3s ease;
+    }
+    .nav-item::after {
+      content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%) scaleX(0);
+      width: 60%; height: 2px;
+      background: linear-gradient(90deg, #2563eb, #7c3aed);
+      border-radius: 2px; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .nav-item.active::after { transform: translateX(-50%) scaleX(1); }
+    .nav-item:hover::after { transform: translateX(-50%) scaleX(0.6); }
+    .nav-item.active:hover::after { transform: translateX(-50%) scaleX(1); }
+
+    /* --- Premium tables --- */
+    table { 
+      overflow: hidden; 
+      backdrop-filter: blur(16px);
+    }
+    th { 
+      background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(99,102,241,0.08)) !important;
+      border-bottom: 1px solid rgba(37,99,235,0.1);
+    }
+    td { transition: background 0.2s ease; }
+    tr {
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    tr:hover td {
+      background: rgba(37,99,235,0.04) !important;
+    }
+
+    /* --- Premium badges --- */
+    .badge-green, .badge-red, .badge-blue {
+      position: relative; overflow: hidden;
+      backdrop-filter: blur(4px);
+    }
+
+    /* --- Premium buttons with glow --- */
+    .action-btn {
+      position: relative; overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .action-btn:hover {
+      transform: translateY(-1px);
+    }
+    .btn-danger:hover { box-shadow: 0 4px 20px rgba(239,68,68,0.3); }
+    .btn-success:hover { box-shadow: 0 4px 20px rgba(34,197,94,0.3); }
+    .btn-primary:hover { box-shadow: 0 4px 20px rgba(59,130,246,0.3); }
+
+    /* --- Premium modal --- */
+    .modal-box {
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(37,99,235,0.08);
+      border: 1px solid rgba(37,99,235,0.15) !important;
+      backdrop-filter: blur(24px) !important;
+    }
+
+    /* --- Premium scrollbar --- */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #2563eb, #7c3aed);
+      border-radius: 2px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #3b82f6, #8b5cf6); }
+
+    /* --- Premium inputs --- */
+    input, textarea, select {
+      transition: all 0.3s ease !important;
+    }
+    input:focus, textarea:focus, select:focus {
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.1), 0 0 20px rgba(37,99,235,0.05) !important;
+    }
+
+    /* --- Premium toasts --- */
+    .toast {
+      background: rgba(12,24,48,0.92) !important;
+      backdrop-filter: blur(16px) !important;
+      border: 1px solid rgba(37,99,235,0.2) !important;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.3) !important;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(-8px);
+    }
+
+    /* --- Page transition animation --- */
+    .page {
+      animation: pageEnter 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes pageEnter {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* --- Premium scratch card --- */
+    .scratch-card {
+      border: 1px solid rgba(251,191,36,0.15) !important;
+      box-shadow: 0 0 80px rgba(251,191,36,0.06), 0 24px 60px rgba(0,0,0,0.3) !important;
+    }
+
+    /* --- Premium banner carousel --- */
+    .banner-carousel {
+      box-shadow: 0 12px 48px rgba(0,0,0,0.3), 0 0 0 1px rgba(37,99,235,0.06);
+      animation: pulseGlow 4s ease-in-out infinite;
+    }
+
+    /* --- Refer box premium --- */
+    .refer-box {
+      border: 1px solid rgba(251,191,36,0.12) !important;
+      box-shadow: 0 0 30px rgba(251,191,36,0.03);
+    }
+
+    /* --- Home section titles premium --- */
+    .section-title {
+      font-size: 16px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b, #fbbf24);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite;
+    }
+
+    /* --- Premium card grids --- */
+    .card-grid, .app-grid, .premium-grid, .video-grid {
+      gap: 16px;
+    }
+
+    /* --- Smooth logo animation --- */
+    .topbar .logo {
+      transition: transform 0.3s ease;
+      display: inline-block;
+    }
+    .topbar .logo:hover {
+      transform: scale(1.02);
+    }
+
+    /* --- Premium user display --- */
+    .topbar .right span {
+      position: relative;
+    }
+
+    /* --- Deposit box premium --- */
+    .deposit-box .submit-btn {
+      background: linear-gradient(135deg,#2563eb,#7c3aed,#2563eb);
+      background-size: 200% auto;
+      transition: 0.4s ease;
+    }
+    .deposit-box .submit-btn:hover {
+      background-position: right center;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(37,99,235,0.25);
+    }
+
+    /* --- App card hover premium --- */
+    .app-card {
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease;
+    }
+    .app-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+    }
+
+    /* --- Premium card hover --- */
+    .premium-card {
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease;
+    }
+    .premium-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(34,197,94,0.1);
+    }
+
+    /* --- Video card premium --- */
+    .video-card {
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease;
+    }
+    .video-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.12);
+    }
+
+    /* --- Inbox item premium --- */
+    .inbox-item {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .inbox-item:hover {
+      transform: translateX(4px);
+      border-color: rgba(96,165,250,0.12);
+    }
+
+    /* --- My card premium --- */
+    .my-card {
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease;
+    }
+    .my-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.1);
+    }
+
+    /* --- Scratch overlay premium --- */
+    .scratch-overlay {
+      backdrop-filter: blur(12px) !important;
+    }
+
+    /* --- Topbar premium shimmer line --- */
+    .topbar::after {
+      content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(37,99,235,0.2), rgba(139,92,246,0.2), transparent);
+    }
+
+    /* --- Login box premium shadow --- */
+    .login-box {
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    /* --- Premium selection color --- */
+    ::selection {
+      background: rgba(37,99,235,0.3);
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -751,6 +1064,12 @@
 
 <!-- ===== APP (USER) ===== -->
 <div id="userApp" style="display:none;">
+  <!-- Floating background orbs -->
+  <div style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden;">
+    <div style="position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,0.06),transparent 70%);top:-150px;right:-100px;animation:float 14s ease-in-out infinite;pointer-events:none;"></div>
+    <div style="position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,0.04),transparent 70%);bottom:-120px;left:-80px;animation:float 18s ease-in-out infinite reverse;pointer-events:none;"></div>
+    <div style="position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,0.03),transparent 70%);top:50%;left:70%;animation:float 12s ease-in-out infinite 3s;pointer-events:none;"></div>
+  </div>
   <div class="topbar">
     <div class="logo"><span class="hl">ISHU_OXE</span> CARDING</div>
     <div class="right">
@@ -899,6 +1218,12 @@
 
 <!-- ===== ADMIN APP ===== -->
 <div id="adminApp" style="display:none;">
+  <!-- Floating background orbs -->
+  <div style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden;">
+    <div style="position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,0.06),transparent 70%);top:-150px;right:-100px;animation:float 14s ease-in-out infinite;pointer-events:none;"></div>
+    <div style="position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,0.04),transparent 70%);bottom:-120px;left:-80px;animation:float 18s ease-in-out infinite reverse;pointer-events:none;"></div>
+    <div style="position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,0.03),transparent 70%);top:50%;left:70%;animation:float 12s ease-in-out infinite 3s;pointer-events:none;"></div>
+  </div>
   <div class="topbar">
     <div class="logo"><span class="hl">ISHU_OXE</span> ADMIN</div>
     <div class="right">
