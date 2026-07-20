@@ -140,8 +140,12 @@
     .login-box .links a:hover { color: #fff; }
     .pass-wrap { position: relative; display: flex; align-items: center; margin-bottom: 14px; }
     .pass-wrap input { margin-bottom: 0 !important; padding-right: 36px !important; }
-    .rm-check { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; cursor: pointer; z-index: 2; }
-    .rm-check input { width: 16px; height: 16px; accent-color: #2563eb; cursor: pointer; margin: 0; }
+    .rm-check { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 5px; cursor: pointer; z-index: 2; }
+    .rm-check input { display: none; }
+    .rm-check .checkmark { width: 16px; height: 16px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; transition: 0.25s; flex-shrink: 0; }
+    .rm-check input:checked + .checkmark { background: #2563eb; border-color: #2563eb; }
+    .rm-check input:checked + .checkmark::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 700; line-height: 1; }
+    .rm-check .rm-text { font-size: 11px; color: rgba(255,255,255,0.3); white-space: nowrap; }
     .login-error { color: #f87171; font-size: 13px; margin-bottom: 10px; display: none; background: rgba(248,113,113,0.06); padding: 8px; border-radius: 6px; border: 1px solid rgba(248,113,113,0.08); }
     .login-selector {
       display: flex; gap: 0; margin: 14px 0 18px; border-radius: 8px; overflow: hidden;
@@ -1200,6 +1204,8 @@
       <input type="password" id="loginPass" placeholder="Password">
       <label class="rm-check" id="rememberMeWrap">
         <input type="checkbox" id="rememberMe">
+        <span class="checkmark"></span>
+        <span class="rm-text">Remember me</span>
       </label>
     </div>
     <div id="loginCaptchaArea" style="display:none;background:#0a0d12;border-radius:6px;padding:10px;margin-bottom:14px;text-align:center;border:1px solid rgba(255,255,255,0.04);">
