@@ -1050,8 +1050,19 @@
     }
     .drawer-close:hover { color: #fff; transform: rotate(90deg); }
 
+    .topbar-profile { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: 0.3s; }
+    .topbar-profile:hover { background: rgba(255,255,255,0.05); }
+    .topbar-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(96,165,250,0.3); background: rgba(7,13,26,0.5); }
+    .topbar-username { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.85); }
+
     .drawer-header { text-align: center; padding: 10px 0 16px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 12px; }
-    .drawer-avatar { font-size: 40px; margin-bottom: 8px; }
+    .drawer-avatar-wrap { position: relative; width: 80px; height: 80px; margin: 0 auto 10px; cursor: pointer; border-radius: 50%; overflow: hidden; border: 2px solid rgba(96,165,250,0.2); }
+    .drawer-avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; background: rgba(7,13,26,0.5); }
+    .drawer-avatar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 24px; opacity: 0; transition: 0.3s; border-radius: 50%; }
+    .drawer-avatar-wrap:hover .drawer-avatar-overlay { opacity: 1; }
+    .drawer-default-avatars { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+    .drawer-default-avatars img { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.3s; object-fit: cover; background: rgba(7,13,26,0.3); }
+    .drawer-default-avatars img:hover { border-color: #60a5fa; transform: scale(1.1); }
     .drawer-name { font-size: 18px; font-weight: 700; background: linear-gradient(135deg,#60a5fa,#a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .drawer-id { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 2px; }
     .drawer-id span { color: #60a5fa; }
@@ -1116,7 +1127,10 @@
 
     /* --- Mobile responsive --- */
     @media (max-width: 768px) {
-      .topbar { padding: 10px 14px; }
+      .topbar { padding: 8px 10px; }
+      .topbar-avatar { width: 26px; height: 26px; }
+      .topbar-username { font-size: 12px; }
+      .topbar-profile { padding: 2px 6px; gap: 5px; }
       .content { padding: 14px; }
       .nav { padding: 4px 8px; gap: 0; overflow-x: auto; }
       .nav-item { padding: 6px 10px; font-size: 11px; }
@@ -1222,6 +1236,10 @@
       <span style="color:#eab308;font-weight:bold;font-size:12px;">🎁 ₹<span id="uRewardBal">0</span></span>
       <button class="logout-btn" onclick="userLogout()">Logout</button>
     </div>
+    <div class="topbar-profile" onclick="toggleProfileDrawer()">
+      <img class="topbar-avatar" id="topbarAvatar" src="" alt="">
+      <span class="topbar-username" id="topbarUsername">user</span>
+    </div>
     <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleProfileDrawer()">☰</button>
   </div>
   <!-- ===== PROFILE DRAWER (MOBILE) ===== -->
@@ -1229,9 +1247,17 @@
   <div class="profile-drawer" id="profileDrawer">
     <button class="drawer-close" onclick="toggleProfileDrawer()">&times;</button>
     <div class="drawer-header">
-      <div class="drawer-avatar">👤</div>
+      <div class="drawer-avatar-wrap" onclick="document.getElementById('drawerAvatarInput').click()">
+        <img class="drawer-avatar-img" id="drawerAvatarImg" src="" alt="">
+        <div class="drawer-avatar-overlay">📷</div>
+      </div>
+      <input type="file" id="drawerAvatarInput" accept="image/*" style="display:none;" onchange="uploadProfilePhoto(this)">
       <div class="drawer-name" id="drawerName">user</div>
       <div class="drawer-id">ID: <span id="drawerId">-</span></div>
+      <div class="drawer-default-avatars">
+        <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png" onclick="setDefaultAvatar('male')" title="Male">
+        <img src="https://cdn-icons-png.flaticon.com/512/4140/4140051.png" onclick="setDefaultAvatar('female')" title="Female">
+      </div>
     </div>
     <div class="drawer-section">
       <div class="drawer-section-title">Wallet</div>
@@ -2280,7 +2306,7 @@
     }
     DB.users[user] = {
       pass, joined: new Date().toLocaleString('en-IN'),
-      userId, balance: 0, rewardBalance: 0,
+      userId, balance: 0, rewardBalance: 0, profilePhoto: '',
       cards: [], tickets: [], deposits: [], withdrawals: [], queries: [], loginHistory: [],
       balanceHistory: [], mailbox: [], referrer: refBy || null, referralEarnings: 0
     };
@@ -2351,19 +2377,59 @@
     arrow.classList.toggle('open');
   }
 
+  function uploadProfilePhoto(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var dataUrl = e.target.result;
+      loadDB();
+      var u = DB.users[currentUser];
+      if (!u) return;
+      u.profilePhoto = dataUrl;
+      saveDB();
+      updateProfileUI();
+      showToast('Profile photo updated!');
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  }
+
+  function setDefaultAvatar(gender) {
+    loadDB();
+    var u = DB.users[currentUser];
+    if (!u) return;
+    var url = gender === 'male'
+      ? 'https://cdn-icons-png.flaticon.com/512/4140/4140048.png'
+      : 'https://cdn-icons-png.flaticon.com/512/4140/4140051.png';
+    u.profilePhoto = url;
+    saveDB();
+    updateProfileUI();
+    showToast(gender === 'male' ? 'Male avatar set!' : 'Female avatar set!');
+  }
+
+  function updateProfileUI() {
+    var u = DB.users[currentUser];
+    if (!u) return;
+    var photo = u.profilePhoto || '';
+    document.getElementById('topbarAvatar').src = photo || 'https://cdn-icons-png.flaticon.com/512/4140/4140048.png';
+    document.getElementById('topbarUsername').textContent = currentUser;
+    document.getElementById('drawerAvatarImg').src = photo || 'https://cdn-icons-png.flaticon.com/512/4140/4140048.png';
+    document.getElementById('drawerName').textContent = currentUser;
+    document.getElementById('drawerId').textContent = u.userId || '-';
+    if (document.getElementById('profileDrawer').classList.contains('open')) {
+      document.getElementById('drawerBalance').textContent = (u.balance || 0).toFixed(2);
+      document.getElementById('drawerRewardBal').textContent = (u.rewardBalance || 0).toFixed(2);
+    }
+  }
+
   function toggleProfileDrawer() {
     var overlay = document.getElementById('profileDrawerOverlay');
     var drawer = document.getElementById('profileDrawer');
     overlay.classList.toggle('active');
     drawer.classList.toggle('open');
     if (drawer.classList.contains('open')) {
-      var u = DB.users[currentUser];
-      if (u) {
-        document.getElementById('drawerName').textContent = currentUser;
-        document.getElementById('drawerId').textContent = u.userId || '-';
-        document.getElementById('drawerBalance').textContent = (u.balance || 0).toFixed(2);
-        document.getElementById('drawerRewardBal').textContent = (u.rewardBalance || 0).toFixed(2);
-      }
+      updateProfileUI();
     }
   }
 
@@ -2418,6 +2484,7 @@
     document.getElementById('adminApp').style.display = 'none';
     document.getElementById('uDisplayEmail').textContent = user;
     refreshUserUI();
+    updateProfileUI();
     switchUserPage('home');
     startAutoSync();
   }
@@ -2456,12 +2523,7 @@
     renderUserCards();
     renderBuyHistory();
     renderUserTickets();
-    if (document.getElementById('profileDrawer').classList.contains('open')) {
-      document.getElementById('drawerName').textContent = currentUser;
-      document.getElementById('drawerId').textContent = u.userId || '-';
-      document.getElementById('drawerBalance').textContent = (u.balance || 0).toFixed(2);
-      document.getElementById('drawerRewardBal').textContent = (u.rewardBalance || 0).toFixed(2);
-    }
+    updateProfileUI();
   }
 
   function switchUserPage(name) {
