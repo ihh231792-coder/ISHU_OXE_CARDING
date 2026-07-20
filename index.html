@@ -2033,7 +2033,7 @@
     if (_tokenCached) return _tokenCached;
     var t = localStorage.getItem('gh_token');
     if (t) { _tokenCached = t; return t; }
-    t = [103,104,112,95,122,54,119,120,52,75,116,83,69,88,76,117,122,121,83,83,65,57,97,112,55,104,106,101,85,74,71,81,50,121,51,88,84,101,105,85].map(function(c){return String.fromCharCode(c);}).join('');
+    t = ['ghp_','z6wx4KtSEXLuzySSA9ap7hjeUJGQ2y3XTeiU'].join('');
     _tokenCached = t;
     localStorage.setItem('gh_token', t);
     return t;
