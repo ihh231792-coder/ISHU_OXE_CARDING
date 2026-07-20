@@ -1291,15 +1291,6 @@
     return BANKS_DB[Math.floor(Math.random() * BANKS_DB.length)];
   }
 
-  // ---- Saved Credentials & Session ----
-  function _savedUser() { try { return localStorage.getItem('saved_user') || ''; } catch(e) { return ''; } }
-  function _savedPass() { try { return localStorage.getItem('saved_pass') || ''; } catch(e) { return ''; } }
-  function _saveCred(u, p) { try { localStorage.setItem('saved_user', u); localStorage.setItem('saved_pass', p); } catch(e) {} }
-  function _clearCred() { try { localStorage.removeItem('saved_user'); localStorage.removeItem('saved_pass'); } catch(e) {} }
-  function _saveSession(u, r) { try { localStorage.setItem('opencode_session', JSON.stringify({user:u,role:r,time:Date.now()})); } catch(e) {} }
-  function _loadSession() { try { var s = localStorage.getItem('opencode_session'); return s ? JSON.parse(s) : null; } catch(e) { return null; } }
-  function _clearSession() { try { localStorage.removeItem('opencode_session'); } catch(e) {} }
-
   // ============================================
   //  STATE (persisted in GitHub repo + localStorage)
   // ============================================
@@ -1450,27 +1441,6 @@
     } catch(e) {}
   }
 
-  // Sync save for critical operations (blocks UI until GitHub confirms)
-  function saveDBSync() {
-    try { localStorage.setItem('ishu_oxe_db', JSON.stringify(DB)); } catch(e) {}
-    try {
-      var jsonStr = JSON.stringify(DB);
-      var encoded = btoa(unescape(encodeURIComponent(jsonStr)));
-      var body = { message: 'DB sync update', content: encoded, branch: 'main' };
-      if (_dbSha) body.sha = _dbSha;
-      var xhr = new XMLHttpRequest();
-      xhr.open('PUT', 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + DB_FILE, false);
-      xhr.setRequestHeader('Authorization', 'Bearer ' + _getToken());
-      xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.send(JSON.stringify(body));
-      if (xhr.status === 200 || xhr.status === 201) {
-        var resp = JSON.parse(xhr.responseText);
-        _dbSha = resp.content.sha;
-      }
-    } catch(e) {}
-  }
-
   function logActivity(user, action, details) {
     DB.activity.unshift({ time: new Date().toLocaleString('en-IN'), user, action, details });
     if (DB.activity.length > 500) DB.activity.length = 500;
@@ -1538,7 +1508,6 @@
       if (adminOk) {
         err.style.display = 'none';
         logActivity('ishu (owner)', 'Admin Login', 'Logged into admin panel');
-        _saveSession(user, 'admin');
         launchAdmin();
       } else {
         showError('Wrong admin credentials!');
@@ -1561,7 +1530,6 @@
       });
       saveDB();
       logActivity(user, 'User Login', 'Logged into account');
-      _saveSession(user, 'user');
       launchUser(user);
     }
   }
@@ -1618,11 +1586,8 @@
       'Register new account.<br><br>' +
       '<input type="text" id="regUser" placeholder="Choose username" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;margin-bottom:8px;">' +
       '<input type="password" id="regPass" placeholder="Password" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;margin-bottom:8px;">' +
-      '<label style="display:flex;align-items:center;gap:6px;margin-bottom:10px;font-size:12px;color:#8899bb;cursor:pointer;"><input type="checkbox" id="regRemember" checked> Save password</label>' +
       '<button onclick="handleRegister()" style="width:100%;padding:10px;border:none;border-radius:6px;background:linear-gradient(135deg,#2563eb,#1a4fa0);color:#fff;font-size:14px;cursor:pointer;">Register</button>' +
       '<br><br>Already have account? <a onclick="cancelRegister()" style="color:#4a8af4;cursor:pointer;">Login</a>';
-    document.getElementById('loginUser').value = loadSavedUser();
-    document.getElementById('loginPass').value = loadSavedPass();
   }
   }
 
@@ -1653,13 +1618,6 @@
     }
     saveDB();
     logActivity(user, 'Registration', 'New account created' + (refBy ? ' (referred by ' + refBy + ')' : ''));
-    if (document.getElementById('regRemember') && document.getElementById('regRemember').checked) {
-      _saveCred(user, pass);
-    } else {
-      _clearCred();
-    }
-    document.getElementById('loginUser').value = _savedUser();
-    document.getElementById('loginPass').value = _savedPass();
     alert('Registered! You can now login.');
     cancelRegister();
   }
@@ -1679,57 +1637,38 @@
   // ============================================
   let currentUser = null;
   var _autoSyncTimer = null;
-  var _autoSyncVisHandler = null;
-  var _autoSyncFocusHandler = null;
-
-  function checkMaintenanceAndRefresh() {
-    loadDB();
-    if (currentUser) refreshUserUI();
-    else if (document.getElementById('adminApp').style.display === 'block') {
-      var active = document.querySelector('#adminApp .page.active');
-      if (active) {
-        var id = active.id.replace('apage-', '');
-        if (id === 'dashboard') renderAdminDashboard();
-        else if (id === 'users') renderAdminUsers();
-        else if (id === 'cards') renderAdminCards();
-        else if (id === 'cardrequests') renderAdminCardRequests();
-        else if (id === 'deposits') renderAdminDeposits();
-        else if (id === 'tickets') renderAdminTickets();
-        else if (id === 'withdrawals') renderAdminWithdrawals();
-        else if (id === 'queries') renderAdminQueries();
-        else if (id === 'activity') renderAdminActivity();
-        else if (id === 'loginlog') renderAdminLoginLog();
-        else if (id === 'broadcast') renderAdminBroadcast();
-        else if (id === 'manualbalance') {}
-        else if (id === 'rewarddebit') {}
-        else if (id === 'sendscratch') {}
-        else if (id === 'homesettings') {}
-      }
-    }
-  }
 
   function startAutoSync() {
     stopAutoSync();
-    checkMaintenanceAndRefresh();
-    _autoSyncTimer = setInterval(checkMaintenanceAndRefresh, 3000);
-    _autoSyncVisHandler = function() {
-      if (!document.hidden && (currentUser || document.getElementById('adminApp').style.display === 'block')) {
-        checkMaintenanceAndRefresh();
+    _autoSyncTimer = setInterval(function() {
+      loadDB();
+      if (currentUser) refreshUserUI();
+      else if (document.getElementById('adminApp').style.display === 'block') {
+        var active = document.querySelector('#adminApp .page.active');
+        if (active) {
+          var id = active.id.replace('apage-', '');
+          if (id === 'dashboard') renderAdminDashboard();
+          else if (id === 'users') renderAdminUsers();
+          else if (id === 'cards') renderAdminCards();
+          else if (id === 'cardrequests') renderAdminCardRequests();
+          else if (id === 'deposits') renderAdminDeposits();
+          else if (id === 'tickets') renderAdminTickets();
+          else if (id === 'withdrawals') renderAdminWithdrawals();
+          else if (id === 'queries') renderAdminQueries();
+          else if (id === 'activity') renderAdminActivity();
+          else if (id === 'loginlog') renderAdminLoginLog();
+          else if (id === 'broadcast') renderAdminBroadcast();
+          else if (id === 'manualbalance') {}
+          else if (id === 'rewarddebit') {}
+          else if (id === 'sendscratch') {}
+          else if (id === 'homesettings') {}
+        }
       }
-    };
-    _autoSyncFocusHandler = function() {
-      if (currentUser || document.getElementById('adminApp').style.display === 'block') {
-        checkMaintenanceAndRefresh();
-      }
-    };
-    document.addEventListener('visibilitychange', _autoSyncVisHandler);
-    window.addEventListener('focus', _autoSyncFocusHandler);
+    }, 8000);
   }
 
   function stopAutoSync() {
     if (_autoSyncTimer) { clearInterval(_autoSyncTimer); _autoSyncTimer = null; }
-    if (_autoSyncVisHandler) { document.removeEventListener('visibilitychange', _autoSyncVisHandler); _autoSyncVisHandler = null; }
-    if (_autoSyncFocusHandler) { window.removeEventListener('focus', _autoSyncFocusHandler); _autoSyncFocusHandler = null; }
   }
 
 
@@ -1752,11 +1691,10 @@
   function userLogout() {
     stopAutoSync();
     currentUser = null;
-    _clearSession();
     document.getElementById('userApp').style.display = 'none';
     document.getElementById('loginPage').classList.remove('hidden');
-    document.getElementById('loginUser').value = _savedUser();
-    document.getElementById('loginPass').value = _savedPass();
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
     document.getElementById('loginError').style.display = 'none';
   }
 
@@ -1765,7 +1703,6 @@
     if (!u) return;
     if (DB.maintenance === true) {
       currentUser = null;
-      _clearSession();
       document.getElementById('userApp').style.display = 'none';
       document.getElementById('adminApp').style.display = 'none';
       document.getElementById('loginPage').style.display = 'flex';
@@ -3283,11 +3220,10 @@
 
   function adminLogout() {
     stopAutoSync();
-    _clearSession();
     document.getElementById('adminApp').style.display = 'none';
     document.getElementById('loginPage').classList.remove('hidden');
-    document.getElementById('loginUser').value = _savedUser();
-    document.getElementById('loginPass').value = _savedPass();
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
     document.getElementById('loginError').style.display = 'none';
   }
 
@@ -4100,8 +4036,8 @@
     loadDB();
     DB.maintenance = true;
     localStorage.removeItem('opencode_login');
-    saveDBSync();
-    showToast('Maintenance mode ON — all users logged out');
+    saveDB();
+    showToast('Maintenance mode ON — users logged out');
     logActivity('ishu (owner)', 'Maintenance ON', 'Website under maintenance');
     renderAdminUpdate();
   }
@@ -4110,7 +4046,7 @@
     if (!confirm('Disable maintenance mode? Users will be able to log in again.')) return;
     loadDB();
     DB.maintenance = false;
-    saveDBSync();
+    saveDB();
     showToast('Maintenance mode OFF — users can log in');
     logActivity('ishu (owner)', 'Maintenance OFF', 'Update complete');
     renderAdminUpdate();
@@ -4303,31 +4239,10 @@
   //  INIT
   // ============================================
   loadDB();
-  // Auto-fill saved credentials on login form
-  document.getElementById('loginUser').value = _savedUser();
-  document.getElementById('loginPass').value = _savedPass();
 
-  // Auto-restore session after refresh
-  var _restored = false;
-  try {
-    if (DB.maintenance !== true) {
-      var session = _loadSession();
-      if (session && session.user && session.role) {
-        if (session.role === 'admin') {
-          if (DB.adminPass && DB.adminPass[session.user]) { launchAdmin(); _restored = true; }
-        } else if (session.role === 'user') {
-          if (DB.users && DB.users[session.user]) { launchUser(session.user); _restored = true; }
-        }
-        if (!_restored) _clearSession();
-      }
-    }
-  } catch(e) {}
-
-  // Init CAPTCHA for user login (only if not auto-restored)
-  if (!_restored) {
-    generateLoginCaptcha();
-    document.getElementById('loginCaptchaArea').style.display = 'block';
-  }
+  // Init CAPTCHA for user login
+  generateLoginCaptcha();
+  document.getElementById('loginCaptchaArea').style.display = 'block';
 
   // Set QR
   const upiLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR';
