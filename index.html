@@ -2299,44 +2299,44 @@
     // If already a direct image URL, skip
     if (link.match(/\.(jpg|jpeg|png|gif|webp|ico|svg|bmp)(\?|$)/i) || link.startsWith('data:') || link.match(/googleusercontent\.com/) || link.match(/fbcdn\.net/)) return;
 
-    // ---- INSTANT FILL (0 seconds — no proxy needed) ----
+    // ---- INSTANT domain-based name (no proxy, 0 seconds) ----
     var playMatch = link.match(/[?&]id=([a-zA-Z0-9._-]+)/);
     if (playMatch) {
-      // Play Store: CDN icon from package ID (100% instant, real Google CDN)
-      document.getElementById(iconInputId).value = 'https://play-lh.googleusercontent.com/' + playMatch[1];
-      // Extract app name from package ID (clean fallback)
       var raw = playMatch[1].split('.').pop() || playMatch[1];
       document.getElementById(nameInputId).value = raw.charAt(0).toUpperCase() + raw.slice(1).replace(/[_.]/g, ' ');
     } else {
-      // Non-Play Store: quick domain-based fallback name
       var parts = link.replace(/https?:\/\//, '').split('/')[0].split('.');
       var domain = parts.filter(function(p) { return p !== 'www' && p !== 'm'; }).pop() || parts[0];
       if (domain) document.getElementById(nameInputId).value = domain.charAt(0).toUpperCase() + domain.slice(1);
     }
+    // Show fetching indicator
+    document.getElementById(iconInputId).placeholder = '⏳ Fetching...';
+    showToast('Fetching real app icon...');
 
-    // ---- ASYNC: Try proxy to get REAL name + icon (overwrites if better) ----
-    fetchViaProxy(link, function(html) {
+    // ---- ASYNC: Try ALL proxies IN PARALLEL for fastest response ----
+    fetchViaProxyParallel(link, function(html) {
       var name = extractMetaContent(html, 'og:title') || extractMetaContent(html, 'twitter:title') || extractTitle(html) || extractPlayStoreName(html);
       var icon = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || extractImageSrc(html) || '';
-      // If Play Store, also extract JSON-LD app icon
+      // Play Store: try JSON-LD for better icon
       if ((!icon || !icon.match(/play-lh\.googleusercontent\.com/)) && link.match(/play\.google\.com/)) {
         var jd = extractJsonLd(html, 'application/ld+json');
-        if (jd && jd.image) icon = convertToPlayStoreFormat(jd.image);
+        if (jd && jd.image) icon = jd.image;
       }
-      // Ensure icon is in Play Store CDN format if it's a Play Store link
-      if (icon && link.match(/play\.google\.com/) && !icon.match(/play-lh\.googleusercontent\.com/)) {
-        icon = convertToPlayStoreFormat(icon);
-      }
+      // Ensure Play Store CDN images get the supporting format
+      if (icon && icon.match(/play-lh\.googleusercontent\.com/)) icon = convertToPlayStoreFormat(icon);
       if (name) document.getElementById(nameInputId).value = name;
-      if (icon) document.getElementById(iconInputId).value = icon;
+      if (icon) {
+        document.getElementById(iconInputId).value = icon;
+        document.getElementById(iconInputId).placeholder = 'Icon URL';
+      } else {
+        document.getElementById(iconInputId).placeholder = 'Icon URL (fetch failed)';
+      }
     });
   }
 
-  // Convert any image URL to Play Store CDN "supporting format"
+  // Convert to Play Store CDN "supporting format" with proper size params
   function convertToPlayStoreFormat(url) {
-    // If already Play Store CDN, ensure it has proper size params
     if (url.match(/play-lh\.googleusercontent\.com/)) {
-      // Remove existing size params and add standard format
       url = url.replace(/=.*$/, '');
       return url + '=w600-h300-pc0xffffff-pd';
     }
@@ -2360,31 +2360,51 @@
   function autoFetchBanner() {
     var url = document.getElementById('aBannerUrlInput').value.trim();
     if (!url || url.startsWith('data:')) return;
-    // If it's a direct image URL (known CDN, file extension, or data), use as-is
-    if (url.match(/\.(jpg|jpeg|png|gif|webp|ico|svg)(\?|$)/i) || url.match(/googleusercontent\.com/) || url.match(/fbcdn\.net/) || url.match(/cloudinary\.com/) || url.match(/img[0-9]?\.blogspot\.com/)) return;
+    // If it's a direct image URL (known CDN, file extension), use as-is
+    if (url.match(/\.(jpg|jpeg|png|gif|webp|ico|svg)(\?|$)/i) || url.match(/googleusercontent\.com/) || url.match(/fbcdn\.net/) || url.match(/cloudinary\.com/)) return;
 
-    // ---- INSTANT FALLBACK for Play Store links ----
-    var playMatch = url.match(/[?&]id=([a-zA-Z0-9._-]+)/);
-    if (playMatch) {
-      document.getElementById('aBannerUrlInput').value = 'https://play-lh.googleusercontent.com/' + playMatch[1] + '=w600-h300-pc0xffffff-pd';
-    }
+    showToast('⏳ Fetching banner image...');
 
-    // ---- ASYNC: Try proxy to get REAL OG image (overwrites if found) ----
-    fetchViaProxy(url, function(html) {
+    // ---- ASYNC: Try ALL proxies IN PARALLEL for fastest response ----
+    fetchViaProxyParallel(url, function(html) {
       var img = extractMetaContent(html, 'og:image') || extractMetaContent(html, 'twitter:image') || '';
       if (!img && url.match(/play\.google\.com/)) {
-        // Play Store: try JSON-LD for image
         var jd = extractJsonLd(html, 'application/ld+json');
         if (jd && jd.image) img = jd.image;
       }
       if (img) {
         if (img.startsWith('/')) { var a = url.match(/^https?:\/\/[^\/]+/); if (a) img = a[0] + img; }
-        // Convert to supporting format if Play Store image
         if (img.match(/play-lh\.googleusercontent\.com/)) img = convertToPlayStoreFormat(img);
         document.getElementById('aBannerUrlInput').value = img;
-        showToast('Banner image auto-fetched from website!');
+        showToast('Banner image auto-fetched!');
+      } else {
+        showToast('Could not fetch banner from this link');
       }
     });
+  }
+
+  // Try ALL proxies in parallel — first one to respond wins
+  function fetchViaProxyParallel(url, callback) {
+    var proxies = [
+      'https://api.allorigins.win/raw?url=',
+      'https://corsproxy.io/?url=',
+      'https://api.codetabs.com/v1/proxy?quest=',
+      'https://cors-anywhere.herokuapp.com/'
+    ];
+    var done = false;
+    proxies.forEach(function(proxy) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', proxy + encodeURIComponent(url), true);
+      xhr.timeout = 6000;
+      xhr.onload = function() { if (!done && xhr.status === 200 && xhr.responseText) { done = true; callback(xhr.responseText); } };
+      xhr.onerror = function() {};
+      xhr.ontimeout = function() {};
+      xhr.send();
+    });
+    // Fallback: if none respond in 8 seconds, try sequential fallback
+    setTimeout(function() {
+      if (!done) { fetchViaProxy(url, callback); }
+    }, 8000);
   }
 
   function fetchViaProxy(url, callback) {
