@@ -3093,6 +3093,9 @@
   }
 
   function launchUser(user) {
+    var pls = document.getElementById('pageLoadSpinner');
+    if (pls) { pls.style.opacity = '0'; pls.style.display = 'none'; }
+    document.getElementById('loginSpinner').style.display = 'none';
     if (DB.maintenance === true) {
       document.getElementById('loginError').textContent = 'Website under maintenance, please wait 30 minutes.';
       document.getElementById('loginError').style.display = 'block';
@@ -5579,6 +5582,9 @@
   //  LAUNCH ADMIN
   // ============================================
   function launchAdmin() {
+    var pls = document.getElementById('pageLoadSpinner');
+    if (pls) { pls.style.opacity = '0'; pls.style.display = 'none'; }
+    document.getElementById('loginSpinner').style.display = 'none';
     localStorage.setItem('ishu_session_user', 'admin');
     localStorage.setItem('ishu_session_role', 'admin');
     document.getElementById('loginPage').classList.add('hidden');
