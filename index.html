@@ -1577,7 +1577,7 @@
     <div class="nav-item active" data-upage="home" onclick="switchUserPage('home')">Home</div>
     <div class="nav-item" data-upage="mycards" onclick="switchUserPage('mycards')">My Cards</div>
     <div class="nav-item" data-upage="deposit" onclick="switchUserPage('deposit')">Deposit</div>
-    <div class="nav-item" data-upage="reward" onclick="switchUserPage('reward')">Reward Wallet</div>
+    <div class="nav-item" data-upage="reward" onclick="switchUserPage('reward')">Withdraw Wallet</div>
     <div class="nav-item" data-upage="depbonus" onclick="switchUserPage('depbonus')">🎁 Deposit Bonus</div>
     <div class="nav-item" data-upage="buyhistory" onclick="switchUserPage('buyhistory')">Buy History</div>
     <div class="nav-item" data-upage="inbox" onclick="switchUserPage('inbox')">Inbox <span class="badge" id="inboxBadge" style="display:none;">0</span></div>
@@ -1754,7 +1754,7 @@
         <div style="font-size:40px;margin:8px 0;">🎉</div>
         <div class="reward-label">You Won a Scratch Reward!</div>
         <div class="reward-amount" id="inboxScratchAmount">₹0</div>
-        <div style="color:#22c55e;font-size:12px;margin:8px 0;">🎊 Added to your Reward Wallet!</div>
+        <div style="color:#22c55e;font-size:12px;margin:8px 0;">🎊 Added to your Withdraw Wallet!</div>
       </div>
     </div>
     <div class="page" id="upage-deposit">
@@ -1792,7 +1792,7 @@
       </div>
     </div>
     <div class="page" id="upage-reward">
-      <h2 style="margin-bottom:4px;">Reward Wallet</h2>
+      <h2 style="margin-bottom:4px;">Withdraw Wallet</h2>
       <p style="color:#8899bb;margin-bottom:16px;font-size:13px;">Earn scratch rewards on every purchase</p>
       <div class="rw-box">
         <div class="rw-lbl">Your Reward Balance</div>
@@ -2030,7 +2030,7 @@
 
     <!-- REWARD DEBIT -->
     <div class="page" id="apage-rewarddebit">
-      <h2 style="margin-bottom:10px;">Reward Wallet Debit</h2>
+      <h2 style="margin-bottom:10px;">Withdraw Wallet Debit</h2>
       <div class="rw-box" style="max-width:440px;">
         <p style="color:#8899bb;font-size:12px;margin-bottom:10px;">Enter User ID to check reward balance & debit</p>
         <div style="display:flex;gap:8px;margin-bottom:6px;">
@@ -2040,7 +2040,7 @@
         <div id="aRDBalanceDisplay" style="background:#0d1f3a;border-radius:6px;padding:10px;margin-bottom:10px;display:none;text-align:center;">
           <div style="font-size:11px;color:#8899bb;">Username: <strong id="aRDUsername" style="color:#fff;"></strong></div>
           <div style="font-size:24px;font-weight:bold;color:#eab308;margin:4px 0;">₹<span id="aRDBalance">0.00</span></div>
-          <div style="font-size:11px;color:#8899bb;">Reward Wallet Balance</div>
+          <div style="font-size:11px;color:#8899bb;">Withdraw Wallet Balance</div>
         </div>
         <input type="number" id="aRDAmount" placeholder="Amount to debit" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:14px;text-align:center;outline:none;margin-bottom:6px;">
         <textarea id="aRDNote" placeholder="Reason (required)" style="width:100%;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:13px;outline:none;resize:vertical;min-height:50px;margin-bottom:8px;"></textarea>
@@ -2107,7 +2107,7 @@
 
       <div class="home-form">
         <h3>⭐ Premium Free Earning Apps</h3>
-        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Paste link → name & icon auto-fetch. Users complete task → auto-credit reward to their Reward Wallet.</p>
+        <p style="color:#556688;font-size:11px;margin-bottom:8px;">Paste link → name & icon auto-fetch. Users complete task → auto-credit reward to their Withdraw Wallet.</p>
         <div id="aPremiumAppList"></div>
         <div class="btn-row" style="margin-top:8px;">
           <input type="text" id="aPAppNameInput" placeholder="App name (auto-fetched)..." style="flex:0.5;">
@@ -2311,7 +2311,7 @@
     <div class="reward-amount" id="scratchAmount">₹0</div>
     <div class="revealed-box">
       <div style="font-size:12px;color:#8899bb;">Reward added to</div>
-      <div style="font-size:14px;color:#eab308;font-weight:bold;">Reward Wallet</div>
+      <div style="font-size:14px;color:#eab308;font-weight:bold;">Withdraw Wallet</div>
     </div>
     <button class="claim-btn" id="scratchClaimBtn" onclick="claimScratchReward()">Claim Reward</button>
   </div>
@@ -3108,7 +3108,14 @@
     { target: 200, bonus: 38, label: 'Deposit 200', desc: 'Deposit ₹200 and you will receive ₹38 bonus' },
     { target: 500, bonus: 68, label: 'Deposit 500', desc: 'Deposit ₹500 and you will receive ₹68 bonus' },
     { target: 1000, bonus: 118, label: 'Deposit 1000', desc: 'Deposit ₹1000 and you will receive ₹118 bonus' },
-    { target: 3000, bonus: 228, label: 'Deposit 3000', desc: 'Deposit ₹3000 and you will receive ₹228 bonus' }
+    { target: 3000, bonus: 228, label: 'Deposit 3000', desc: 'Deposit ₹3000 and you will receive ₹228 bonus' },
+    { target: 5000, bonus: 1500, label: 'Deposit 5000', desc: 'Deposit ₹5000 and you will receive ₹1500 bonus (30%)' },
+    { target: 10000, bonus: 3000, label: 'Deposit 10000', desc: 'Deposit ₹10,000 and you will receive ₹3000 bonus (30%)' },
+    { target: 20000, bonus: 6000, label: 'Deposit 20000', desc: 'Deposit ₹20,000 and you will receive ₹6000 bonus (30%)' },
+    { target: 50000, bonus: 15000, label: 'Deposit 50000', desc: 'Deposit ₹50,000 and you will receive ₹15,000 bonus (30%)' },
+    { target: 60000, bonus: 18000, label: 'Deposit 60000', desc: 'Deposit ₹60,000 and you will receive ₹18,000 bonus (30%)' },
+    { target: 80000, bonus: 24000, label: 'Deposit 80000', desc: 'Deposit ₹80,000 and you will receive ₹24,000 bonus (30%)' },
+    { target: 100000, bonus: 30000, label: 'Deposit 100000', desc: 'Deposit ₹1,00,000 and you will receive ₹30,000 bonus (30%)' }
   ];
 
   function openDepositBonusModal() {
@@ -3558,7 +3565,7 @@
     div.innerHTML = u.mailbox.slice().reverse().map(function(m) {
       if (m.type === 'scratch_card') {
         if (m.claimed) {
-          return '<div class="inbox-item"><div class="inbox-icon">🎉</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">🎊 Congratulations! You received <strong style="color:#eab308;">₹' + m.amount + '</strong> — added to your Reward Wallet!</div></div></div>';
+          return '<div class="inbox-item"><div class="inbox-icon">🎉</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">🎊 Congratulations! You received <strong style="color:#eab308;">₹' + m.amount + '</strong> — added to your Withdraw Wallet!</div></div></div>';
         } else if (m.scratched) {
           return '<div class="inbox-item"><div class="inbox-icon">🎉</div><div class="inbox-body"><div class="inbox-from">From: ' + esc(m.from) + '</div><div class="inbox-date">' + m.date + '</div><div class="inbox-msg">Scratch card worth <strong style="color:#eab308;">₹' + m.amount + '</strong> — <button class="action-btn btn-success" onclick="doClaimScratch(\'' + m._id + '\')" style="font-size:9px;padding:2px 8px;">Claim</button></div></div></div>';
         } else {
@@ -3624,7 +3631,7 @@
     renderUserInbox();
     refreshUserUI();
     updateInboxBadge();
-    showToast('₹' + m.amount + ' added to Reward Wallet!');
+    showToast('₹' + m.amount + ' added to Withdraw Wallet!');
   }
 
   // ---- Home Page: Banners, Apps, Videos ----
@@ -3863,7 +3870,7 @@
   }
 
   function completePremiumTask(appName, reward) {
-    if (!confirm('Confirm you completed the task for "' + appName + '"? You will receive ₹' + reward + ' in your Reward Wallet.')) return;
+    if (!confirm('Confirm you completed the task for "' + appName + '"? You will receive ₹' + reward + ' in your Withdraw Wallet.')) return;
     loadDB();
     const u = DB.users[currentUser];
     if (!u.premiumTasks) u.premiumTasks = [];
@@ -3874,7 +3881,7 @@
     saveDB();
     renderPremiumApps();
     refreshUserUI();
-    showToast('🎉 Task completed! ₹' + reward + ' added to your Reward Wallet!');
+    showToast('🎉 Task completed! ₹' + reward + ' added to your Withdraw Wallet!');
   }
 
   // ---- Admin: Home Settings ----
@@ -4720,10 +4727,10 @@
     logActivity(currentUser, 'Scratch Reward', `₹${pendingScratchAmount} added to reward wallet`);
     closeScratchCard();
     refreshUserUI();
-    showToast(`₹${pendingScratchAmount} added to Reward Wallet!`);
+    showToast(`₹${pendingScratchAmount} added to Withdraw Wallet!`);
   }
 
-  // ---- User: Reward Wallet ----
+  // ---- User: Withdraw Wallet ----
   function renderRewardWallet() {
     const u = DB.users[currentUser];
     if (!u) return;
@@ -4916,6 +4923,13 @@
 
   var _wgPrevPeriod = {};
   function wgGlobalTick() {
+    if (document.getElementById('upage-colorgame') && !document.getElementById('upage-colorgame').classList.contains('active')) {
+      if (wgTickTimer) { clearInterval(wgTickTimer); wgTickTimer = null; }
+      return;
+    }
+    if (!wgTickTimer) {
+      wgTickTimer = setInterval(wgGlobalTick, 1000);
+    }
     WG_SECTIONS.forEach(function(sec) {
       var t = wgSectionTime(sec.id);
       var prevPeriod = _wgPrevPeriod[sec.id];
@@ -4928,6 +4942,11 @@
       }
       _wgPrevPeriod[sec.id] = t.period;
     });
+    var modal = document.getElementById('wgResultModal');
+    if (modal && modal.style.display === 'flex' && Date.now() >= _wgResultCloseAt) {
+      modal.style.display = 'none';
+      if (_wgResultTimer) { clearInterval(_wgResultTimer); _wgResultTimer = null; }
+    }
     wgRefreshDisplay();
   }
 
@@ -5151,6 +5170,7 @@
 // ---- Result Modal (with Violet Split display) ----
   var _wgResultTimer = null;
   var _wgResultSec = 0;
+  var _wgResultCloseAt = 0;
   function showWgResultModal(num, color, big, didWin, amt, noBet) {
     var modal = document.getElementById('wgResultModal');
     if (!modal) return;
@@ -5181,7 +5201,7 @@
       outcome.textContent = 'YOU WIN!';
       outcome.className = 'wg-r-outcome win';
       outcome.style.color = '';
-      amtEl.textContent = '₹' + amt.toFixed(2) + ' added to Reward Wallet';
+      amtEl.textContent = '₹' + amt.toFixed(2) + ' added to Withdraw Wallet';
     } else {
       outcome.textContent = 'YOU LOSE';
       outcome.className = 'wg-r-outcome lose';
@@ -5190,8 +5210,9 @@
     }
 
     modal.style.display = 'flex';
-    _wgResultSec = 2;
-    document.getElementById('wgRClose').textContent = _wgResultSec;
+    _wgResultCloseAt = Date.now() + 2500;
+    _wgResultSec = 3;
+    document.getElementById('wgRClose').textContent = '3';
     _wgResultTimer = setInterval(function() {
       _wgResultSec--;
       var el = document.getElementById('wgRClose');
