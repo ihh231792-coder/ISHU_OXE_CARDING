@@ -3966,23 +3966,22 @@
 
   function renderPayMethods() {
     var methods = [
-      { id:'gpay', name:'Google Pay', icon:'https://cdn-icons-png.flaticon.com/512/6121/6121969.png', uri:'tez' },
-      { id:'phonepe', name:'PhonePe', icon:'https://cdn-icons-png.flaticon.com/512/5969/5969290.png', uri:'phonepe' },
-      { id:'paytm', name:'Paytm', icon:'https://cdn-icons-png.flaticon.com/512/6121/6121980.png', uri:'paytm' },
-      { id:'bhim', name:'BHIM', icon:'https://cdn-icons-png.flaticon.com/512/5969/5969284.png', uri:'bhim' },
-      { id:'amazonpay', name:'Amazon Pay', icon:'https://cdn-icons-png.flaticon.com/512/6121/6121971.png', uri:'amazonpay' },
-      { id:'cred', name:'CRED', icon:'https://cdn-icons-png.flaticon.com/512/6121/6121974.png', uri:'cred' },
-      { id:'navi', name:'Navi', icon:'https://cdn-icons-png.flaticon.com/512/6121/6121977.png', uri:'navi' },
-      { id:'mobikwik', name:'MobiKwik', icon:'https://cdn-icons-png.flaticon.com/512/6121/6121983.png', uri:'mobikwik' },
-      { id:'freecharge', name:'Freecharge', icon:'https://cdn-icons-png.flaticon.com/512/5969/5969325.png', uri:'freecharge' },
-      { id:'upi', name:'Any UPI', icon:'https://cdn-icons-png.flaticon.com/512/5969/5969298.png', uri:'upi' },
-      { id:'netbanking', name:'Net Banking', icon:'https://cdn-icons-png.flaticon.com/512/5969/5969287.png', uri:'netbanking' },
-      { id:'whatsapp', name:'WhatsApp Pay', icon:'https://cdn-icons-png.flaticon.com/512/5969/5969299.png', uri:'whatsapp' },
+      { id:'gpay', name:'Google Pay', icon:'https://logo.clearbit.com/pay.google.com', uri:'tez' },
+      { id:'phonepe', name:'PhonePe', icon:'https://logo.clearbit.com/phonepe.com', uri:'phonepe' },
+      { id:'paytm', name:'Paytm', icon:'https://logo.clearbit.com/paytm.com', uri:'paytm' },
+      { id:'bhim', name:'BHIM', icon:'https://logo.clearbit.com/bhimupi.org.in', uri:'bhim' },
+      { id:'amazonpay', name:'Amazon Pay', icon:'https://logo.clearbit.com/amazon.in', uri:'amazonpay' },
+      { id:'cred', name:'CRED', icon:'https://logo.clearbit.com/cred.club', uri:'cred' },
+      { id:'navi', name:'Navi', icon:'https://logo.clearbit.com/navi.com', uri:'navi' },
+      { id:'mobikwik', name:'MobiKwik', icon:'https://logo.clearbit.com/mobikwik.com', uri:'mobikwik' },
+      { id:'freecharge', name:'Freecharge', icon:'https://logo.clearbit.com/freecharge.in', uri:'freecharge' },
+      { id:'upi', name:'Any UPI', icon:'https://logo.clearbit.com/upi.org.in', uri:'upi' },
+      { id:'whatsapp', name:'WhatsApp Pay', icon:'https://logo.clearbit.com/whatsapp.com', uri:'whatsapp' },
     ];
     var container = document.getElementById('payMethods');
     container.innerHTML = methods.map(function(m) {
       return '<div class="pay-method" id="pm-' + m.id + '" onclick="selectPayMethod(\'' + m.id + '\',\'' + m.uri + '\')">' +
-        '<img src="' + m.icon + '" alt="' + m.name + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+        '<img src="' + m.icon + '" alt="' + m.name + '" loading="lazy" onerror="this.src=\'https://ui-avatars.com/api/?name=' + encodeURIComponent(m.name) + '&background=2563eb&color=fff&size=64\'">' +
         '<div class="pm-name">' + m.name + '</div></div>';
     }).join('');
   }
@@ -3997,7 +3996,9 @@
 
     // Open UPI app via intent URL
     var upiDeepLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR&am=' + _pendingDepositAmount;
-    if (uri !== 'upi' && uri !== 'netbanking') {
+    if (uri === 'upi') {
+      window.open(upiDeepLink, '_blank');
+    } else {
       // Try app-specific deep link
       var appLinks = {
         'tez': 'https://pay.google.com/gp/p/ui/pay?pa=7381374701@ybl&pn=ISHU_OXE&am=' + _pendingDepositAmount,
