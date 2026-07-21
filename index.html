@@ -4823,7 +4823,7 @@
     document.getElementById('wgSelInfo').textContent = 'Select a color to bet';
     document.getElementById('wgPlaceBtn').disabled = false;
     document.getElementById('wgPlaceBtn').textContent = '► Place Bet';
-    document.getElementById('wgResultModal').classList.remove('show');
+    document.getElementById('wgResultModal').style.display = 'none';
     document.getElementById('wgBetAmount').value = '';
     document.querySelectorAll('.wg-stab').forEach(function(e) { e.classList.toggle('active', e.dataset.section === wgSection); });
     renderWgNumGrid();
@@ -5075,8 +5075,8 @@
   var _wgResultSec = 0;
   function showWgResultModal(num, color, big, didWin, amt, noBet) {
     var modal = document.getElementById('wgResultModal');
+    if (!modal) return;
     if (_wgResultTimer) { clearInterval(_wgResultTimer); _wgResultTimer = null; }
-    updateBodyScrollLock();
     document.getElementById('wgRPeriod').textContent = 'Period: ' + document.getElementById('wgPeriod').textContent;
     var colorHex = { green:'#22c55e', red:'#ef4444', violet:'#a855f7' };
     document.getElementById('wgRNum').style.background = colorHex[color];
@@ -5111,19 +5111,17 @@
       amtEl.textContent = 'Better luck next time!';
     }
 
-    modal.classList.add('show');
-    updateBodyScrollLock();
+    modal.style.display = 'flex';
     _wgResultSec = 2;
     document.getElementById('wgRClose').textContent = _wgResultSec;
     _wgResultTimer = setInterval(function() {
       _wgResultSec--;
       var el = document.getElementById('wgRClose');
-      if (el) el.textContent = _wgResultSec;
+      if (el) el.textContent = _wgResultSec > 0 ? _wgResultSec : 0;
       if (_wgResultSec <= 0) {
         clearInterval(_wgResultTimer);
         _wgResultTimer = null;
-        modal.classList.remove('show');
-        updateBodyScrollLock();
+        modal.style.display = 'none';
       }
     }, 1000);
   }
