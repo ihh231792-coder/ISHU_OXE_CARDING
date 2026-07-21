@@ -5109,12 +5109,16 @@
 
     modal.classList.add('show');
     updateBodyScrollLock();
-    var sec = 3;
+    var sec = 2;
     document.getElementById('wgRClose').textContent = sec;
     var closeTimer = setInterval(function() {
       sec--;
       document.getElementById('wgRClose').textContent = sec;
-      if (sec <= 0) clearInterval(closeTimer);
+      if (sec <= 0) {
+        clearInterval(closeTimer);
+        modal.classList.remove('show');
+        updateBodyScrollLock();
+      }
     }, 1000);
   }
 
