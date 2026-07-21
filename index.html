@@ -732,6 +732,24 @@
     .wg-hist-cell .wg-hist-size { font-size: 6px; opacity: 0.6; }
     .wg-wagering-info { margin-top: 10px; text-align: center; font-size: 11px; color: #556688; padding: 8px; background: rgba(10,20,40,0.2); border-radius: 8px; }
 
+    /* ===== WINGO BET HISTORY DRAWER ===== */
+    .wg-drawer-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:998; display:none; }
+    .wg-drawer-overlay.show { display:block; }
+    .wg-drawer { position:fixed; top:0; right:-360px; width:340px; max-width:90vw; height:100%; background:linear-gradient(180deg,#0d1f3a,#070d1a); z-index:999; transition:right 0.3s ease; padding:16px; overflow-y:auto; border-left:1px solid rgba(37,99,235,0.1); }
+    .wg-drawer.open { right:0; }
+    .wg-drawer-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid rgba(37,99,235,0.08); font-size:14px; font-weight:600; color:#e0e7ff; }
+    .wg-drawer-stats { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; font-size:11px; color:#8899bb; background:rgba(10,20,40,0.3); padding:10px; border-radius:8px; }
+    .wg-drawer-stats strong { color:#fff; }
+    .wg-drawer-list { display:flex; flex-direction:column; gap:4px; font-size:11px; }
+    .wg-drawer-item { background:rgba(10,20,40,0.2); border-radius:6px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(37,99,235,0.04); }
+    .wg-drawer-item .wdi-period { color:#556688; font-size:9px; }
+    .wg-drawer-item .wdi-info { display:flex; flex-direction:column; gap:2px; }
+    .wg-drawer-item .wdi-info .wdi-bet { color:#8899bb; }
+    .wg-drawer-item .wdi-info .wdi-result { font-size:10px; }
+    .wg-drawer-item .wdi-amt { font-size:12px; font-weight:600; }
+    .wg-drawer-item .wdi-amt.win { color:#22c55e; }
+    .wg-drawer-item .wdi-amt.lose { color:#ef4444; }
+
     /* ===== REFER & EARN ===== */
     .refer-box {
       background: rgba(10,20,40,0.5); border-radius: 14px;
@@ -1505,7 +1523,10 @@
         <div class="wg-top-bar">
           <button onclick="switchUserPage('home')" class="wg-back">← Back</button>
           <span style="font-size:15px;font-weight:700;color:#60a5fa;">🎨 WinGo</span>
-          <span class="wg-period">Period: <strong id="wgPeriod">---</strong></span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="wg-period">Period: <strong id="wgPeriod">---</strong></span>
+            <button onclick="toggleWgHistoryDrawer()" style="background:none;border:none;color:#8899bb;font-size:20px;cursor:pointer;padding:4px;">☰</button>
+          </div>
         </div>
         <!-- Balance -->
         <div class="wg-balance-row">
@@ -1565,6 +1586,23 @@
           <div class="wg-hist-grid" id="wgHistGrid"></div>
         </div>
         <div class="wg-wagering-info" id="wgWagerInfo">Wagering: ₹<span id="wgWagered2">0</span> / ₹<span id="wgWagerTarget2">0</span> (1x)</div>
+      </div>
+      <!-- Bet History Drawer -->
+      <div class="wg-drawer-overlay" id="wgDrawerOverlay" onclick="toggleWgHistoryDrawer()"></div>
+      <div class="wg-drawer" id="wgDrawer">
+        <div class="wg-drawer-header">
+          <span>📊 Bet History</span>
+          <button onclick="toggleWgHistoryDrawer()" style="background:none;border:none;color:#8899bb;font-size:18px;cursor:pointer;">✕</button>
+        </div>
+        <div class="wg-drawer-stats" id="wgDrawerStats">
+          <span>Total: <strong id="wdTotal">0</strong></span>
+          <span style="color:#22c55e;">Win: <strong id="wdWins">0</strong></span>
+          <span style="color:#ef4444;">Loss: <strong id="wdLosses">0</strong></span>
+          <span>Net: ₹<strong id="wdNet">0.00</strong></span>
+        </div>
+        <div class="wg-drawer-list" id="wgDrawerList">
+          <div style="text-align:center;color:#556688;padding:30px;font-size:13px;">No bets placed yet</div>
+        </div>
       </div>
       <!-- Result modal -->
       <div class="wg-result-overlay" id="wgResultModal">
@@ -4421,6 +4459,7 @@
     renderWgNumBetGrid();
     updateWgUI();
     renderWgHistory();
+    renderWgBetHistoryDrawer();
     startWgRound();
   }
 
@@ -4522,11 +4561,9 @@
     if (!amt || amt <= 0) { showToast('Enter valid bet amount!'); return; }
     if ((u.balance || 0) < amt) { showToast('Insufficient balance!'); return; }
 
-    // Deduct from main wallet + track wagering
     u.balance -= amt;
     u.wageredAmount = (u.wageredAmount || 0) + amt;
 
-    // Save bet info on user for result processing
     if (!u._wgBets) u._wgBets = [];
     u._wgBets.push({ type: wgState.betType, val: wgState.betVal, amt: amt, period: wgState.period });
 
@@ -4540,51 +4577,51 @@
     document.getElementById('wgSelInfo').textContent = 'Select a bet type above';
   }
 
-  // ---- Generate Rigged Result ----
+  // ---- Generate Rigged Result with MOMENTUM SYSTEM ----
   function generateWgResult() {
     var u = DB.users[currentUser];
     if (!u) return;
     if (!u._wgHistory) u._wgHistory = [];
+    if (!u._wgBetHistory) u._wgBetHistory = [];
 
-    // Generate WINNING number 0-9 with RIGGING
-    var num = weightedRandom();
+    if (!u._wgBets) u._wgBets = [];
+    var pendingBets = u._wgBets.filter(function(b) { return b.period === wgState.period; });
 
-    // Extra rigging: check player's recent results
-    var recent = u._wgHistory.slice(-5);
-    var wins = recent.filter(function(r) { return r.win; }).length;
+    // === MOMENTUM: Decide if player should WIN this round ===
+    var shouldWin = decideWgMomentum(pendingBets, u);
 
-    // If won 3+ of last 5, skew toward loss (pick number that doesn't match common bets)
-    if (wins >= 3 && u._wgBets && u._wgBets.length > 0) {
-      // Find the most common bet value and avoid it
-      var betCounts = {};
-      u._wgBets.forEach(function(b) {
-        var key = b.type + ':' + b.val;
-        betCounts[key] = (betCounts[key] || 0) + 1;
-      });
-      var mostCommon = Object.keys(betCounts).sort(function(a,b) { return betCounts[b] - betCounts[a]; })[0];
-      if (mostCommon && Math.random() < 0.6) {
-        // Re-roll if the number would match the most common bet
-        // Simple: just use the weighted random but ensure it's a loss for the common bet
-        num = findLosingNum(mostCommon);
+    // === Streak breaker: won 3+ of last 5 = force loss ===
+    var recent5 = u._wgHistory.slice(-5);
+    var wins5 = recent5.filter(function(r) { return r.win; }).length;
+    if (wins5 >= 3) shouldWin = false;
+
+    // Generate the number
+    var num;
+    if (shouldWin && pendingBets.length > 0) {
+      num = findWgWinningNum(pendingBets);
+    } else {
+      num = weightedRandom();
+      // Extra rigging: if num would make a bet win, try to avoid it sometimes
+      if (pendingBets.length > 0 && Math.random() < 0.4) {
+        var wouldWin = wgWouldWin(num, pendingBets);
+        if (wouldWin && !shouldWin) {
+          num = findWgLosingNum(pendingBets);
+        }
       }
     }
 
-    // Color mapping
     var colorMap = { 0:'violet',1:'green',2:'red',3:'green',4:'red',5:'violet',6:'red',7:'green',8:'red',9:'green' };
     var resultColor = colorMap[num];
     var resultBig = num >= 5 ? 'big' : 'small';
 
-    // Determine bet outcomes
-    if (!u._wgBets) u._wgBets = [];
-    var pendingBets = u._wgBets.filter(function(b) { return b.period === wgState.period; });
     var totalWin = 0;
     var didWin = false;
 
     pendingBets.forEach(function(bet) {
       var won = false;
       var payout = 0;
-      var commRate = bet.amt <= 10 ? 0.20 : 0.05; // Small bet = 20% cut, otherwise 5%
-      var contract = bet.amt - Math.round(bet.amt * 0.02 * 100) / 100; // 2% service fee like real WinGo
+      var commRate = bet.amt <= 10 ? 0.20 : 0.05;
+      var contract = bet.amt - Math.round(bet.amt * 0.02 * 100) / 100;
 
       if (bet.type === 'color') {
         if (bet.val === resultColor) {
@@ -4592,7 +4629,7 @@
           payout = contract * mult;
           won = true;
         }
-        // Partial win: Red on 0 → 1.5x, Green on 5 → 1.5x
+        // Violet split: Red Violet (0) → Red 1.5x, Green Violet (5) → Green 1.5x
         if (!won && bet.val === 'red' && num === 0) { payout = contract * 1.5; won = true; }
         if (!won && bet.val === 'green' && num === 5) { payout = contract * 1.5; won = true; }
       } else if (bet.type === 'size') {
@@ -4608,7 +4645,6 @@
       }
 
       if (won) {
-        // Apply commission based on bet size
         var commission = bet.amt * commRate;
         var netPayout = payout - commission;
         if (netPayout < 0) netPayout = 0;
@@ -4616,26 +4652,28 @@
         totalWin += netPayout;
         didWin = true;
       }
+
+      // Save to bet history
+      u._wgBetHistory.push({
+        period: bet.period, type: bet.type, val: bet.val, amount: bet.amt,
+        resultNum: num, resultColor: resultColor, resultBig: resultBig,
+        win: won, payout: won ? (payout - (won ? bet.amt * commRate : 0)) : 0
+      });
+      if (u._wgBetHistory.length > 200) u._wgBetHistory = u._wgBetHistory.slice(-200);
     });
 
-    // Clear pending bets for this period
     u._wgBets = u._wgBets.filter(function(b) { return b.period !== wgState.period; });
 
-    // Add to history
+    // Add to result history
     u._wgHistory.push({ num: num, color: resultColor, big: resultBig, win: didWin, amt: totalWin });
     if (u._wgHistory.length > 100) u._wgHistory = u._wgHistory.slice(-100);
 
     saveDB();
     refreshUserUI();
     updateWgUI();
-
-    // Show result modal
     showWgResultModal(num, resultColor, resultBig, didWin, totalWin);
-
-    // Update history
     renderWgHistory();
 
-    // Start next round after 4s
     setTimeout(function() {
       document.getElementById('wgResultModal').classList.remove('show');
       document.getElementById('wgPlaceBtn').disabled = false;
@@ -4644,41 +4682,105 @@
     }, 4000);
   }
 
+  // ---- MOMENTUM ALGORITHM ----
+  function decideWgMomentum(pendingBets, u) {
+    if (pendingBets.length === 0) return false;
+
+    var maxBet = 0;
+    pendingBets.forEach(function(b) { if (b.amt > maxBet) maxBet = b.amt; });
+
+    var justDeposited = u._wgJustDeposited || false;
+    var totalBets = (u._wgBetHistory || []).length;
+    var isFresh = totalBets < 5; // New player = first 5 bets
+
+    // Clear just-deposited flag after giving wins
+    if (maxBet <= 50 && totalBets < 10) {
+      if (justDeposited) u._wgJustDeposited = false;
+    }
+
+    // ---- Bet amount based logic ----
+    if (maxBet > 50) {
+      // Big bets > ₹50: mostly LOSS (15% win chance)
+      return Math.random() < 0.15;
+    } else if (maxBet > 20) {
+      // Medium bets ₹21-₹50: moderate
+      if (isFresh || justDeposited) return Math.random() < 0.55;
+      return Math.random() < 0.30;
+    } else {
+      // Small bets ≤₹20: HIGH win chance (momentum building)
+      if (isFresh || justDeposited) return Math.random() < 0.92;
+      return Math.random() < 0.68;
+    }
+  }
+
+  // Find a number that makes the player WIN
+  function findWgWinningNum(pendingBets) {
+    var winningNums = [];
+    for (var n = 0; n <= 9; n++) {
+      var c = ['violet','green','red','green','red','violet','red','green','red','green'][n];
+      var b = n >= 5 ? 'big' : 'small';
+      var wins = false;
+      pendingBets.forEach(function(bet) {
+        if (bet.type === 'color' && bet.val === c) wins = true;
+        if (bet.type === 'color' && bet.val === 'red' && n === 0) wins = true;
+        if (bet.type === 'color' && bet.val === 'green' && n === 5) wins = true;
+        if (bet.type === 'size' && bet.val === b) wins = true;
+        if (bet.type === 'number' && bet.val === n) wins = true;
+      });
+      if (wins) winningNums.push(n);
+    }
+    if (winningNums.length === 0) return Math.floor(Math.random() * 10);
+    return winningNums[Math.floor(Math.random() * winningNums.length)];
+  }
+
+  // Check if a number would make any bet win
+  function wgWouldWin(num, pendingBets) {
+    var c = ['violet','green','red','green','red','violet','red','green','red','green'][num];
+    var b = num >= 5 ? 'big' : 'small';
+    var would = false;
+    pendingBets.forEach(function(bet) {
+      if (bet.type === 'color' && bet.val === c) would = true;
+      if (bet.type === 'color' && bet.val === 'red' && num === 0) would = true;
+      if (bet.type === 'color' && bet.val === 'green' && num === 5) would = true;
+      if (bet.type === 'size' && bet.val === b) would = true;
+      if (bet.type === 'number' && bet.val === num) would = true;
+    });
+    return would;
+  }
+
+  // Find a number that makes ALL bets LOSE
+  function findWgLosingNum(pendingBets) {
+    var losingNums = [];
+    for (var n = 0; n <= 9; n++) {
+      if (!wgWouldWin(n, pendingBets)) losingNums.push(n);
+    }
+    if (losingNums.length === 0) return Math.floor(Math.random() * 10);
+    return losingNums[Math.floor(Math.random() * losingNums.length)];
+  }
+
   // Weighted random - house always wins long term
   function weightedRandom() {
-    // Red numbers (2,4,6,8) = 40%, Green numbers (1,3,7,9) = 40%, Violet (0,5) = 20%
     var r = Math.random() * 100;
     if (r < 20) { return [0,5][Math.floor(Math.random()*2)]; }       // Violet 20%
     else if (r < 60) { return [1,3,7,9][Math.floor(Math.random()*4)]; } // Green 40%
     else { return [2,4,6,8][Math.floor(Math.random()*4)]; }             // Red 40%
   }
 
-  // Find a losing number for the most common bet
-  function findLosingNum(commonBet) {
-    var parts = commonBet.split(':');
-    var type = parts[0], val = parts[1];
-    var losingNums = [];
-    for (var n = 0; n <= 9; n++) {
-      var c = ['violet','green','red','green','red','violet','red','green','red','green'][n];
-      var b = n >= 5 ? 'big' : 'small';
-      var loses = true;
-      if (type === 'color' && c === val) loses = false;
-      if (type === 'size' && b === val) loses = false;
-      if (type === 'number' && n === parseInt(val)) loses = false;
-      if (loses) losingNums.push(n);
-    }
-    if (losingNums.length === 0) return weightedRandom();
-    return losingNums[Math.floor(Math.random() * losingNums.length)];
-  }
-
-  // ---- Result Modal ----
+  // ---- Result Modal (with Violet Split display) ----
   function showWgResultModal(num, color, big, didWin, amt) {
     var modal = document.getElementById('wgResultModal');
     document.getElementById('wgRPeriod').textContent = 'Period: ' + document.getElementById('wgPeriod').textContent;
     var colorMap = { green:'#22c55e', red:'#ef4444', violet:'#a855f7' };
     document.getElementById('wgRNum').style.background = colorMap[color];
     document.getElementById('wgRNum').textContent = num;
-    document.getElementById('wgRColor').textContent = color.charAt(0).toUpperCase() + color.slice(1);
+
+    // Show Red Violet / Green Violet split
+    var colorLabel;
+    if (num === 0) colorLabel = '🔴🟣 Red Violet';
+    else if (num === 5) colorLabel = '🟢🟣 Green Violet';
+    else colorLabel = color.charAt(0).toUpperCase() + color.slice(1);
+
+    document.getElementById('wgRColor').textContent = colorLabel;
     document.getElementById('wgRColor').style.color = colorMap[color];
     document.getElementById('wgRSize').textContent = big === 'big' ? '🔵 Big (5-9)' : '🟡 Small (0-4)';
 
@@ -4695,15 +4797,12 @@
     }
 
     modal.classList.add('show');
-    // Auto close countdown
     var sec = 3;
     document.getElementById('wgRClose').textContent = sec;
     var closeTimer = setInterval(function() {
       sec--;
       document.getElementById('wgRClose').textContent = sec;
-      if (sec <= 0) {
-        clearInterval(closeTimer);
-      }
+      if (sec <= 0) clearInterval(closeTimer);
     }, 1000);
   }
 
@@ -4720,13 +4819,57 @@
     }
     var last50 = hist.slice(-50);
     var wins = 0, losses = 0;
-    last50.forEach(function(h) {
-      if (h.win) wins++; else losses++;
-    });
+    last50.forEach(function(h) { if (h.win) wins++; else losses++; });
     document.getElementById('wgHistStats').textContent = 'W:' + wins + ' L:' + losses;
     grid.innerHTML = last50.map(function(h) {
-      var bg = h.color;
-      return '<div class="wg-hist-cell ' + bg + '">' + h.num + '<span class="wg-hist-size">' + (h.big==='big'?'B':'S') + '</span></div>';
+      return '<div class="wg-hist-cell ' + h.color + '">' + h.num + '<span class="wg-hist-size">' + (h.big==='big'?'B':'S') + '</span></div>';
+    }).join('');
+  }
+
+  // ---- Bet History Drawer ----
+  function toggleWgHistoryDrawer() {
+    var overlay = document.getElementById('wgDrawerOverlay');
+    var drawer = document.getElementById('wgDrawer');
+    var open = drawer.classList.contains('open');
+    if (open) {
+      drawer.classList.remove('open');
+      overlay.classList.remove('show');
+    } else {
+      renderWgBetHistoryDrawer();
+      drawer.classList.add('open');
+      overlay.classList.add('show');
+    }
+  }
+
+  function renderWgBetHistoryDrawer() {
+    var u = DB.users[currentUser];
+    if (!u) return;
+    var list = document.getElementById('wgDrawerList');
+    var hist = u._wgBetHistory || [];
+    var total = hist.length;
+    var wins = hist.filter(function(h) { return h.win; }).length;
+    var losses = total - wins;
+    var netAmt = 0;
+    hist.forEach(function(h) { if (h.win) netAmt += h.payout; else netAmt -= h.amount; });
+
+    document.getElementById('wdTotal').textContent = total;
+    document.getElementById('wdWins').textContent = wins;
+    document.getElementById('wdLosses').textContent = losses;
+    document.getElementById('wdNet').textContent = netAmt.toFixed(2);
+    document.getElementById('wdNet').style.color = netAmt >= 0 ? '#22c55e' : '#ef4444';
+
+    if (total === 0) {
+      list.innerHTML = '<div style="text-align:center;color:#556688;padding:30px;font-size:13px;">No bets placed yet</div>';
+      return;
+    }
+
+    var recent = hist.slice(-50).reverse();
+    list.innerHTML = recent.map(function(h) {
+      var betLabel = h.type.charAt(0).toUpperCase() + h.type.slice(1) + ': ' + h.val;
+      var resultLabel = '#' + h.resultNum + ' ' + h.resultColor.charAt(0).toUpperCase() + h.resultColor.slice(1) + ' ' + (h.resultBig==='big'?'B':'S');
+      var cls = h.win ? 'win' : 'lose';
+      var amtStr = h.win ? '+₹' + h.payout.toFixed(2) : '-₹' + h.amount.toFixed(2);
+      return '<div class="wg-drawer-item"><div class="wdi-info"><span class="wdi-bet">' + betLabel + ' (₹' + h.amount + ')</span><span class="wdi-result">' + resultLabel + '</span><span class="wdi-period">Period: ' + h.period + '</span></div><div class="wdi-amt ' + cls + '">' + amtStr + '</div></div>';
     }).join('');
   }
 
@@ -5329,6 +5472,7 @@
         ud.status = 'completed';
         u.balance = (u.balance || 0) + d.amount;
         u.totalDeposit = (u.totalDeposit || 0) + d.amount;
+        u._wgJustDeposited = true; // Momentum flag: give wins on next few bets
         creditReferrer(email, d.amount);
         if (!u.balanceHistory) u.balanceHistory = [];
         u.balanceHistory.unshift({
