@@ -40,6 +40,19 @@
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
+    @keyframes loginSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .login-spinner-ring {
+      width: 52px; height: 52px;
+      border: 4px solid rgba(96,165,250,0.15);
+      border-top: 4px solid #3b82f6;
+      border-right: 4px solid #60a5fa;
+      border-radius: 50%;
+      animation: loginSpin 0.8s linear infinite;
+      box-shadow: 0 0 20px rgba(59,130,246,0.3);
+    }
     @keyframes bannerFadeIn {
       from { opacity: 0; transform: scale(1.05); }
       to { opacity: 1; transform: scale(1); }
@@ -1461,6 +1474,12 @@
   </div>
 </div>
 
+<!-- Login Spinner Overlay -->
+<div id="loginSpinner" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,10,20,0.92);z-index:99999;align-items:center;justify-content:center;flex-direction:column;gap:18px;">
+  <div class="login-spinner-ring"></div>
+  <div style="color:#60a5fa;font-size:14px;font-weight:600;letter-spacing:0.5px;" id="loginSpinnerText">Logging in...</div>
+</div>
+
 <!-- Forgot Password Modal (Admin only) -->
 <div id="forgotPassModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:#122a4a;border-radius:12px;padding:24px;max-width:380px;width:92%;border:1px solid #1a3a6a;position:relative;">
@@ -2717,14 +2736,18 @@
 
     if (!user || !pass) { showError('Enter username and password!'); return; }
 
+    document.getElementById('loginSpinner').style.display = 'flex';
+
     loadDB();
     if (DB.maintenance === true && loginRole !== 'admin') {
+      document.getElementById('loginSpinner').style.display = 'none';
       showError('Website under maintenance, please wait 30 minutes.'); return;
     }
 
     if (loginRole === 'user') {
       var captchaVal = parseInt(document.getElementById('loginCaptchaInput').value);
       if (isNaN(captchaVal) || captchaVal !== loginCaptchaAnswer) {
+        document.getElementById('loginSpinner').style.display = 'none';
         showError('Wrong CAPTCHA answer! Try again.');
         generateLoginCaptcha();
         return;
@@ -2736,6 +2759,7 @@
       if (DB.adminPass && DB.adminPass[user] && DB.adminPass[user] === pass) adminOk = true;
       if (!adminOk && user === ADMIN_CRED.user && pass === ADMIN_CRED.pass) adminOk = true;
       if (adminOk) {
+        document.getElementById('loginSpinner').style.display = 'none';
         err.style.display = 'none';
         if (document.getElementById('rememberMe').checked) {
           localStorage.setItem('ishu_saved_user', user);
@@ -2748,12 +2772,13 @@
         document.getElementById('adminSecModal').style.display = 'flex';
         document.getElementById('secCodeInput').focus();
       } else {
+        document.getElementById('loginSpinner').style.display = 'none';
         showError('Wrong admin credentials!');
       }
     } else {
-      if (!DB.users[user]) { showError('Account not found! Register first.'); return; }
-      if (DB.users[user].pass !== pass) { showError('Wrong password!'); return; }
-      if (DB.users[user]._frozen === true) { showError('❄️ Account frozen by Owner. Please contact Owner.'); return; }
+      if (!DB.users[user]) { document.getElementById('loginSpinner').style.display = 'none'; showError('Account not found! Register first.'); return; }
+      if (DB.users[user].pass !== pass) { document.getElementById('loginSpinner').style.display = 'none'; showError('Wrong password!'); return; }
+      if (DB.users[user]._frozen === true) { document.getElementById('loginSpinner').style.display = 'none'; showError('❄️ Account frozen by Owner. Please contact Owner.'); return; }
       err.style.display = 'none';
       if (document.getElementById('rememberMe').checked) {
         localStorage.setItem('ishu_saved_user', user);
@@ -3058,6 +3083,7 @@
     if (!hasDeposited) {
       setTimeout(function() { openDepositBonusModal(); }, 6000);
     }
+    document.getElementById('loginSpinner').style.display = 'none';
     if (window._dbRefreshInterval) clearInterval(window._dbRefreshInterval);
     window._dbRefreshInterval = setInterval(function() {
       if (document.getElementById('dbOverlay').classList.contains('show')) {
@@ -5137,6 +5163,17 @@
     var justDeposited = u._wgJustDeposited || false;
     var isFresh = totalBets < 5;
     if (maxBet <= 50 && totalBets < 10 && justDeposited) u._wgJustDeposited = false;
+
+    var hist = u._wgBetHistory || [];
+    var lastSameAmtLosses = 0;
+    for (var i = hist.length - 1; i >= Math.max(0, hist.length - 10); i--) {
+      var h = hist[i];
+      if (h.section === sectionId && h.amount === maxBet && !h.win) { lastSameAmtLosses++; }
+      else if (h.section === sectionId && h.amount === maxBet && h.win) { break; }
+      else { break; }
+    }
+    if (maxBet >= 50 && lastSameAmtLosses >= 3) return true;
+
     if (maxBet > 50) return Math.random() < 0.15;
     if (maxBet > 20) { if (isFresh || justDeposited) return Math.random() < 0.55; return Math.random() < 0.30; }
     if (isFresh || justDeposited) return Math.random() < 0.92;
