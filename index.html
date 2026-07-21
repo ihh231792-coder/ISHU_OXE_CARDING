@@ -2751,10 +2751,18 @@
 
     if (!user || !pass) { showError('Enter username and password!'); return; }
 
-    // Show spinner for ALL login types
+    // Show spinner, force browser repaint, then do login logic
     document.getElementById('loginSpinner').style.display = 'flex';
     document.getElementById('loginSpinnerText').textContent = loginRole === 'admin' ? 'Verifying...' : 'Logging in...';
 
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        doLoginLogic(user, pass, err);
+      });
+    });
+  }
+
+  function doLoginLogic(user, pass, err) {
     loadDB();
     if (DB.maintenance === true && loginRole !== 'admin') {
       document.getElementById('loginSpinner').style.display = 'none';
