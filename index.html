@@ -825,6 +825,13 @@
     .db-footer label input { accent-color:#3b82f6; }
     .db-footer .db-activity-btn { background:rgba(37,99,235,0.1); border:none; color:#60a5fa; padding:8px 18px; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; transition:0.3s; }
     .db-footer .db-activity-btn:hover { background:rgba(37,99,235,0.2); }
+    .db-page-summary { background:linear-gradient(145deg,#0b1a33,#0d1f3a); border-radius:14px; padding:18px; margin-bottom:18px; border:1px solid rgba(37,99,235,0.12); }
+    .db-page-summary .db-ps-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .db-page-summary .db-ps-label { font-size:12px; color:#8899bb; }
+    .db-page-summary .db-ps-val { font-size:16px; font-weight:800; color:#e0e7ff; }
+    .db-page-summary .db-ps-val.gold { color:#fbbf24; }
+    .db-page-summary .db-ps-bar { background:rgba(0,0,0,0.3); border-radius:8px; height:10px; overflow:hidden; margin-top:6px; }
+    .db-page-summary .db-ps-bar-fill { height:100%; border-radius:8px; background:linear-gradient(90deg,#2563eb,#60a5fa); transition:width 0.6s ease; }
 
     /* ===== REFER & EARN ===== */
     .refer-box {
@@ -1571,6 +1578,7 @@
     <div class="nav-item" data-upage="mycards" onclick="switchUserPage('mycards')">My Cards</div>
     <div class="nav-item" data-upage="deposit" onclick="switchUserPage('deposit')">Deposit</div>
     <div class="nav-item" data-upage="reward" onclick="switchUserPage('reward')">Reward Wallet</div>
+    <div class="nav-item" data-upage="depbonus" onclick="switchUserPage('depbonus')">🎁 Deposit Bonus</div>
     <div class="nav-item" data-upage="buyhistory" onclick="switchUserPage('buyhistory')">Buy History</div>
     <div class="nav-item" data-upage="inbox" onclick="switchUserPage('inbox')">Inbox <span class="badge" id="inboxBadge" style="display:none;">0</span></div>
     <div class="nav-item" data-upage="query" onclick="switchUserPage('query')">Payment Query</div>
@@ -1806,6 +1814,12 @@
         <div class="refer-link" id="referLinkText" onclick="copyReferLink()">Loading...</div>
         <div style="font-size:11px;color:#556688;margin-top:6px;" id="referEarnings">Referral Earnings: ₹<strong id="referEarningAmount">0</strong></div>
       </div>
+    </div>
+    <div class="page" id="upage-depbonus">
+      <h2 style="margin-bottom:4px;">🎁 Deposit Bonus Rewards</h2>
+      <p style="color:#8899bb;margin-bottom:16px;font-size:13px;">Claim rewards as you reach each deposit tier</p>
+      <div class="db-page-summary" id="dbPageSummary"></div>
+      <div id="dbPageTiers"></div>
     </div>
     <div class="page" id="upage-query">
       <div class="support-box" style="max-width:500px;margin:0 auto;">
@@ -3040,7 +3054,10 @@
     switchUserPage('home');
     startAutoSync();
     showAdBanner();
-    setTimeout(function() { openDepositBonusModal(); }, 6000);
+    var hasDeposited = (u.totalDeposit || 0) >= 100;
+    if (!hasDeposited) {
+      setTimeout(function() { openDepositBonusModal(); }, 6000);
+    }
     if (window._dbRefreshInterval) clearInterval(window._dbRefreshInterval);
     window._dbRefreshInterval = setInterval(function() {
       if (document.getElementById('dbOverlay').classList.contains('show')) {
@@ -3164,6 +3181,62 @@
     showToast('🎉 Claimed ₹' + tier.bonus + ' bonus!');
   }
 
+  function renderDepositBonusPage() {
+    var u = DB.users[currentUser];
+    if (!u) return;
+    var total = u.totalDeposit || 0;
+    var claimed = u._dbClaimed || [];
+    var totalBonus = 0;
+    var claimedBonus = 0;
+    var nextTier = null;
+    DEPOSIT_BONUS_TIERS.forEach(function(tier, i) {
+      totalBonus += tier.bonus;
+      if (claimed.indexOf(i) !== -1) claimedBonus += tier.bonus;
+      if (!nextTier && total < tier.target) nextTier = tier;
+    });
+    var nextNeed = nextTier ? (nextTier.target - total) : 0;
+    var maxTarget = DEPOSIT_BONUS_TIERS[DEPOSIT_BONUS_TIERS.length - 1].target;
+    var overallPct = Math.min(total / maxTarget * 100, 100);
+    var summary = document.getElementById('dbPageSummary');
+    summary.innerHTML =
+      '<div class="db-ps-row"><div class="db-ps-label">Total Deposited</div><div class="db-ps-val">₹' + total.toLocaleString('en-IN') + '</div></div>' +
+      '<div class="db-ps-row"><div class="db-ps-label">Bonus Earned</div><div class="db-ps-val gold">₹' + claimedBonus.toFixed(2) + '</div></div>' +
+      '<div class="db-ps-bar"><div class="db-ps-bar-fill" style="width:' + overallPct + '%;"></div></div>' +
+      '<div class="db-ps-row" style="margin-top:8px;"><div class="db-ps-label">Overall Progress</div><div class="db-ps-val">' + Math.round(overallPct) + '%</div></div>' +
+      (nextTier ? '<div class="db-ps-row"><div class="db-ps-label">Next Tier</div><div class="db-ps-val">₹' + nextNeed + ' more → ₹' + nextTier.bonus + ' bonus</div></div>' :
+        '<div class="db-ps-row"><div class="db-ps-label">Status</div><div class="db-ps-val gold">🎉 All tiers unlocked!</div></div>');
+    var tiersEl = document.getElementById('dbPageTiers');
+    tiersEl.innerHTML = DEPOSIT_BONUS_TIERS.map(function(tier, i) {
+      var filled = Math.min(total, tier.target);
+      var pct = (filled / tier.target * 100);
+      var reached = total >= tier.target;
+      var isClaimed = claimed.indexOf(i) !== -1;
+      var badge = isClaimed ? '✅ Claimed' : (reached ? '🎯 Unlocked' : '🔒 Locked');
+      var statusClass = isClaimed ? 'completed' : '';
+      var btnHtml;
+      if (isClaimed) {
+        btnHtml = '<button class="db-tier-btn completed" disabled>✅ Completed</button>';
+      } else if (reached) {
+        btnHtml = '<button class="db-tier-btn claim" onclick="claimDepositBonus(' + i + ');renderDepositBonusPage();">🎉 Claim Bonus ₹' + tier.bonus + '</button>';
+      } else {
+        btnHtml = '<button class="db-tier-btn deposit" onclick="switchUserPage(\'deposit\')">💰 Deposit ₹' + (tier.target - total) + ' more</button>';
+      }
+      return '<div class="db-tier ' + statusClass + '">' +
+        '<div class="db-tier-header">' +
+          '<div class="db-tier-title">' + tier.label + '</div>' +
+          '<div class="db-tier-badge">' + badge + '</div>' +
+        '</div>' +
+        '<div class="db-tier-reward">+ ₹' + tier.bonus.toFixed(2) + '</div>' +
+        '<div class="db-tier-desc">' + tier.desc + '</div>' +
+        '<div class="db-progress-wrap">' +
+          '<div class="db-progress-fill ' + (pct >= 100 ? 'complete' : '') + '" style="width:' + pct + '%;"></div>' +
+          '<div class="db-progress-text">₹' + filled + ' / ₹' + tier.target + '</div>' +
+        '</div>' +
+        btnHtml +
+      '</div>';
+    }).join('');
+  }
+
   // Mock function to test deposit bonus progress (call from console: updateDeposit(50))
   function updateDeposit(amount) {
     var u = DB.users[currentUser];
@@ -3227,6 +3300,7 @@
     if (name === 'inbox') renderUserInbox();
     if (name === 'deposit') renderUserDeposits();
     if (name === 'reward') renderRewardWallet();
+    if (name === 'depbonus') renderDepositBonusPage();
     if (name === 'query') renderUserQueries();
     if (name === 'history') renderUserHistory();
     if (name === 'support') renderUserTickets();
