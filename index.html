@@ -1176,7 +1176,35 @@
       .card-visual { height: 110px; }
       .deposit-box .qr-area { width: 160px; height: 160px; }
       .deposit-box .qr-area canvas, .deposit-box .qr-area img { width:160px; height:160px; }
+      .pay-methods { grid-template-columns:repeat(3,1fr); gap:8px; }
+      .pay-method { padding:10px 6px; }
+      .pay-method img { width:28px; height:28px; }
     }
+    .pay-page { max-width:480px; margin:0 auto; padding:20px 16px; }
+    .pay-header { text-align:center; margin-bottom:20px; }
+    .pay-header h2 { font-size:20px; color:#fff; }
+    .pay-header .amt { font-size:28px; font-weight:800; background:linear-gradient(135deg,#22c55e,#16a34a); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin:6px 0; }
+    .pay-qr { background:rgba(10,20,40,0.5); border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:24px; text-align:center; margin-bottom:16px; backdrop-filter:blur(10px); }
+    .pay-qr .qr-wrap { width:200px; height:200px; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; }
+    .pay-qr .qr-wrap canvas, .pay-qr .qr-wrap img { width:200px; height:200px; border-radius:8px; }
+    .pay-qr .upi-id { color:#60a5fa; font-size:15px; font-weight:600; }
+    .pay-qr .upi-label { color:rgba(255,255,255,0.4); font-size:11px; margin-top:2px; }
+    .pay-methods { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px; }
+    .pay-method { background:rgba(10,20,40,0.5); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px 8px; text-align:center; cursor:pointer; transition:0.3s; backdrop-filter:blur(10px); }
+    .pay-method:hover { border-color:rgba(37,99,235,0.3); background:rgba(37,99,235,0.08); transform:translateY(-2px); }
+    .pay-method.selected { border-color:#22c55e; background:rgba(34,197,94,0.08); box-shadow:0 0 20px rgba(34,197,94,0.1); }
+    .pay-method img { width:36px; height:36px; border-radius:8px; margin-bottom:4px; display:block; margin-left:auto; margin-right:auto; }
+    .pay-method .pm-name { font-size:10px; color:rgba(255,255,255,0.6); }
+    .pay-method .pm-name.active { color:#22c55e; }
+    .pay-utr { background:rgba(10,20,40,0.5); border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:20px; margin-bottom:16px; backdrop-filter:blur(10px); }
+    .pay-utr label { font-size:13px; color:rgba(255,255,255,0.7); display:block; margin-bottom:6px; }
+    .pay-utr input { width:100%; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); background:rgba(7,13,26,0.6); color:#fff; font-size:14px; text-align:center; outline:none; box-sizing:border-box; }
+    .pay-utr input:focus { border-color:rgba(96,165,250,0.3); }
+    .pay-submit { width:100%; padding:14px; border:none; border-radius:10px; background:linear-gradient(135deg,#22c55e,#16a34a); color:#fff; font-size:16px; font-weight:700; cursor:pointer; transition:0.3s; }
+    .pay-submit:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(34,197,94,0.3); }
+    .pay-submit:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+    .pay-back { display:inline-flex; align-items:center; gap:6px; color:rgba(255,255,255,0.5); font-size:13px; cursor:pointer; margin-bottom:16px; transition:0.3s; }
+    .pay-back:hover { color:#fff; }
   </style>
 </head>
 <body>
@@ -1386,16 +1414,36 @@
     <div class="page" id="upage-deposit">
       <div class="deposit-box">
         <h2>Deposit Funds</h2>
-        <p style="color:#8899bb;font-size:12px;">Pay via UPI to add balance</p>
-        <div class="qr-area"><div id="uQrCode"></div></div>
-        <p style="color:#8899bb;font-size:11px;margin-bottom:10px;">Scan with any UPI app</p>
-        <input type="number" id="uDepositAmount" placeholder="Amount in ₹">
-        <input type="text" id="uDepositTxn" placeholder="Transaction ID (UTI)">
-        <button class="submit-btn" onclick="userDeposit()">Submit</button>
-        <div class="note">Enter UTI after payment. Admin will verify & credit your balance.</div>
+        <p style="color:#8899bb;font-size:12px;margin-bottom:14px;">Enter amount & pay with any UPI app</p>
+        <input type="number" id="uDepositAmount" placeholder="Enter amount in ₹" oninput="togglePayNow()">
+        <button class="submit-btn" id="payNowBtn" onclick="showPaymentPage()" style="display:none;">Pay Now →</button>
+        <div class="note">After payment, you'll enter UTR/UTI to submit request.</div>
       </div>
       <h3 style="font-size:15px;margin:16px 0 8px;max-width:440px;margin-left:auto;margin-right:auto;">Your Deposit History</h3>
       <div id="uDepositHistory" style="max-width:440px;margin:0 auto;"></div>
+    </div>
+
+    <!-- ===== PAYMENT PAGE ===== -->
+    <div class="page" id="upage-pay">
+      <div class="pay-page">
+        <div class="pay-back" onclick="backToDeposit()">← Back to Deposit</div>
+        <div class="pay-header">
+          <h2>Complete Payment</h2>
+          <div class="amt" id="payAmountDisplay">₹0</div>
+        </div>
+        <div class="pay-qr">
+          <div class="qr-wrap" id="payQrContainer"></div>
+          <div class="upi-id">7381374701@ybl</div>
+          <div class="upi-label">UPI ID — Scan any UPI app to pay</div>
+        </div>
+        <p style="color:rgba(255,255,255,0.4);font-size:11px;margin-bottom:8px;text-align:center;">Choose your payment app</p>
+        <div class="pay-methods" id="payMethods"></div>
+        <div class="pay-utr">
+          <label>Enter UTR / Transaction ID after payment</label>
+          <input type="text" id="payUtrInput" placeholder="e.g. HDFC123456789" maxlength="50">
+        </div>
+        <button class="pay-submit" id="paySubmitBtn" onclick="submitPayment()">Submit & Verify</button>
+      </div>
     </div>
     <div class="page" id="upage-reward">
       <h2 style="margin-bottom:4px;">Reward Wallet</h2>
@@ -3392,7 +3440,6 @@
     document.getElementById('aBannerUploadProg').innerHTML = '<span style="color:#22c55e;">0%</span> <span style="font-size:9px;color:rgba(255,255,255,0.3);">' + '░'.repeat(20) + '</span>';
     readFileAsDataURL(file, function(dataUrl) {
       document.getElementById('aBannerUrlInput').value = dataUrl;
-      document.getElementById('aBannerUploadProg').innerHTML = '';
       showToast('Image loaded! Click "+ Add Banner" to save.');
     }, 'aBannerUploadProg');
     input.value = '';
@@ -3403,7 +3450,6 @@
     document.getElementById('aAppIconUploadProg').innerHTML = '<span style="color:#22c55e;">0%</span> <span style="font-size:9px;color:rgba(255,255,255,0.3);">' + '░'.repeat(20) + '</span>';
     readFileAsDataURL(file, function(dataUrl) {
       document.getElementById('aAppIconInput').value = dataUrl;
-      document.getElementById('aAppIconUploadProg').innerHTML = '';
       showToast('Icon loaded! Add app name & link, then click "+ Add".');
     }, 'aAppIconUploadProg');
     input.value = '';
@@ -3414,7 +3460,6 @@
     document.getElementById('aPAppIconUploadProg').innerHTML = '<span style="color:#22c55e;">0%</span> <span style="font-size:9px;color:rgba(255,255,255,0.3);">' + '░'.repeat(20) + '</span>';
     readFileAsDataURL(file, function(dataUrl) {
       document.getElementById('aPAppIconInput').value = dataUrl;
-      document.getElementById('aPAppIconUploadProg').innerHTML = '';
       showToast('Icon loaded! Add details, then click "+ Add".');
     }, 'aPAppIconUploadProg');
     input.value = '';
@@ -3886,25 +3931,121 @@
   }
 
   // ---- User: Deposit ----
-  function userDeposit() {
-    const amt = parseFloat(document.getElementById('uDepositAmount').value);
-    const txn = document.getElementById('uDepositTxn').value.trim();
-    if (!amt || amt <= 0) { showToast('Enter valid amount!'); return; }
-    if (!txn) { showToast('Enter Transaction ID!'); return; }
+  var _pendingDepositAmount = 0;
 
+  function togglePayNow() {
+    var amt = parseFloat(document.getElementById('uDepositAmount').value);
+    document.getElementById('payNowBtn').style.display = (amt && amt > 0) ? 'block' : 'none';
+  }
+
+  function showPaymentPage() {
+    var amt = parseFloat(document.getElementById('uDepositAmount').value);
+    if (!amt || amt <= 0) { showToast('Enter valid amount!'); return; }
+    _pendingDepositAmount = amt;
+    document.getElementById('payAmountDisplay').textContent = '₹' + amt.toFixed(2);
+    document.getElementById('payUtrInput').value = '';
+    document.getElementById('paySubmitBtn').disabled = false;
+    document.getElementById('paySubmitBtn').textContent = 'Submit & Verify';
+
+    // Generate QR
+    var qrContainer = document.getElementById('payQrContainer');
+    qrContainer.innerHTML = '';
+    var upiLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR&am=' + amt;
+    if (typeof QRCode !== 'undefined') {
+      new QRCode(qrContainer, { text: upiLink, width: 200, height: 200 });
+    } else {
+      qrContainer.innerHTML = '<div style="color:#8899bb;font-size:12px;">QR: ' + upiLink + '</div>';
+    }
+
+    // Render payment methods
+    renderPayMethods();
+
+    // Switch to payment page
+    switchUserPage('pay');
+  }
+
+  function renderPayMethods() {
+    var methods = [
+      { id:'gpay', name:'Google Pay', icon:'https://cdn-icons-png.flaticon.com/512/6121/6121969.png', uri:'tez' },
+      { id:'phonepe', name:'PhonePe', icon:'https://cdn-icons-png.flaticon.com/512/5969/5969290.png', uri:'phonepe' },
+      { id:'paytm', name:'Paytm', icon:'https://cdn-icons-png.flaticon.com/512/6121/6121980.png', uri:'paytm' },
+      { id:'bhim', name:'BHIM', icon:'https://cdn-icons-png.flaticon.com/512/5969/5969284.png', uri:'bhim' },
+      { id:'amazonpay', name:'Amazon Pay', icon:'https://cdn-icons-png.flaticon.com/512/6121/6121971.png', uri:'amazonpay' },
+      { id:'cred', name:'CRED', icon:'https://cdn-icons-png.flaticon.com/512/6121/6121974.png', uri:'cred' },
+      { id:'navi', name:'Navi', icon:'https://cdn-icons-png.flaticon.com/512/6121/6121977.png', uri:'navi' },
+      { id:'mobikwik', name:'MobiKwik', icon:'https://cdn-icons-png.flaticon.com/512/6121/6121983.png', uri:'mobikwik' },
+      { id:'freecharge', name:'Freecharge', icon:'https://cdn-icons-png.flaticon.com/512/5969/5969325.png', uri:'freecharge' },
+      { id:'upi', name:'Any UPI', icon:'https://cdn-icons-png.flaticon.com/512/5969/5969298.png', uri:'upi' },
+      { id:'netbanking', name:'Net Banking', icon:'https://cdn-icons-png.flaticon.com/512/5969/5969287.png', uri:'netbanking' },
+      { id:'whatsapp', name:'WhatsApp Pay', icon:'https://cdn-icons-png.flaticon.com/512/5969/5969299.png', uri:'whatsapp' },
+    ];
+    var container = document.getElementById('payMethods');
+    container.innerHTML = methods.map(function(m) {
+      return '<div class="pay-method" id="pm-' + m.id + '" onclick="selectPayMethod(\'' + m.id + '\',\'' + m.uri + '\')">' +
+        '<img src="' + m.icon + '" alt="' + m.name + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+        '<div class="pm-name">' + m.name + '</div></div>';
+    }).join('');
+  }
+
+  var _selectedPayMethod = null;
+
+  function selectPayMethod(id, uri) {
+    document.querySelectorAll('.pay-method').forEach(function(el) { el.classList.remove('selected'); });
+    var el = document.getElementById('pm-' + id);
+    if (el) el.classList.add('selected');
+    _selectedPayMethod = id;
+
+    // Open UPI app via intent URL
+    var upiDeepLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR&am=' + _pendingDepositAmount;
+    if (uri !== 'upi' && uri !== 'netbanking') {
+      // Try app-specific deep link
+      var appLinks = {
+        'tez': 'https://pay.google.com/gp/p/ui/pay?pa=7381374701@ybl&pn=ISHU_OXE&am=' + _pendingDepositAmount,
+        'phonepe': 'phonepe://pay?pa=7381374701@ybl&pn=ISHU_OXE&am=' + _pendingDepositAmount,
+        'paytm': 'paytmmp://pay?pa=7381374701@ybl&pn=ISHU_OXE&am=' + _pendingDepositAmount,
+      };
+      var link = appLinks[uri] || upiDeepLink;
+      window.open(link, '_blank');
+    } else {
+      window.open(upiDeepLink, '_blank');
+    }
+  }
+
+  function submitPayment() {
+    var txn = document.getElementById('payUtrInput').value.trim();
+    if (!txn) { showToast('Enter UTR / Transaction ID!'); return; }
+    var amt = _pendingDepositAmount;
+    if (!amt || amt <= 0) { showToast('Invalid amount!'); return; }
+
+    loadDB();
     const u = DB.users[currentUser];
     if (!u) return;
 
-    const dep = { id: Date.now(), user: currentUser, amount: amt, txn, date: new Date().toLocaleString('en-IN'), status: 'pending' };
+    const dep = { id: Date.now(), user: currentUser, amount: amt, txn: txn, method: _selectedPayMethod || 'upi', date: new Date().toLocaleString('en-IN'), status: 'pending' };
+    if (!u.deposits) u.deposits = [];
     u.deposits.push(dep);
     DB.globalDeposits.push(dep);
-
     saveDB();
-    logActivity(currentUser, 'Deposit Request', `₹${amt.toFixed(2)} via UPI (${txn}) — pending verification`);
+    logActivity(currentUser, 'Deposit Request', '₹' + amt.toFixed(2) + ' via UPI (' + txn + ') — pending verification');
     refreshUserUI();
     document.getElementById('uDepositAmount').value = '';
-    document.getElementById('uDepositTxn').value = '';
-    showToast('Deposit request submitted! Wait for admin verification.');
+    document.getElementById('payNowBtn').style.display = 'none';
+    document.getElementById('payUtrInput').value = '';
+    document.getElementById('paySubmitBtn').textContent = '✅ Submitted!';
+    document.getElementById('paySubmitBtn').disabled = true;
+    _pendingDepositAmount = 0;
+    _selectedPayMethod = null;
+    showToast('Deposit request submitted! Admin will verify.');
+    switchUserPage('deposit');
+  }
+
+  function backToDeposit() {
+    switchUserPage('deposit');
+  }
+
+  function userDeposit() {
+    // Legacy - now handled by new flow
+    showToast('Enter amount and click Pay Now!');
   }
 
   function renderUserDeposits() {
@@ -5294,12 +5435,6 @@
     loadSavedLogin();
     generateLoginCaptcha();
     document.getElementById('loginCaptchaArea').style.display = 'block';
-    var upiLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR';
-    var qrContainer = document.getElementById('uQrCode');
-    qrContainer.innerHTML = '';
-    if (typeof QRCode !== 'undefined') {
-      new QRCode(qrContainer, { text: upiLink, width: 200, height: 200 });
-    }
   }
   document.getElementById('secCodeInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') verifyAdminSecCode();
