@@ -637,7 +637,7 @@
       transition: 0.4s; cursor: pointer; backdrop-filter: blur(8px);
     }
     .game-card:hover { border-color: rgba(139,92,246,0.35); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
-    .game-card .game-icon { font-size: 40px; margin-bottom: 8px; }
+    .game-card .game-icon { margin-bottom: 8px; }
     .game-card .game-name { font-size: 14px; color: rgba(255,255,255,0.85); font-weight: 700; margin-bottom: 4px; }
     .game-card .game-desc { font-size: 11px; color: rgba(255,255,255,0.35); margin-bottom: 12px; }
     .game-card .game-btn {
@@ -1554,7 +1554,7 @@
     <div class="nav-item" data-upage="inbox" onclick="switchUserPage('inbox')">Inbox <span class="badge" id="inboxBadge" style="display:none;">0</span></div>
     <div class="nav-item" data-upage="query" onclick="switchUserPage('query')">Payment Query</div>
     <div class="nav-item" data-upage="history" onclick="switchUserPage('history')">My History</div>
-    <div class="nav-item" data-upage="colorgame" onclick="switchUserPage('colorgame')">🎨 Online Games</div>
+    <div class="nav-item" data-upage="colorgame" onclick="switchUserPage('colorgame')"><img src="https://th.bing.com/th/id/OIP.Hh5N6SYLXcJSWIZrNwMaLQHaHa?w=20&h=20&c=7&r=0&o=7&pid=1.7" style="width:18px;height:18px;vertical-align:middle;margin-right:4px;border-radius:3px;"> Online Games</div>
   </div>
   <div class="content">
     <div class="page active" id="upage-home">
@@ -1575,7 +1575,7 @@
         <div class="home-section-col">
           <div class="section-title">🎮 Online Games</div>
           <div class="game-card" onclick="switchUserPage('colorgame')">
-            <div class="game-icon">🎨</div>
+            <div class="game-icon"><img src="https://th.bing.com/th/id/OIP.Hh5N6SYLXcJSWIZrNwMaLQHaHa?w=50&h=50&c=7&r=0&o=7&pid=1.7" style="width:50px;height:50px;border-radius:8px;display:block;margin:0 auto;"></div>
             <div class="game-name">Color Prediction</div>
             <div class="game-desc">Predict the color & win up to 9x!</div>
             <button class="game-btn">Play Now</button>
@@ -1591,7 +1591,7 @@
         <!-- Top bar -->
         <div class="wg-top-bar">
           <button onclick="switchUserPage('home')" class="wg-back">← Back</button>
-          <span style="font-size:15px;font-weight:700;color:#60a5fa;">🎨 WinGo</span>
+          <span style="font-size:15px;font-weight:700;color:#60a5fa;display:flex;align-items:center;gap:4px;"><img src="https://th.bing.com/th/id/OIP.Hh5N6SYLXcJSWIZrNwMaLQHaHa?w=20&h=20&c=7&r=0&o=7&pid=1.7" style="width:20px;height:20px;border-radius:4px;"> WinGo</span>
           <div style="display:flex;align-items:center;gap:8px;">
             <span class="wg-period">Period: <strong id="wgPeriod">---</strong></span>
             <button onclick="toggleWgHistoryDrawer()" style="background:none;border:none;color:#8899bb;font-size:20px;cursor:pointer;padding:4px;">☰</button>
