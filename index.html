@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ISHU_OXE CARDING — Admin Panel</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -353,8 +354,8 @@
       backdrop-filter: blur(10px);
     }
     .deposit-box .upi-id { color:#60a5fa; font-size:16px; font-weight:700; margin:8px 0; }
-    .deposit-box .qr-area { margin:16px auto; width:180px; height:180px; }
-    .deposit-box .qr-area img { width:100%; height:100%; border-radius:10px; }
+    .deposit-box .qr-area { margin:16px auto; width:200px; height:200px; display:flex; align-items:center; justify-content:center; }
+    .deposit-box .qr-area canvas, .deposit-box .qr-area img { width:200px; height:200px; border-radius:10px; display:block; }
     .deposit-box input {
       width:100%; padding:12px; border-radius:8px; border:1px solid rgba(37,99,235,0.08);
       background:rgba(7,13,26,0.4); color:#fff; font-size:14px; text-align:center; outline:none; margin-bottom:10px; transition:0.3s;
@@ -1173,7 +1174,8 @@
       .premium-grid { grid-template-columns: 1fr; }
       .product-card { padding: 14px; }
       .card-visual { height: 110px; }
-      .deposit-box .qr-area { width: 140px; height: 140px; }
+      .deposit-box .qr-area { width: 160px; height: 160px; }
+      .deposit-box .qr-area canvas, .deposit-box .qr-area img { width:160px; height:160px; }
     }
   </style>
 </head>
@@ -1385,7 +1387,7 @@
       <div class="deposit-box">
         <h2>Deposit Funds</h2>
         <p style="color:#8899bb;font-size:12px;">Pay via UPI to add balance</p>
-        <div class="qr-area"><img id="uQrImage" src="" alt="QR"></div>
+        <div class="qr-area"><div id="uQrCode"></div></div>
         <p style="color:#8899bb;font-size:11px;margin-bottom:10px;">Scan with any UPI app</p>
         <input type="number" id="uDepositAmount" placeholder="Amount in ₹">
         <input type="text" id="uDepositTxn" placeholder="Transaction ID (UTI)">
@@ -1620,6 +1622,7 @@
           <input type="text" id="aBannerLinkInput" placeholder="🔗 Optional click link..." style="flex:0.8;min-width:100px;">
           <label class="btn-add" style="background:#7c3aed;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('bannerFileInput').click()">📁 Upload</label>
           <input type="file" id="bannerFileInput" accept="image/*" style="display:none;" onchange="uploadBannerFile(this)">
+          <span id="aBannerUploadProg" style="font-size:10px;color:#888;"></span>
           <button class="btn-add" onclick="addAdminBanner()">+ Add</button>
         </div>
         <div class="btn-row" style="margin-top:4px;">
@@ -1638,6 +1641,7 @@
           <input type="text" id="aAppLinkInput" placeholder="Play Store / app link..." style="flex:0.8;">
           <label class="btn-add" style="background:#22c55e;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('appIconFile').click()">📁 Icon</label>
           <input type="file" id="appIconFile" accept="image/*" style="display:none;" onchange="uploadAppIconFile(this)">
+          <span id="aAppIconUploadProg" style="font-size:10px;color:#888;"></span>
           <label class="btn-add" style="background:#a855f7;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('appApkFile').click()">📦 APK</label>
           <input type="file" id="appApkFile" accept=".apk,application/vnd.android.package-archive" style="display:none;" onchange="uploadFreeAppApk(this)">
           <input type="hidden" id="aAppApkUrl" value="">
@@ -1656,6 +1660,7 @@
           <button class="btn-add" onclick="addAdminVideo()">+ Add</button>
           <label class="btn-add" style="background:#7c3aed;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('videoFileInput').click()">📁 Upload</label>
           <input type="file" id="videoFileInput" accept="video/*" style="display:none;" onchange="uploadVideoFile(this)">
+          <span id="aVideoUploadProg" style="font-size:10px;color:#888;"></span>
         </div>
       </div>
 
@@ -1670,6 +1675,7 @@
           <input type="number" id="aPAppRewardInput" placeholder="Reward ₹" style="flex:0.2;">
           <label class="btn-add" style="background:#22c55e;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('pAppIconFile').click()">📁</label>
           <input type="file" id="pAppIconFile" accept="image/*" style="display:none;" onchange="uploadPremiumAppIconFile(this)">
+          <span id="aPAppIconUploadProg" style="font-size:10px;color:#888;"></span>
           <label class="btn-add" style="background:#a855f7;cursor:pointer;padding:6px 14px;border:none;border-radius:6px;font-size:11px;font-weight:bold;color:#fff;display:inline-flex;align-items:center;" onclick="document.getElementById('pAppApkFile').click()">📦 APK</label>
           <input type="file" id="pAppApkFile" accept=".apk,application/vnd.android.package-archive" style="display:none;" onchange="uploadPremiumAppApk(this)">
           <input type="hidden" id="aPAppApkUrl" value="">
@@ -3362,38 +3368,53 @@
   }
 
   // ---- File Upload Helpers ----
-  function readFileAsDataURL(file, callback) {
+  function readFileAsDataURL(file, callback, progressId) {
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { showToast('File too large! Max 5MB.'); return; }
     var reader = new FileReader();
-    reader.onload = function(e) { callback(e.target.result); };
+    var progEl = progressId ? document.getElementById(progressId) : null;
+    reader.onprogress = function(e) {
+      if (e.lengthComputable && progEl) {
+        progEl.textContent = Math.round(e.loaded / e.total * 100) + '%';
+      }
+    };
+    reader.onload = function(e) {
+      if (progEl) progEl.textContent = 'Done';
+      callback(e.target.result);
+    };
     reader.readAsDataURL(file);
   }
 
   function uploadBannerFile(input) {
     var file = input.files[0];
+    document.getElementById('aBannerUploadProg').textContent = '0%';
     readFileAsDataURL(file, function(dataUrl) {
       document.getElementById('aBannerUrlInput').value = dataUrl;
+      document.getElementById('aBannerUploadProg').textContent = '';
       showToast('Image loaded! Click "+ Add Banner" to save.');
-    });
+    }, 'aBannerUploadProg');
     input.value = '';
   }
 
   function uploadAppIconFile(input) {
     var file = input.files[0];
+    document.getElementById('aAppIconUploadProg').textContent = '0%';
     readFileAsDataURL(file, function(dataUrl) {
       document.getElementById('aAppIconInput').value = dataUrl;
+      document.getElementById('aAppIconUploadProg').textContent = '';
       showToast('Icon loaded! Add app name & link, then click "+ Add".');
-    });
+    }, 'aAppIconUploadProg');
     input.value = '';
   }
 
   function uploadPremiumAppIconFile(input) {
     var file = input.files[0];
+    document.getElementById('aPAppIconUploadProg').textContent = '0%';
     readFileAsDataURL(file, function(dataUrl) {
       document.getElementById('aPAppIconInput').value = dataUrl;
+      document.getElementById('aPAppIconUploadProg').textContent = '';
       showToast('Icon loaded! Add details, then click "+ Add".');
-    });
+    }, 'aPAppIconUploadProg');
     input.value = '';
   }
 
@@ -3401,9 +3422,15 @@
     var file = input.files[0];
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) { showToast('Video too large! Max 10MB. Use URL for larger videos.'); return; }
+    var progEl = document.getElementById('aVideoUploadProg');
+    progEl.textContent = '0%';
     var reader = new FileReader();
+    reader.onprogress = function(e) {
+      if (e.lengthComputable) progEl.textContent = Math.round(e.loaded / e.total * 100) + '%';
+    };
     reader.onload = function(e) {
       document.getElementById('aVideoUrlInput').value = e.target.result;
+      progEl.textContent = '';
       showToast('Video loaded! Add title, then click "+ Add".');
     };
     reader.readAsDataURL(file);
@@ -3411,16 +3438,26 @@
   }
 
   // ---- APK Upload to GitHub ----
-  function uploadApkToGithub(file, doneCb) {
+  function uploadApkToGithub(file, doneCb, progressCb) {
     if (!file) return;
     if (file.size > 90 * 1024 * 1024) { showToast('APK too large! Max 90MB.'); return; }
     var reader = new FileReader();
+    reader.onprogress = function(e) {
+      if (e.lengthComputable && progressCb) {
+        progressCb('reading', Math.round(e.loaded / e.total * 100));
+      }
+    };
     reader.onload = function(e) {
       var base64 = e.target.result.split(',')[1];
       var safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
       var fileName = 'apks/apk_' + Date.now() + '_' + safeName;
       var body = { message: 'Upload APK: ' + file.name, content: base64, branch: 'main' };
       var xhr = new XMLHttpRequest();
+      xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable && progressCb) {
+          progressCb('uploading', Math.round(e.loaded / e.total * 100));
+        }
+      };
       xhr.open('PUT', 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + fileName, true);
       xhr.setRequestHeader('Authorization', 'Bearer ' + _getToken());
       xhr.setRequestHeader('Accept', 'application/vnd.github.v3+json');
@@ -3445,13 +3482,16 @@
     var file = input.files[0];
     if (!file) return;
     var statusEl = document.getElementById('aAppApkStatus');
-    statusEl.textContent = '⏳ Uploading ' + file.name + '...';
+    statusEl.textContent = '⏳ Reading ' + file.name + '... 0%';
     document.getElementById('aAppApkUrl').value = '';
     uploadApkToGithub(file, function(err, url, name) {
       if (err) { statusEl.textContent = '❌ ' + err; return; }
       document.getElementById('aAppApkUrl').value = url;
-      statusEl.textContent = '✅ ' + name + ' uploaded!';
+      statusEl.innerHTML = '✅ ' + name + ' uploaded! <span style="color:#22c55e;">100%</span>';
       showToast('APK ready! Click "+ Add" to save.');
+    }, function(phase, pct) {
+      var label = phase === 'reading' ? 'Reading' : 'Uploading';
+      statusEl.textContent = '⏳ ' + label + ' ' + file.name + '... ' + pct + '%';
     });
     input.value = '';
   }
@@ -3460,13 +3500,16 @@
     var file = input.files[0];
     if (!file) return;
     var statusEl = document.getElementById('aPAppApkStatus');
-    statusEl.textContent = '⏳ Uploading ' + file.name + '...';
+    statusEl.textContent = '⏳ Reading ' + file.name + '... 0%';
     document.getElementById('aPAppApkUrl').value = '';
     uploadApkToGithub(file, function(err, url, name) {
       if (err) { statusEl.textContent = '❌ ' + err; return; }
       document.getElementById('aPAppApkUrl').value = url;
-      statusEl.textContent = '✅ ' + name + ' uploaded!';
+      statusEl.innerHTML = '✅ ' + name + ' uploaded! <span style="color:#22c55e;">100%</span>';
       showToast('APK ready! Click "+ Add" to save.');
+    }, function(phase, pct) {
+      var label = phase === 'reading' ? 'Reading' : 'Uploading';
+      statusEl.textContent = '⏳ ' + label + ' ' + file.name + '... ' + pct + '%';
     });
     input.value = '';
   }
@@ -5235,9 +5278,12 @@
     loadSavedLogin();
     generateLoginCaptcha();
     document.getElementById('loginCaptchaArea').style.display = 'block';
-    const upiLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR';
-    const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(upiLink);
-    document.getElementById('uQrImage').src = qrUrl;
+    var upiLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR';
+    var qrContainer = document.getElementById('uQrCode');
+    qrContainer.innerHTML = '';
+    if (typeof QRCode !== 'undefined') {
+      new QRCode(qrContainer, { text: upiLink, width: 200, height: 200 });
+    }
   }
   document.getElementById('secCodeInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') verifyAdminSecCode();
