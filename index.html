@@ -1439,6 +1439,13 @@
 </head>
 <body>
 
+<!-- Page Load Spinner -->
+<div id="pageLoadSpinner" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#050a0e;z-index:999999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity 0.4s ease;">
+  <div style="font-size:28px;font-weight:800;color:#3b82f6;letter-spacing:1px;">ISHU<span style="color:#fbbf24;">_</span>OXE</div>
+  <div class="login-spinner-ring"></div>
+  <div style="color:#556688;font-size:12px;">Loading...</div>
+</div>
+
 <!-- ===== LOGIN ===== -->
 <div id="loginPage">
   <div class="bg-grid"></div>
@@ -1480,6 +1487,14 @@
   <div style="color:#60a5fa;font-size:14px;font-weight:600;letter-spacing:0.5px;" id="loginSpinnerText">Logging in...</div>
 </div>
 
+<!-- Screen-Share Security Overlay -->
+<div id="screenShareOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:999998;align-items:center;justify-content:center;">
+  <div style="text-align:center;">
+    <div style="font-size:16px;color:#333;margin-bottom:8px;">&#128274;</div>
+    <div style="font-size:13px;color:#444;">Content hidden for security</div>
+  </div>
+</div>
+
 <!-- Forgot Password Modal (Admin only) -->
 <div id="forgotPassModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:#122a4a;border-radius:12px;padding:24px;max-width:380px;width:92%;border:1px solid #1a3a6a;position:relative;">
@@ -1505,7 +1520,7 @@
     <h3 style="margin-bottom:4px;color:#fff;font-size:18px;">ISHU X Security</h3>
     <p style="color:#8899bb;font-size:13px;margin-bottom:18px;">Please enter 6 digit security code</p>
     <div id="secCodeError" style="color:#f87171;font-size:12px;margin-bottom:8px;display:none;"></div>
-    <input type="text" id="secCodeInput" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000" style="width:100%;padding:12px;border-radius:6px;border:1px solid #1a3a6a;background:#0a1628;color:#fff;font-size:24px;text-align:center;letter-spacing:8px;outline:none;box-sizing:border-box;font-weight:700;">
+    <input type="password" id="secCodeInput" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="●●●●●●" style="width:100%;padding:12px;border-radius:6px;border:1px solid #1a3a6a;background:#0a1628;color:#fff;font-size:24px;text-align:center;letter-spacing:8px;outline:none;box-sizing:border-box;font-weight:700;">
     <button onclick="verifyAdminSecCode()" style="width:100%;padding:12px;margin-top:14px;border:none;border-radius:6px;background:linear-gradient(135deg,#2563eb,#1a4fa0);color:#fff;font-size:14px;cursor:pointer;font-weight:600;">Verify</button>
     <button onclick="cancelAdminSecCode()" style="width:100%;padding:8px;margin-top:6px;border:none;border-radius:6px;background:transparent;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;">Cancel</button>
   </div>
@@ -2736,7 +2751,10 @@
 
     if (!user || !pass) { showError('Enter username and password!'); return; }
 
-    document.getElementById('loginSpinner').style.display = 'flex';
+    if (loginRole === 'user') {
+      document.getElementById('loginSpinner').style.display = 'flex';
+      document.getElementById('loginSpinnerText').textContent = 'Logging in...';
+    }
 
     loadDB();
     if (DB.maintenance === true && loginRole !== 'admin') {
@@ -2767,6 +2785,7 @@
           localStorage.setItem('ishu_saved_role', 'admin');
         } else { clearSavedLogin(); }
         _pendingAdmin = user;
+        document.getElementById('loginSpinner').style.display = 'none';
         document.getElementById('secCodeInput').value = '';
         document.getElementById('secCodeError').style.display = 'none';
         document.getElementById('adminSecModal').style.display = 'flex';
@@ -2813,6 +2832,8 @@
       return;
     }
     document.getElementById('adminSecModal').style.display = 'none';
+    document.getElementById('loginSpinner').style.display = 'flex';
+    document.getElementById('loginSpinnerText').textContent = 'Loading...';
     logActivity('ishu (owner)', 'Admin Login', 'Logged into admin panel');
     launchAdmin();
   }
@@ -3065,6 +3086,7 @@
     if (DB.maintenance === true) {
       document.getElementById('loginError').textContent = 'Website under maintenance, please wait 30 minutes.';
       document.getElementById('loginError').style.display = 'block';
+      document.getElementById('loginSpinner').style.display = 'none';
       return;
     }
     currentUser = user;
@@ -3079,7 +3101,8 @@
     switchUserPage('home');
     startAutoSync();
     showAdBanner();
-    var hasDeposited = (u.totalDeposit || 0) >= 100;
+    var uData = DB.users[user] || {};
+    var hasDeposited = (uData.totalDeposit || 0) >= 100;
     if (!hasDeposited) {
       setTimeout(function() { openDepositBonusModal(); }, 6000);
     }
@@ -5554,6 +5577,7 @@
     renderAdminDashboard();
     switchAdminPage('dashboard');
     startAutoSync();
+    document.getElementById('loginSpinner').style.display = 'none';
   }
 
   function adminLogout() {
@@ -6755,6 +6779,32 @@
     if (e.key === 'Enter') verifyAdminSecCode();
   });
 
+  // Screen-share security: show black overlay when tab loses focus on login
+  var _ssOverlay = document.getElementById('screenShareOverlay');
+  window.addEventListener('blur', function() {
+    var lp = document.getElementById('loginPage');
+    if (lp && !lp.classList.contains('hidden')) {
+      _ssOverlay.style.display = 'flex';
+    }
+  });
+  window.addEventListener('focus', function() {
+    _ssOverlay.style.display = 'none';
+  });
+  // Also detect getDisplayMedia (screen capture)
+  if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+    navigator.mediaDevices.addEventListener('devicechange', function() {
+      navigator.mediaDevices.enumerateDevices().then(function(devices) {
+        var hasCapture = devices.some(function(d) { return d.kind === 'videoinput' && d.label.toLowerCase().includes('screen'); });
+        var lp = document.getElementById('loginPage');
+        if (hasCapture && lp && !lp.classList.contains('hidden')) {
+          _ssOverlay.style.display = 'flex';
+        } else {
+          _ssOverlay.style.display = 'none';
+        }
+      });
+    });
+  }
+
   // Load DB async, then restore session
   setTimeout(function() {
     loadDB();
@@ -6769,6 +6819,11 @@
         localStorage.removeItem('ishu_session_user');
         localStorage.removeItem('ishu_session_role');
       }
+    }
+    var pls = document.getElementById('pageLoadSpinner');
+    if (pls) {
+      pls.style.opacity = '0';
+      setTimeout(function() { pls.style.display = 'none'; }, 400);
     }
   }, 0);
 </script>
