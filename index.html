@@ -4772,6 +4772,7 @@
   var wgTab = 'color';
   var wgBetType = null, wgBetVal = null;
   var wgTickTimer = null;
+  var _wgSettled = {};
 
   function wgSeeded(h) {
     var x = Math.sin(h * 9301 + 49297) * 233280;
@@ -4842,12 +4843,12 @@
   function wgGlobalTick() {
     WG_SECTIONS.forEach(function(sec) {
       var t = wgSectionTime(sec.id);
-      var lastPeriodKey = '_wgLastPeriod_' + sec.id;
-      var lastPeriod = wgGlobalTick[lastPeriodKey];
-      if (lastPeriod !== undefined && lastPeriod !== t.period) {
-        wgSettleBets(sec.id, t.period - 1);
+      var settleKey = sec.id + '_' + t.period;
+      if (t.left <= 3 && !_wgSettled[settleKey]) {
+        _wgSettled[settleKey] = true;
+        wgSettleBets(sec.id, t.period);
       }
-      wgGlobalTick[lastPeriodKey] = t.period;
+      if (t.left > 25) delete _wgSettled[settleKey];
     });
     wgRefreshDisplay();
   }
@@ -5070,8 +5071,11 @@
     return { num: n, color: c, big: b };
   }
 // ---- Result Modal (with Violet Split display) ----
+  var _wgResultTimer = null;
+  var _wgResultSec = 0;
   function showWgResultModal(num, color, big, didWin, amt, noBet) {
     var modal = document.getElementById('wgResultModal');
+    if (_wgResultTimer) { clearInterval(_wgResultTimer); _wgResultTimer = null; }
     updateBodyScrollLock();
     document.getElementById('wgRPeriod').textContent = 'Period: ' + document.getElementById('wgPeriod').textContent;
     var colorHex = { green:'#22c55e', red:'#ef4444', violet:'#a855f7' };
@@ -5079,13 +5083,13 @@
     document.getElementById('wgRNum').textContent = num;
 
     var colorLabel;
-    if (num === 0) colorLabel = '🔴🟣 Red Violet';
-    else if (num === 5) colorLabel = '🟢🟣 Green Violet';
+    if (num === 0) colorLabel = 'Red Violet';
+    else if (num === 5) colorLabel = 'Green Violet';
     else colorLabel = color.charAt(0).toUpperCase() + color.slice(1);
 
     document.getElementById('wgRColor').textContent = colorLabel;
     document.getElementById('wgRColor').style.color = colorHex[color];
-    document.getElementById('wgRSize').textContent = big === 'big' ? '🔵 Big (5-9)' : '🟡 Small (0-4)';
+    document.getElementById('wgRSize').textContent = big === 'big' ? 'Big (5-9)' : 'Small (0-4)';
 
     var outcome = document.getElementById('wgROutcome');
     var amtEl = document.getElementById('wgRAmount');
@@ -5096,12 +5100,12 @@
       outcome.style.color = colorHex[color];
       amtEl.textContent = 'You did not place a bet this round';
     } else if (didWin) {
-      outcome.textContent = '🎉 YOU WIN!';
+      outcome.textContent = 'YOU WIN!';
       outcome.className = 'wg-r-outcome win';
       outcome.style.color = '';
       amtEl.textContent = '₹' + amt.toFixed(2) + ' added to Reward Wallet';
     } else {
-      outcome.textContent = '😞 YOU LOSE';
+      outcome.textContent = 'YOU LOSE';
       outcome.className = 'wg-r-outcome lose';
       outcome.style.color = '';
       amtEl.textContent = 'Better luck next time!';
@@ -5109,13 +5113,15 @@
 
     modal.classList.add('show');
     updateBodyScrollLock();
-    var sec = 2;
-    document.getElementById('wgRClose').textContent = sec;
-    var closeTimer = setInterval(function() {
-      sec--;
-      document.getElementById('wgRClose').textContent = sec;
-      if (sec <= 0) {
-        clearInterval(closeTimer);
+    _wgResultSec = 2;
+    document.getElementById('wgRClose').textContent = _wgResultSec;
+    _wgResultTimer = setInterval(function() {
+      _wgResultSec--;
+      var el = document.getElementById('wgRClose');
+      if (el) el.textContent = _wgResultSec;
+      if (_wgResultSec <= 0) {
+        clearInterval(_wgResultTimer);
+        _wgResultTimer = null;
         modal.classList.remove('show');
         updateBodyScrollLock();
       }
