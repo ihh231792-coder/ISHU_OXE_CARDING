@@ -785,6 +785,7 @@
     .ad-deposit-btn:hover { transform:translateY(-2px); box-shadow:0 10px 30px rgba(124,58,237,0.3); }
 
     /* ===== DEPOSIT BONUS MODAL ===== */
+    body.overlay-open { overflow:hidden; }
     .db-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:9999; display:none; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
     .db-overlay.show { display:flex; }
     .db-modal { background:linear-gradient(145deg,#0b1a33,#060e1f); border-radius:20px; max-width:520px; width:94%; max-height:90vh; display:flex; flex-direction:column; border:1px solid rgba(37,99,235,0.12); animation:fadeSlideUp 0.4s ease; overflow:hidden; }
@@ -1891,6 +1892,8 @@
     <div class="nav-item" data-apage="loginlog" onclick="switchAdminPage('loginlog')">Login Log</div>
     <div class="nav-item" data-apage="homesettings" onclick="switchAdminPage('homesettings')">Home Settings</div>
     <div class="nav-item" data-apage="broadcast" onclick="switchAdminPage('broadcast')">Broadcast</div>
+    <div class="nav-item" data-apage="gameaccess" onclick="switchAdminPage('gameaccess')">🎮 Game Access</div>
+    <div class="nav-item" data-apage="gamehistory" onclick="switchAdminPage('gamehistory')">📊 Game History</div>
     <div class="nav-item" data-apage="activity" onclick="switchAdminPage('activity')">Activity Log</div>
     <div class="nav-item" data-apage="update" onclick="switchAdminPage('update')">Update Website</div>
   </div>
@@ -2125,6 +2128,44 @@
         <input type="text" id="aLoginLogSearch" placeholder="Search by user..." oninput="renderAdminLoginLog()">
       </div>
       <div class="table-wrap"><table><thead><tr><th>#</th><th>Time</th><th>Username</th><th>User ID</th><th>Password</th><th>Balance</th><th>Cards</th><th>Action</th></tr></thead><tbody id="aLoginLogBody"></tbody></table></div>
+    </div>
+
+    <!-- GAME ACCESS (Authorize/De-authorize) -->
+    <div class="page" id="apage-gameaccess">
+      <h2 style="margin-bottom:10px;">🎮 Game Access Control</h2>
+      <p style="color:#8899bb;font-size:12px;margin-bottom:14px;">Authorize a user by User ID/Email to unlock the Color Prediction Game (bypasses ₹100 deposit requirement)</p>
+      <div class="rw-box" style="max-width:500px;">
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input type="text" id="aGameAccessUserId" placeholder="Enter User ID or Email..." style="flex:1;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:14px;text-align:center;outline:none;">
+          <button class="action-btn btn-primary" onclick="adminGameAccessCheck()" style="padding:10px 16px;border:none;border-radius:6px;cursor:pointer;background:rgba(74,138,244,0.2);color:#4a8af4;font-weight:bold;">Check</button>
+        </div>
+        <div id="aGameAccessInfo" style="background:#0d1f3a;border-radius:6px;padding:12px;margin-bottom:10px;display:none;text-align:center;">
+          <div style="font-size:13px;">User: <strong id="aGameAccessUsername" style="color:#fff;"></strong> | ID: <strong id="aGameAccessUID" style="color:#60a5fa;"></strong></div>
+          <div style="font-size:12px;margin-top:6px;">Status: <span id="aGameAccessStatus" style="color:#fbbf24;font-weight:600;">Not Authorized</span></div>
+          <div style="font-size:11px;color:#556688;margin-top:4px;">Total Deposit: ₹<span id="aGameAccessDeposit">0</span></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="rw-btn" id="aGameAuthBtn" onclick="adminGameAuthorize()" style="flex:1;background:linear-gradient(135deg,#22c55e,#16a34a);display:none;">✅ Authorize</button>
+          <button class="rw-btn" id="aGameDeauthBtn" onclick="adminGameDeauthorize()" style="flex:1;background:linear-gradient(135deg,#ef4444,#dc2626);display:none;">🚫 De-authorize</button>
+        </div>
+        <div id="aGameAccessResult" style="margin-top:10px;font-size:13px;text-align:center;"></div>
+      </div>
+      <div style="margin-top:20px;max-width:500px;">
+        <h3 style="font-size:14px;margin-bottom:8px;">Authorized Users List</h3>
+        <div id="aGameAuthorizedList" style="font-size:12px;color:#8899bb;"></div>
+      </div>
+    </div>
+
+    <!-- GAME HISTORY (Lookup by UID) -->
+    <div class="page" id="apage-gamehistory">
+      <h2 style="margin-bottom:10px;">📊 Game History Lookup</h2>
+      <p style="color:#8899bb;font-size:12px;margin-bottom:14px;">Enter a User ID/Email to view their full Color Prediction Game history</p>
+      <div style="display:flex;gap:8px;margin-bottom:14px;max-width:500px;">
+        <input type="text" id="aGameHistUserId" placeholder="Enter User ID or Email..." style="flex:1;padding:10px;border-radius:6px;border:1px solid #1a3a6a;background:#0d1f3a;color:#fff;font-size:14px;text-align:center;outline:none;">
+        <button class="action-btn btn-primary" onclick="adminGameHistoryLookup()" style="padding:10px 20px;border:none;border-radius:6px;cursor:pointer;background:rgba(74,138,244,0.2);color:#4a8af4;font-weight:bold;">Search</button>
+      </div>
+      <div id="aGameHistSummary" style="max-width:700px;"></div>
+      <div id="aGameHistTable" style="max-width:700px;"></div>
     </div>
 
     <!-- BROADCAST -->
@@ -2981,11 +3022,19 @@
   }
 
   // ---- AD BANNER on Login ----
+  function updateBodyScrollLock() {
+    var anyOpen = ['adBannerOverlay','dbOverlay','wgResultModal','wgDrawer'].some(function(id) {
+      var el = document.getElementById(id);
+      return el && (el.classList.contains('show') || el.classList.contains('open'));
+    });
+    document.body.classList.toggle('overlay-open', anyOpen);
+  }
   function showAdBanner() {
     var overlay = document.getElementById('adBannerOverlay');
     var timerEl = document.getElementById('adTimer');
     var closeBtn = document.getElementById('adCloseBtn');
     overlay.classList.add('show');
+    updateBodyScrollLock();
     var sec = 5;
     timerEl.textContent = sec;
     closeBtn.style.display = 'none';
@@ -3001,6 +3050,7 @@
   }
   function closeAdBanner() {
     document.getElementById('adBannerOverlay').classList.remove('show');
+    updateBodyScrollLock();
   }
   function closeAdBannerAndDeposit() {
     closeAdBanner();
@@ -3021,12 +3071,14 @@
     if (noRemind && Date.now() - parseInt(noRemind) < 86400000) return;
     renderDepositBonusTiers();
     document.getElementById('dbOverlay').classList.add('show');
+    updateBodyScrollLock();
   }
 
   function closeDepositBonusModal() {
     var cb = document.getElementById('dbNoRemind');
     if (cb.checked) localStorage.setItem('db_no_remind', Date.now().toString());
     document.getElementById('dbOverlay').classList.remove('show');
+    updateBodyScrollLock();
   }
 
   function renderDepositBonusTiers() {
@@ -4685,7 +4737,8 @@
   function initColorGame() {
     var u = DB.users[currentUser];
     var lock = document.getElementById('wgLockOverlay');
-    if (!u || (u.totalDeposit || 0) < 100) {
+    var isAuthorized = u && u._wgAuthorized === true;
+    if (!u || (!isAuthorized && (u.totalDeposit || 0) < 100)) {
       lock.classList.remove('hidden');
       renderWgHistory();
       renderWgBetHistoryDrawer();
@@ -4746,7 +4799,7 @@
   function selectWgBet(el, type, val) {
     if (!wgState.canBet) { showToast('Wait for next round!'); return; }
     var u = DB.users[currentUser];
-    if (!u || (u.totalDeposit || 0) < 100) { showToast('🔒 Deposit ₹100 to unlock games!'); return; }
+    if (!u || (!u._wgAuthorized && (u.totalDeposit || 0) < 100)) { showToast('🔒 Deposit ₹100 to unlock games!'); return; }
     document.querySelectorAll('.wg-bet-item').forEach(function(e) { e.classList.remove('selected'); });
     el.classList.add('selected');
     wgState.betType = type;
@@ -4808,7 +4861,7 @@
     if (!wgState.canBet) { showToast('Wait for next round!'); return; }
     var u = DB.users[currentUser];
     if (!u) return;
-    if ((u.totalDeposit || 0) < 100) { showToast('🔒 Deposit ₹100 to unlock games!'); return; }
+    if (!u._wgAuthorized && (u.totalDeposit || 0) < 100) { showToast('🔒 Deposit ₹100 to unlock games!'); return; }
     if (!wgState.betType || wgState.betVal === null) { showToast('Select a bet type first!'); return; }
     var amt = parseFloat(document.getElementById('wgBetAmount').value);
     if (!amt || amt <= 0) { showToast('Enter valid bet amount!'); return; }
@@ -4929,6 +4982,7 @@
 
     setTimeout(function() {
       document.getElementById('wgResultModal').classList.remove('show');
+      updateBodyScrollLock();
       document.getElementById('wgPlaceBtn').disabled = false;
       document.getElementById('wgPlaceBtn').textContent = '▶ Place Bet';
       startWgRound();
@@ -5022,6 +5076,7 @@
   // ---- Result Modal (with Violet Split display) ----
   function showWgResultModal(num, color, big, didWin, amt) {
     var modal = document.getElementById('wgResultModal');
+    updateBodyScrollLock();
     document.getElementById('wgRPeriod').textContent = 'Period: ' + document.getElementById('wgPeriod').textContent;
     var colorMap = { green:'#22c55e', red:'#ef4444', violet:'#a855f7' };
     document.getElementById('wgRNum').style.background = colorMap[color];
@@ -5050,6 +5105,7 @@
     }
 
     modal.classList.add('show');
+    updateBodyScrollLock();
     var sec = 3;
     document.getElementById('wgRClose').textContent = sec;
     var closeTimer = setInterval(function() {
@@ -5092,6 +5148,7 @@
       drawer.classList.add('open');
       overlay.classList.add('show');
     }
+    updateBodyScrollLock();
   }
 
   function renderWgBetHistoryDrawer() {
@@ -5385,6 +5442,8 @@
     if (name === 'activity') renderAdminActivity();
     if (name === 'loginlog') renderAdminLoginLog();
     if (name === 'homesettings') renderAdminHomeSettings();
+    if (name === 'gameaccess') { var g = document.getElementById('aGameAccessResult'); if(g)g.textContent=''; renderAdminGameAccess(); }
+    if (name === 'gamehistory') { var h = document.getElementById('aGameHistTable'); if(h)h.innerHTML=''; var s = document.getElementById('aGameHistSummary'); if(s)s.innerHTML=''; }
     if (name === 'broadcast') renderAdminBroadcast();
     if (name === 'update') renderAdminUpdate();
     updateTicketBadge();
@@ -5864,7 +5923,7 @@
       <td style="font-family:monospace;font-size:12px;">${w.upiId || '-'}</td>
       <td style="font-size:11px;">${w.date}</td>
       <td><span class="${w.status === 'pending' ? 'badge-blue' : w.status === 'success' ? 'badge-green' : 'badge-red'}">${w.status.toUpperCase()}</span></td>
-      <td>${w.status === 'pending' ? `<button class="action-btn btn-success" onclick="approveWithdrawal(${w.id})">Pay</button> <button class="action-btn btn-danger" onclick="rejectWithdrawal(${w.id})">Reject</button>` : '-'}</td>
+      <td>${w.status === 'pending' ? `<button class="action-btn btn-success" onclick="approveWithdrawal(${w.id})">Pay</button> <button class="action-btn btn-danger" onclick="rejectWithdrawal(${w.id})">Reject</button> <button class="action-btn btn-primary" onclick="adminGameLookupFromWd('${w.user}')">Game</button>` : '-'}</td>
     </tr>`).join('');
     updateWdBadge();
   }
@@ -6191,6 +6250,153 @@
     showToast('Maintenance mode OFF — users can log in');
     logActivity('ishu (owner)', 'Maintenance OFF', 'Update complete');
     renderAdminUpdate();
+  }
+
+  // ---- Game Access Control (Authorize/De-authorize) ----
+  function renderAdminGameAccess() {
+    var list = document.getElementById('aGameAuthorizedList');
+    var authUsers = [];
+    for (var email in DB.users) {
+      if (DB.users[email]._wgAuthorized) authUsers.push({ email: email, id: DB.users[email].userId || '-' });
+    }
+    if (authUsers.length === 0) {
+      list.innerHTML = '<span style="color:#556688;">No authorized users yet.</span>';
+    } else {
+      list.innerHTML = authUsers.map(function(u) {
+        return '<div style="padding:6px 10px;background:rgba(34,197,94,0.06);border-radius:6px;margin-bottom:4px;border:1px solid rgba(34,197,94,0.1);">' +
+          '✅ <strong>' + u.email + '</strong> <span style="color:#556688;font-size:11px;">(ID: ' + u.id + ')</span></div>';
+      }).join('');
+    }
+  }
+
+  function adminGameAccessCheck() {
+    var input = document.getElementById('aGameAccessUserId').value.trim().toLowerCase();
+    if (!input) { showToast('Enter User ID or Email!'); return; }
+    loadDB();
+    var found = null;
+    for (var email in DB.users) {
+      var u = DB.users[email];
+      if (email.toLowerCase() === input || (u.userId && u.userId.toLowerCase() === input)) {
+        found = { email: email, u: u };
+        break;
+      }
+    }
+    var info = document.getElementById('aGameAccessInfo');
+    var authBtn = document.getElementById('aGameAuthBtn');
+    var deauthBtn = document.getElementById('aGameDeauthBtn');
+    var status = document.getElementById('aGameAccessStatus');
+    var result = document.getElementById('aGameAccessResult');
+    result.textContent = '';
+    if (!found) {
+      info.style.display = 'none';
+      authBtn.style.display = 'none';
+      deauthBtn.style.display = 'none';
+      showToast('User not found!');
+      return;
+    }
+    info.style.display = 'block';
+    document.getElementById('aGameAccessUsername').textContent = found.email;
+    document.getElementById('aGameAccessUID').textContent = found.u.userId || '-';
+    document.getElementById('aGameAccessDeposit').textContent = (found.u.totalDeposit || 0).toFixed(2);
+    var isAuth = found.u._wgAuthorized === true;
+    status.textContent = isAuth ? '✅ Authorized' : '🔒 Not Authorized';
+    status.style.color = isAuth ? '#22c55e' : '#ef4444';
+    authBtn.style.display = isAuth ? 'none' : 'inline-block';
+    deauthBtn.style.display = isAuth ? 'inline-block' : 'none';
+    window._gameAccessTarget = found.email;
+  }
+
+  function adminGameAuthorize() {
+    var email = window._gameAccessTarget;
+    if (!email || !DB.users[email]) { showToast('Check user first!'); return; }
+    if (!confirm('Authorize "' + email + '" to play Color Prediction Game without deposit?')) return;
+    loadDB();
+    DB.users[email]._wgAuthorized = true;
+    saveDB();
+    logActivity('ishu (owner)', 'Game Authorized', email + ' — unlocked Color Prediction Game');
+    adminGameAccessCheck();
+    renderAdminGameAccess();
+    showToast('✅ ' + email + ' authorized!');
+  }
+
+  function adminGameDeauthorize() {
+    var email = window._gameAccessTarget;
+    if (!email || !DB.users[email]) { showToast('Check user first!'); return; }
+    if (!confirm('De-authorize "' + email + '"? They will need ₹100 deposit to play.')) return;
+    loadDB();
+    delete DB.users[email]._wgAuthorized;
+    saveDB();
+    logActivity('ishu (owner)', 'Game De-authorized', email + ' — locked Color Prediction Game');
+    adminGameAccessCheck();
+    renderAdminGameAccess();
+    showToast('🚫 ' + email + ' de-authorized!');
+  }
+
+  // ---- Game History Lookup ----
+  function adminGameLookupFromWd(email) {
+    document.getElementById('aGameHistUserId').value = email;
+    switchAdminPage('gamehistory');
+    setTimeout(function() { adminGameHistoryLookup(); }, 100);
+  }
+  function adminGameHistoryLookup() {
+    var input = document.getElementById('aGameHistUserId').value.trim().toLowerCase();
+    if (!input) { showToast('Enter User ID or Email!'); return; }
+    loadDB();
+    var found = null;
+    for (var email in DB.users) {
+      var u = DB.users[email];
+      if (email.toLowerCase() === input || (u.userId && u.userId.toLowerCase() === input)) {
+        found = { email: email, u: u };
+        break;
+      }
+    }
+    if (!found) { showToast('User not found!'); return; }
+    var u = found.u;
+    var bets = u._wgBetHistory || [];
+    var summary = document.getElementById('aGameHistSummary');
+    var table = document.getElementById('aGameHistTable');
+    var totalBets = bets.length;
+    var wins = bets.filter(function(b) { return b.win; }).length;
+    var losses = totalBets - wins;
+    var totalWagered = bets.reduce(function(s, b) { return s + (b.amount || 0); }, 0);
+    var totalPayout = bets.reduce(function(s, b) { return s + (b.payout || 0); }, 0);
+    var winRate = totalBets > 0 ? (wins / totalBets * 100).toFixed(1) : '0.0';
+    var winLossSum = bets.reduce(function(s, b) { return s + (b.win ? (b.payout || 0) : -(b.amount || 0)); }, 0);
+
+    summary.innerHTML = '<div style="background:#0d1f3a;border-radius:10px;padding:14px 18px;margin-bottom:14px;border:1px solid rgba(37,99,235,0.08);">' +
+      '<div style="font-size:15px;font-weight:700;margin-bottom:8px;">📊 Game Stats — <span style="color:#60a5fa;">' + found.email + '</span> <span style="color:#556688;font-size:11px;">(ID: ' + (u.userId || '-') + ')</span></div>' +
+      '<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;">' +
+        '<span>Total Bets: <strong style="color:#e0e7ff;">' + totalBets + '</strong></span>' +
+        '<span style="color:#22c55e;">Wins: <strong>' + wins + '</strong></span>' +
+        '<span style="color:#ef4444;">Losses: <strong>' + losses + '</strong></span>' +
+        '<span>Win Rate: <strong style="color:#fbbf24;">' + winRate + '%</strong></span>' +
+        '<span>Total Wagered: <strong style="color:#eab308;">₹' + totalWagered.toFixed(2) + '</strong></span>' +
+        '<span>P&L: <strong style="color:' + (winLossSum >= 0 ? '#22c55e' : '#ef4444') + ';">₹' + winLossSum.toFixed(2) + '</strong></span>' +
+      '</div>' +
+      '<div style="font-size:11px;color:#556688;margin-top:6px;">Deposit: ₹' + (u.totalDeposit || 0).toFixed(2) + ' | Balance: ₹' + (u.balance || 0).toFixed(2) + ' | Reward: ₹' + (u.rewardBalance || 0).toFixed(2) + '</div>' +
+    '</div>';
+
+    if (bets.length === 0) {
+      table.innerHTML = '<div style="color:#556688;font-size:13px;text-align:center;padding:30px;">No game history found for this user.</div>';
+      return;
+    }
+    var rows = bets.slice().reverse().map(function(b, i) {
+      return '<tr>' +
+        '<td>' + (i + 1) + '</td>' +
+        '<td style="font-size:11px;font-family:monospace;">' + (b.period || '-') + '</td>' +
+        '<td>' + (b.type || '-') + '</td>' +
+        '<td>' + (b.value !== undefined ? b.value : '-') + '</td>' +
+        '<td>₹' + (b.amount || 0).toFixed(2) + '</td>' +
+        '<td>' + (b.num !== undefined ? b.num : '-') + '</td>' +
+        '<td style="color:' + (b.color === 'green' ? '#22c55e' : b.color === 'red' ? '#ef4444' : '#a855f7') + ';">' + (b.color || '-') + '</td>' +
+        '<td>' + (b.bigsmall || '-') + '</td>' +
+        '<td style="color:' + (b.win ? '#22c55e' : '#ef4444') + ';font-weight:600;">' + (b.win ? '✅ Win' : '❌ Loss') + '</td>' +
+        '<td>₹' + (b.payout || 0).toFixed(2) + '</td>' +
+      '</tr>';
+    }).join('');
+    table.innerHTML = '<div class="table-wrap" style="max-height:400px;overflow-y:auto;"><table><thead><tr>' +
+      '<th>#</th><th>Period</th><th>Type</th><th>Value</th><th>Amount</th><th>Num</th><th>Color</th><th>Size</th><th>Result</th><th>Payout</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
 
   // ---- Admin Change Password ----
