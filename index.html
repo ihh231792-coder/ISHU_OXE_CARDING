@@ -4840,15 +4840,19 @@
     }, 100);
   }
 
+  var _wgPrevPeriod = {};
   function wgGlobalTick() {
     WG_SECTIONS.forEach(function(sec) {
       var t = wgSectionTime(sec.id);
-      var settleKey = sec.id + '_' + t.period;
-      if (t.left <= 1 && !_wgSettled[settleKey]) {
-        _wgSettled[settleKey] = true;
-        wgSettleBets(sec.id, t.period);
+      var prevPeriod = _wgPrevPeriod[sec.id];
+      if (prevPeriod !== undefined && prevPeriod !== t.period) {
+        var settleKey = sec.id + '_' + prevPeriod;
+        if (!_wgSettled[settleKey]) {
+          _wgSettled[settleKey] = true;
+          wgSettleBets(sec.id, prevPeriod);
+        }
       }
-      if (t.left > 25) delete _wgSettled[settleKey];
+      _wgPrevPeriod[sec.id] = t.period;
     });
     wgRefreshDisplay();
   }
