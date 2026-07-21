@@ -1433,8 +1433,8 @@
         </div>
         <div class="pay-qr">
           <div class="qr-wrap" id="payQrContainer"></div>
-          <div class="upi-id">7381374701@ybl</div>
-          <div class="upi-label">UPI ID — Scan any UPI app to pay</div>
+          <div class="upi-id" style="display:none;">8480691381@ybl</div>
+          <div class="upi-label" style="color:#60a5fa;font-size:14px;font-weight:600;">ISHU Digital Enterprise Pvt Ltd</div>
         </div>
         <p style="color:rgba(255,255,255,0.4);font-size:11px;margin-bottom:8px;text-align:center;">Choose your payment app</p>
         <div class="pay-methods" id="payMethods"></div>
@@ -3950,7 +3950,7 @@
     // Generate QR
     var qrContainer = document.getElementById('payQrContainer');
     qrContainer.innerHTML = '';
-    var upiLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR&am=' + amt;
+    var upiLink = 'upi://pay?pa=8480691381@ybl&pn=ISHU+Digital+Enterprise+Pvt+Ltd&cu=INR&am=' + amt;
     if (typeof QRCode !== 'undefined') {
       new QRCode(qrContainer, { text: upiLink, width: 200, height: 200 });
     } else {
@@ -3995,15 +3995,15 @@
     _selectedPayMethod = id;
 
     // Open UPI app via intent URL
-    var upiDeepLink = 'upi://pay?pa=7381374701@ybl&pn=ISHU_OXE&cu=INR&am=' + _pendingDepositAmount;
+    var upiDeepLink = 'upi://pay?pa=8480691381@ybl&pn=ISHU+Digital+Enterprise+Pvt+Ltd&cu=INR&am=' + _pendingDepositAmount;
     if (uri === 'upi') {
       window.open(upiDeepLink, '_blank');
     } else {
       // Try app-specific deep link
       var appLinks = {
-        'tez': 'https://pay.google.com/gp/p/ui/pay?pa=7381374701@ybl&pn=ISHU_OXE&am=' + _pendingDepositAmount,
-        'phonepe': 'phonepe://pay?pa=7381374701@ybl&pn=ISHU_OXE&am=' + _pendingDepositAmount,
-        'paytm': 'paytmmp://pay?pa=7381374701@ybl&pn=ISHU_OXE&am=' + _pendingDepositAmount,
+        'tez': 'https://pay.google.com/gp/p/ui/pay?pa=8480691381@ybl&pn=ISHU+Digital+Enterprise+Pvt+Ltd&am=' + _pendingDepositAmount,
+        'phonepe': 'phonepe://pay?pa=8480691381@ybl&pn=ISHU+Digital+Enterprise+Pvt+Ltd&am=' + _pendingDepositAmount,
+        'paytm': 'paytmmp://pay?pa=8480691381@ybl&pn=ISHU+Digital+Enterprise+Pvt+Ltd&am=' + _pendingDepositAmount,
       };
       var link = appLinks[uri] || upiDeepLink;
       window.open(link, '_blank');
