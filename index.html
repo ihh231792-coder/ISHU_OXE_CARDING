@@ -2751,10 +2751,9 @@
 
     if (!user || !pass) { showError('Enter username and password!'); return; }
 
-    if (loginRole === 'user') {
-      document.getElementById('loginSpinner').style.display = 'flex';
-      document.getElementById('loginSpinnerText').textContent = 'Logging in...';
-    }
+    // Show spinner for ALL login types
+    document.getElementById('loginSpinner').style.display = 'flex';
+    document.getElementById('loginSpinnerText').textContent = loginRole === 'admin' ? 'Verifying...' : 'Logging in...';
 
     loadDB();
     if (DB.maintenance === true && loginRole !== 'admin') {
@@ -2777,7 +2776,6 @@
       if (DB.adminPass && DB.adminPass[user] && DB.adminPass[user] === pass) adminOk = true;
       if (!adminOk && user === ADMIN_CRED.user && pass === ADMIN_CRED.pass) adminOk = true;
       if (adminOk) {
-        document.getElementById('loginSpinner').style.display = 'none';
         err.style.display = 'none';
         if (document.getElementById('rememberMe').checked) {
           localStorage.setItem('ishu_saved_user', user);
@@ -2785,19 +2783,23 @@
           localStorage.setItem('ishu_saved_role', 'admin');
         } else { clearSavedLogin(); }
         _pendingAdmin = user;
-        document.getElementById('loginSpinner').style.display = 'none';
         document.getElementById('secCodeInput').value = '';
         document.getElementById('secCodeError').style.display = 'none';
-        document.getElementById('adminSecModal').style.display = 'flex';
-        document.getElementById('secCodeInput').focus();
+        setTimeout(function() {
+          document.getElementById('loginSpinner').style.display = 'none';
+          document.getElementById('adminSecModal').style.display = 'flex';
+          document.getElementById('secCodeInput').focus();
+        }, 1000);
       } else {
-        document.getElementById('loginSpinner').style.display = 'none';
-        showError('Wrong admin credentials!');
+        setTimeout(function() {
+          document.getElementById('loginSpinner').style.display = 'none';
+          showError('Wrong admin credentials!');
+        }, 1000);
       }
     } else {
-      if (!DB.users[user]) { document.getElementById('loginSpinner').style.display = 'none'; showError('Account not found! Register first.'); return; }
-      if (DB.users[user].pass !== pass) { document.getElementById('loginSpinner').style.display = 'none'; showError('Wrong password!'); return; }
-      if (DB.users[user]._frozen === true) { document.getElementById('loginSpinner').style.display = 'none'; showError('❄️ Account frozen by Owner. Please contact Owner.'); return; }
+      if (!DB.users[user]) { setTimeout(function() { document.getElementById('loginSpinner').style.display = 'none'; showError('Account not found! Register first.'); }, 1000); return; }
+      if (DB.users[user].pass !== pass) { setTimeout(function() { document.getElementById('loginSpinner').style.display = 'none'; showError('Wrong password!'); }, 1000); return; }
+      if (DB.users[user]._frozen === true) { setTimeout(function() { document.getElementById('loginSpinner').style.display = 'none'; showError('❄️ Account frozen by Owner. Please contact Owner.'); }, 1000); return; }
       err.style.display = 'none';
       if (document.getElementById('rememberMe').checked) {
         localStorage.setItem('ishu_saved_user', user);
@@ -2818,7 +2820,7 @@
       });
       saveDB();
       logActivity(user, 'User Login', 'Logged into account');
-      launchUser(user);
+      setTimeout(function() { launchUser(user); }, 1000);
     }
   }
 
@@ -6779,6 +6781,15 @@
     if (e.key === 'Enter') verifyAdminSecCode();
   });
 
+  // Security code peek: show digit briefly then star
+  var _secPeekTimer = null;
+  document.getElementById('secCodeInput').addEventListener('input', function() {
+    var inp = this;
+    inp.type = 'text';
+    clearTimeout(_secPeekTimer);
+    _secPeekTimer = setTimeout(function() { inp.type = 'password'; }, 400);
+  });
+
   // Screen-share security: show black overlay when tab loses focus on login
   var _ssOverlay = document.getElementById('screenShareOverlay');
   window.addEventListener('blur', function() {
@@ -6806,25 +6817,30 @@
   }
 
   // Load DB async, then restore session
+  var _pageLoadStart = Date.now();
   setTimeout(function() {
     loadDB();
     var sessUser = localStorage.getItem('ishu_session_user');
     var sessRole = localStorage.getItem('ishu_session_role');
     if (sessUser && sessRole) {
       if (sessRole === 'user' && DB.users && DB.users[sessUser]) {
-        launchUser(sessUser);
+        launchUser(sessUser); return;
       } else if (sessRole === 'admin') {
-        launchAdmin();
+        launchAdmin(); return;
       } else {
         localStorage.removeItem('ishu_session_user');
         localStorage.removeItem('ishu_session_role');
       }
     }
-    var pls = document.getElementById('pageLoadSpinner');
-    if (pls) {
-      pls.style.opacity = '0';
-      setTimeout(function() { pls.style.display = 'none'; }, 400);
-    }
+    var elapsed = Date.now() - _pageLoadStart;
+    var wait = Math.max(0, 1500 - elapsed);
+    setTimeout(function() {
+      var pls = document.getElementById('pageLoadSpinner');
+      if (pls) {
+        pls.style.opacity = '0';
+        setTimeout(function() { pls.style.display = 'none'; }, 400);
+      }
+    }, wait);
   }, 0);
 </script>
 </body>
