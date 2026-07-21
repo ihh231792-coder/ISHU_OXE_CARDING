@@ -1178,7 +1178,7 @@
       .deposit-box .qr-area canvas, .deposit-box .qr-area img { width:160px; height:160px; }
       .pay-methods { grid-template-columns:repeat(3,1fr); gap:8px; }
       .pay-method { padding:10px 6px; }
-      .pay-method img { width:28px; height:28px; object-fit:contain; }
+      .pay-method img { width:28px; height:28px; object-fit:contain; margin-bottom:4px; display:block; margin-left:auto; margin-right:auto; }
     }
     .pay-page { max-width:480px; margin:0 auto; padding:20px 16px; }
     .pay-header { text-align:center; margin-bottom:20px; }
@@ -1190,11 +1190,11 @@
     .pay-qr .upi-id { color:#60a5fa; font-size:15px; font-weight:600; }
     .pay-qr .upi-label { color:rgba(255,255,255,0.4); font-size:11px; margin-top:2px; }
     .pay-methods { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px; }
-    .pay-method { background:rgba(10,20,40,0.5); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px 8px; text-align:center; cursor:pointer; transition:0.3s; backdrop-filter:blur(10px); }
+    .pay-method { background:rgba(10,20,40,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:12px; padding:12px 8px; text-align:center; cursor:pointer; transition:0.3s; backdrop-filter:blur(10px); }
     .pay-method:hover { border-color:rgba(37,99,235,0.3); background:rgba(37,99,235,0.08); transform:translateY(-2px); }
     .pay-method.selected { border-color:#22c55e; background:rgba(34,197,94,0.08); box-shadow:0 0 20px rgba(34,197,94,0.1); }
-    .pay-method img { max-width:32px; max-height:32px; object-fit:contain; border-radius:8px; margin-bottom:4px; display:block; margin-left:auto; margin-right:auto; }
-    .pay-method .pm-name { font-size:10px; color:rgba(255,255,255,0.6); }
+    .pay-method img { width:28px; height:28px; object-fit:contain; border-radius:8px; margin-bottom:4px; display:block; margin-left:auto; margin-right:auto; }
+    .pay-method .pm-name { font-size:11px; color:#e4e4e7; }
     .pay-method .pm-name.active { color:#22c55e; }
     .pay-utr { background:rgba(10,20,40,0.5); border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:20px; margin-bottom:16px; backdrop-filter:blur(10px); }
     .pay-utr label { font-size:13px; color:rgba(255,255,255,0.7); display:block; margin-bottom:6px; }
@@ -3965,24 +3965,24 @@
   }
 
   function renderPayMethods() {
-    var methods = [
-      { id:'gpay', name:'Google Pay', icon:'https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg', uri:'tez' },
-      { id:'phonepe', name:'PhonePe', icon:'https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg', uri:'phonepe' },
-      { id:'paytm', name:'Paytm', icon:'https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo.svg', uri:'paytm' },
-      { id:'bhim', name:'BHIM UPI', icon:'https://upload.wikimedia.org/wikipedia/commons/e/e1/BHIM-Logo.svg', uri:'bhim' },
-      { id:'amazonpay', name:'Amazon Pay', icon:'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg', uri:'amazonpay' },
-      { id:'whatsapp', name:'WhatsApp Pay', icon:'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg', uri:'whatsapp' },
-      { id:'freecharge', name:'Freecharge', icon:'https://upload.wikimedia.org/wikipedia/commons/3/30/Freecharge_logo.svg', uri:'freecharge' },
-      { id:'mobikwik', name:'MobiKwik', icon:'https://upload.wikimedia.org/wikipedia/commons/8/8b/MobiKwik_Logo.svg', uri:'mobikwik' },
-      { id:'cred', name:'CRED', icon:'https://logo.clearbit.com/cred.club', uri:'cred' },
-      { id:'navi', name:'Navi', icon:'https://logo.clearbit.com/navi.com', uri:'navi' },
-      { id:'upi', name:'Any UPI', icon:'https://logo.clearbit.com/upi.org.in', uri:'upi' },
+    var items = [
+      { id:'gpay', name:'Google Pay', uri:'tez', icon:'<img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" alt="GPay" style="width:28px;height:28px;object-fit:contain;display:block;margin:0 auto 4px;">' },
+      { id:'phonepe', name:'PhonePe', uri:'phonepe', icon:'<img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" style="width:28px;height:28px;object-fit:contain;display:block;margin:0 auto 4px;">' },
+      { id:'paytm', name:'Paytm', uri:'paytm', icon:'<svg width="28" height="28" viewBox="0 0 28 28" style="display:block;margin:0 auto 4px;"><rect width="28" height="28" rx="6" fill="#00baf2"/><text x="14" y="19" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="bold" font-size="11">Paytm</text></svg>' },
+      { id:'bhim', name:'BHIM UPI', uri:'bhim', icon:'<svg width="28" height="28" viewBox="0 0 28 28" style="display:block;margin:0 auto 4px;"><rect width="28" height="28" rx="6" fill="#008080"/><text x="14" y="19" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="bold" font-size="10">UPI</text><circle cx="22" cy="6" r="3.5" fill="#f26522"/></svg>' },
+      { id:'amazonpay', name:'Amazon Pay', uri:'amazonpay', icon:'<img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon Pay" style="width:28px;height:28px;object-fit:contain;display:block;margin:0 auto 4px;">' },
+      { id:'whatsapp', name:'WhatsApp Pay', uri:'whatsapp', icon:'<img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" style="width:28px;height:28px;object-fit:contain;display:block;margin:0 auto 4px;">' },
+      { id:'freecharge', name:'Freecharge', uri:'freecharge', icon:'<svg width="28" height="28" viewBox="0 0 28 28" style="display:block;margin:0 auto 4px;"><rect width="28" height="28" rx="6" fill="#f15a24"/><polygon points="16,6 8,16 13,16 11,24 21,13 15,13 17,6" fill="#fff"/></svg>' },
+      { id:'mobikwik', name:'MobiKwik', uri:'mobikwik', icon:'<svg width="28" height="28" viewBox="0 0 28 28" style="display:block;margin:0 auto 4px;"><rect width="28" height="28" rx="6" fill="#00BCD4"/><text x="14" y="20" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="bold" font-size="16">M</text></svg>' },
+      { id:'cred', name:'CRED', uri:'cred', icon:'<svg width="28" height="28" viewBox="0 0 28 28" style="display:block;margin:0 auto 4px;"><rect width="28" height="28" rx="14" fill="#1a1a2e" stroke="#fff" stroke-width="1.5"/><text x="14" y="20" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="bold" font-size="15">C</text></svg>' },
+      { id:'navi', name:'Navi', uri:'navi', icon:'<svg width="28" height="28" viewBox="0 0 28 28" style="display:block;margin:0 auto 4px;"><rect width="28" height="28" rx="6" fill="#00C853"/><text x="14" y="20" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="bold" font-size="16">N</text></svg>' },
+      { id:'upi', name:'Any UPI', uri:'upi', icon:'<svg width="28" height="28" viewBox="0 0 28 28" style="display:block;margin:0 auto 4px;"><rect width="28" height="28" rx="6" fill="#008080"/><text x="14" y="19" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="bold" font-size="10">UPI</text></svg>' },
     ];
     var container = document.getElementById('payMethods');
-    container.innerHTML = methods.map(function(m) {
-      return '<div class="pay-method" id="pm-' + m.id + '" onclick="selectPayMethod(\'' + m.id + '\',\'' + m.uri + '\')">' +
-        '<img src="' + m.icon + '" alt="' + m.name + '" loading="lazy" onerror="this.style.display=\'none\'">' +
-        '<div class="pm-name">' + m.name + '</div></div>';
+    container.innerHTML = items.map(function(it) {
+      return '<div class="pay-method" id="pm-' + it.id + '" onclick="selectPayMethod(\'' + it.id + '\',\'' + it.uri + '\')">' +
+        it.icon +
+        '<div class="pm-name">' + it.name + '</div></div>';
     }).join('');
   }
 
