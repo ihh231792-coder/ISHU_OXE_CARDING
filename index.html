@@ -784,6 +784,41 @@
     .ad-deposit-btn { display:inline-block; padding:12px 36px; border-radius:12px; background:linear-gradient(135deg,#7c3aed,#2563eb); color:#fff; font-size:15px; font-weight:700; border:none; cursor:pointer; transition:0.3s; margin-top:4px; }
     .ad-deposit-btn:hover { transform:translateY(-2px); box-shadow:0 10px 30px rgba(124,58,237,0.3); }
 
+    /* ===== DEPOSIT BONUS MODAL ===== */
+    .db-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:9999; display:none; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
+    .db-overlay.show { display:flex; }
+    .db-modal { background:linear-gradient(145deg,#0b1a33,#060e1f); border-radius:20px; max-width:520px; width:94%; max-height:90vh; display:flex; flex-direction:column; border:1px solid rgba(37,99,235,0.12); animation:fadeSlideUp 0.4s ease; overflow:hidden; }
+    .db-header { padding:20px 24px 14px; border-bottom:1px solid rgba(37,99,235,0.06); position:relative; }
+    .db-header h2 { font-size:19px; font-weight:800; color:#e0e7ff; margin:0; }
+    .db-header .db-sub { font-size:11px; color:#556688; margin-top:3px; }
+    .db-close-top { position:absolute; top:14px; right:16px; background:rgba(255,255,255,0.06); border:none; color:#667799; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:14px; transition:0.3s; display:flex; align-items:center; justify-content:center; }
+    .db-close-top:hover { background:rgba(239,68,68,0.15); color:#ef4444; }
+    .db-body { padding:16px 24px; overflow-y:auto; flex:1; }
+    .db-tier { background:rgba(10,20,40,0.35); border-radius:12px; padding:14px 16px; margin-bottom:10px; border:1px solid rgba(37,99,235,0.05); transition:0.3s; }
+    .db-tier.completed { border-color:rgba(34,197,94,0.15); background:rgba(34,197,94,0.04); }
+    .db-tier-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+    .db-tier-title { font-size:13px; font-weight:600; color:#e0e7ff; }
+    .db-tier-badge { font-size:10px; padding:2px 8px; border-radius:10px; background:rgba(37,99,235,0.12); color:#60a5fa; font-weight:600; }
+    .db-tier.completed .db-tier-badge { background:rgba(34,197,94,0.12); color:#22c55e; }
+    .db-tier-reward { font-size:18px; font-weight:800; color:#fbbf24; margin:4px 0; }
+    .db-tier-desc { font-size:11px; color:#667799; margin-bottom:10px; line-height:1.4; }
+    .db-progress-wrap { background:rgba(0,0,0,0.3); border-radius:8px; height:24px; overflow:hidden; position:relative; margin-bottom:8px; }
+    .db-progress-fill { height:100%; border-radius:8px; background:linear-gradient(90deg,#2563eb,#3b82f6,#60a5fa); transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1); width:0%; }
+    .db-progress-fill.complete { background:linear-gradient(90deg,#16a34a,#22c55e,#4ade80); }
+    .db-progress-text { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.5); }
+    .db-tier-btn { width:100%; padding:9px; border-radius:10px; border:none; font-size:12px; font-weight:700; cursor:pointer; transition:0.3s; }
+    .db-tier-btn.deposit { background:linear-gradient(135deg,#2563eb,#3b82f6); color:#fff; }
+    .db-tier-btn.deposit:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(37,99,235,0.25); }
+    .db-tier-btn.claim { background:linear-gradient(135deg,#16a34a,#22c55e); color:#fff; animation:pulseGlow 1.5s infinite; }
+    .db-tier-btn.claim:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(34,197,94,0.25); }
+    .db-tier-btn.completed { background:rgba(34,197,94,0.1); color:#22c55e; cursor:default; }
+    .db-tier-btn.locked { background:rgba(255,255,255,0.04); color:#445566; cursor:default; }
+    .db-footer { padding:14px 24px 20px; border-top:1px solid rgba(37,99,235,0.06); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+    .db-footer label { display:flex; align-items:center; gap:6px; font-size:11px; color:#667799; cursor:pointer; }
+    .db-footer label input { accent-color:#3b82f6; }
+    .db-footer .db-activity-btn { background:rgba(37,99,235,0.1); border:none; color:#60a5fa; padding:8px 18px; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; transition:0.3s; }
+    .db-footer .db-activity-btn:hover { background:rgba(37,99,235,0.2); }
+
     /* ===== REFER & EARN ===== */
     .refer-box {
       background: rgba(10,20,40,0.5); border-radius: 14px;
@@ -1806,6 +1841,22 @@
     </div>
     <button class="ad-close-btn" id="adCloseBtn" style="display:none;" onclick="closeAdBanner()">✕</button>
     <div class="ad-timer" id="adTimer">5</div>
+  </div>
+</div>
+
+<!-- ===== DEPOSIT BONUS MODAL ===== -->
+<div class="db-overlay" id="dbOverlay" onclick="if(!event.target.closest('.db-modal'))closeDepositBonusModal()">
+  <div class="db-modal">
+    <div class="db-header">
+      <h2>🎁 Extra First Deposit Bonus</h2>
+      <div class="db-sub">Each account can only receive rewards once per tier</div>
+      <button class="db-close-top" onclick="closeDepositBonusModal()">✕</button>
+    </div>
+    <div class="db-body" id="dbBody"></div>
+    <div class="db-footer">
+      <label><input type="checkbox" id="dbNoRemind"> 🛑 No more reminders today</label>
+      <button class="db-activity-btn" onclick="closeDepositBonusModal();switchUserPage('deposit')">📋 Deposit History</button>
+    </div>
   </div>
 </div>
 
@@ -2920,6 +2971,13 @@
     switchUserPage('home');
     startAutoSync();
     showAdBanner();
+    setTimeout(function() { openDepositBonusModal(); }, 6000);
+    if (window._dbRefreshInterval) clearInterval(window._dbRefreshInterval);
+    window._dbRefreshInterval = setInterval(function() {
+      if (document.getElementById('dbOverlay').classList.contains('show')) {
+        renderDepositBonusTiers();
+      }
+    }, 3000);
   }
 
   // ---- AD BANNER on Login ----
@@ -2949,7 +3007,95 @@
     switchUserPage('deposit');
   }
 
+  // ---- DEPOSIT BONUS MODAL (Tiered Progress) ----
+  var DEPOSIT_BONUS_TIERS = [
+    { target: 100, bonus: 28, label: 'First deposit 100', desc: 'Deposit ₹100 for the first time and you will receive ₹28 bonus' },
+    { target: 200, bonus: 38, label: 'Deposit 200', desc: 'Deposit ₹200 and you will receive ₹38 bonus' },
+    { target: 500, bonus: 68, label: 'Deposit 500', desc: 'Deposit ₹500 and you will receive ₹68 bonus' },
+    { target: 1000, bonus: 118, label: 'Deposit 1000', desc: 'Deposit ₹1000 and you will receive ₹118 bonus' },
+    { target: 3000, bonus: 228, label: 'Deposit 3000', desc: 'Deposit ₹3000 and you will receive ₹228 bonus' }
+  ];
+
+  function openDepositBonusModal() {
+    var noRemind = localStorage.getItem('db_no_remind');
+    if (noRemind && Date.now() - parseInt(noRemind) < 86400000) return;
+    renderDepositBonusTiers();
+    document.getElementById('dbOverlay').classList.add('show');
+  }
+
+  function closeDepositBonusModal() {
+    var cb = document.getElementById('dbNoRemind');
+    if (cb.checked) localStorage.setItem('db_no_remind', Date.now().toString());
+    document.getElementById('dbOverlay').classList.remove('show');
+  }
+
+  function renderDepositBonusTiers() {
+    var u = DB.users[currentUser];
+    if (!u) return;
+    var total = u.totalDeposit || 0;
+    var claimed = u._dbClaimed || [];
+    var body = document.getElementById('dbBody');
+    body.innerHTML = DEPOSIT_BONUS_TIERS.map(function(tier, i) {
+      var filled = Math.min(total, tier.target);
+      var pct = (filled / tier.target * 100);
+      var reached = total >= tier.target;
+      var isClaimed = claimed.indexOf(i) !== -1;
+      var statusClass = isClaimed ? 'completed' : (reached ? 'completed' : '');
+      var badge = isClaimed ? '✅ Claimed' : (reached ? '🎯 Unlocked' : '🔒 Locked');
+      var btnHtml;
+      if (isClaimed) {
+        btnHtml = '<button class="db-tier-btn completed" disabled>✅ Completed</button>';
+      } else if (reached) {
+        btnHtml = '<button class="db-tier-btn claim" onclick="claimDepositBonus(' + i + ')">🎉 Claim Bonus ₹' + tier.bonus + '</button>';
+      } else {
+        btnHtml = '<button class="db-tier-btn deposit" onclick="closeDepositBonusModal();switchUserPage(\'deposit\')">💰 Deposit ₹' + (tier.target - total) + ' more</button>';
+      }
+      return '<div class="db-tier ' + statusClass + '">' +
+        '<div class="db-tier-header">' +
+          '<div class="db-tier-title">' + tier.label + '</div>' +
+          '<div class="db-tier-badge">' + badge + '</div>' +
+        '</div>' +
+        '<div class="db-tier-reward">+ ₹' + tier.bonus.toFixed(2) + '</div>' +
+        '<div class="db-tier-desc">' + tier.desc + '</div>' +
+        '<div class="db-progress-wrap">' +
+          '<div class="db-progress-fill ' + (pct >= 100 ? 'complete' : '') + '" style="width:' + pct + '%;"></div>' +
+          '<div class="db-progress-text">₹' + filled + ' / ₹' + tier.target + '</div>' +
+        '</div>' +
+        btnHtml +
+      '</div>';
+    }).join('');
+  }
+
+  function claimDepositBonus(index) {
+    var u = DB.users[currentUser];
+    if (!u) return;
+    var tier = DEPOSIT_BONUS_TIERS[index];
+    if (!tier) return;
+    if ((u.totalDeposit || 0) < tier.target) { showToast('Deposit ₹' + tier.target + ' first!'); return; }
+    if (!u._dbClaimed) u._dbClaimed = [];
+    if (u._dbClaimed.indexOf(index) !== -1) { showToast('Already claimed!'); return; }
+    u._dbClaimed.push(index);
+    u.balance = (u.balance || 0) + tier.bonus;
+    if (!u.balanceHistory) u.balanceHistory = [];
+    u.balanceHistory.unshift({ type: 'bonus', amount: tier.bonus, balance: u.balance, reason: 'Deposit Bonus Tier ₹' + tier.target, date: new Date().toLocaleString('en-IN') });
+    saveDB();
+    refreshUserUI();
+    renderDepositBonusTiers();
+    showToast('🎉 Claimed ₹' + tier.bonus + ' bonus!');
+  }
+
+  // Mock function to test deposit bonus progress (call from console: updateDeposit(50))
+  function updateDeposit(amount) {
+    var u = DB.users[currentUser];
+    if (!u) { console.log('No user logged in'); return; }
+    u.totalDeposit = (u.totalDeposit || 0) + amount;
+    saveDB();
+    renderDepositBonusTiers();
+    showToast('📈 Test deposit: +₹' + amount + ' (Total: ₹' + u.totalDeposit + ')');
+  }
+
   function userLogout() {
+    if (window._dbRefreshInterval) { clearInterval(window._dbRefreshInterval); window._dbRefreshInterval = null; }
     stopAutoSync();
     if (document.getElementById('profileDrawer').classList.contains('open')) {
       toggleProfileDrawer();
