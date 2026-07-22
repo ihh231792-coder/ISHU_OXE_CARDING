@@ -5162,7 +5162,7 @@
       var net = 0;
       if (won) {
         net = payout;
-        u.balance = (u.balance || 0) + net;
+        u.rewardBalance = (u.rewardBalance || 0) + net;
         anyWon = true;
       } else {
         net = -bet.amt;
@@ -5180,6 +5180,8 @@
     u._wgBets = (u._wgBets || []).filter(function(b) { return !(b.section === sectionId && b.period === period); });
     wgAddHistory(u, sectionId, period, result, anyWon, totalNet);
     saveDB();
+    refreshUserUI();
+    updateWgUI();
     if (sectionId === wgSection) {
       showWgResultModal(result.num, colorMap[result.num], result.big, anyWon, totalNet, false, betResults);
     }
