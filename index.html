@@ -5097,7 +5097,7 @@
     if (!u._wgAuthorized && (u.totalDeposit || 0) < 100) { showToast('🔒 Deposit ₹100 to unlock games!'); return; }
     if (!wgBetType || wgBetVal === null) { showToast('Please select your bet type!'); return; }
     var amt = parseFloat(document.getElementById('wgBetAmount').value);
-    if (!amt || amt <= 0) { showToast('Please select your bet amount!'); return; }
+    if (!amt || amt <= 0) { amt = 10; document.getElementById('wgBetAmount').value = '10'; }
     var totalAvail = (u.balance || 0) + (u.rewardBalance || 0);
     if (totalAvail < amt) { showToast('Insufficient balance!'); return; }
 
