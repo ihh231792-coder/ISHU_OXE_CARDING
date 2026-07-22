@@ -1761,6 +1761,7 @@
           <div class="wg-r-size" id="wgRSize">-</div>
           <div class="wg-r-outcome" id="wgROutcome">-</div>
           <div class="wg-r-amount" id="wgRAmount"></div>
+          <div id="wgRBetDetails" style="width:100%;margin-top:8px;max-height:160px;overflow-y:auto;"></div>
           <div class="wg-r-close">Closing in <span id="wgRClose">3</span>s</div>
         </div>
       </div>
@@ -5120,37 +5121,25 @@
     var result = wgDetResult(sectionId, period);
     var pendingBets = (u._wgBets || []).filter(function(b) { return b.section === sectionId && b.period === period; });
     var colorMap = { 0:'violet',1:'green',2:'red',3:'green',4:'red',5:'violet',6:'red',7:'green',8:'red',9:'green' };
-    var colorMult = { red:'2x', green:'2x', violet:'4.5x' };
     var n = result.num, c = colorMap[n], b = n >= 5 ? 'big' : 'small';
 
     if (pendingBets.length === 0) {
       wgAddHistory(u, sectionId, period, result, false, 0);
       saveDB();
       if (sectionId === wgSection) {
-        showWgResultModal(n, c, b, false, 0, true);
+        showWgResultModal(n, c, b, false, 0, true, []);
       }
       return;
     }
-    var shouldWin = wgDecideMomentum(pendingBets, u, sectionId);
-    var histKey = '_wgHistory_' + sectionId;
-    if (!u[histKey]) u[histKey] = [];
-    var recent5 = u[histKey].slice(-5);
-    var wins5 = recent5.filter(function(r) { return r.win; }).length;
-    if (wins5 >= 3) shouldWin = false;
-    var finalResult;
-    if (shouldWin && pendingBets.length > 0) {
-      finalResult = result;
-    } else {
-      finalResult = wgForceLoss(pendingBets, sectionId, period);
-    }
-    var totalWin = 0;
-    var didWin = false;
+
+    var totalNet = 0;
+    var anyWon = false;
+    var betResults = [];
     pendingBets.forEach(function(bet) {
       var won = false;
       var payout = 0;
-      var commRate = bet.amt <= 10 ? 0.20 : 0.05;
       var contract = bet.amt - Math.round(bet.amt * 0.02 * 100) / 100;
-      var rn = finalResult.num, rc = colorMap[rn], rb = rn >= 5 ? 'big' : 'small';
+      var rn = result.num, rc = colorMap[rn], rb = rn >= 5 ? 'big' : 'small';
       if (bet.type === 'color') {
         if (bet.val === rc) { payout = contract * (bet.val === 'violet' ? 4.5 : 2); won = true; }
         if (!won && bet.val === 'red' && rn === 0) { payout = contract * 1.5; won = true; }
@@ -5160,27 +5149,29 @@
       } else if (bet.type === 'number') {
         if (bet.val === rn) { payout = contract * 9; won = true; }
       }
+      var net = 0;
       if (won) {
-        var commission = bet.amt * commRate;
-        var netPayout = payout - commission;
-        if (netPayout < 0) netPayout = 0;
-        u.rewardBalance = (u.rewardBalance || 0) + netPayout;
-        totalWin += netPayout;
-        didWin = true;
+        net = payout;
+        u.balance = (u.balance || 0) + net;
+        anyWon = true;
+      } else {
+        net = -bet.amt;
       }
+      totalNet += net;
+      betResults.push({ type: bet.type, val: bet.val, amt: bet.amt, won: won, net: net });
       if (!u._wgBetHistory) u._wgBetHistory = [];
       u._wgBetHistory.push({
         period: bet.period, type: bet.type, val: bet.val, amount: bet.amt, section: sectionId,
         resultNum: rn, resultColor: rc, resultBig: rb, win: won,
-        payout: won ? (payout - (won ? bet.amt * commRate : 0)) : 0
+        payout: won ? payout : 0
       });
       if (u._wgBetHistory.length > 500) u._wgBetHistory = u._wgBetHistory.slice(-500);
     });
     u._wgBets = (u._wgBets || []).filter(function(b) { return !(b.section === sectionId && b.period === period); });
-    wgAddHistory(u, sectionId, period, finalResult, didWin, totalWin);
+    wgAddHistory(u, sectionId, period, result, anyWon, totalNet);
     saveDB();
     if (sectionId === wgSection) {
-      showWgResultModal(finalResult.num, colorMap[finalResult.num], finalResult.big, didWin, totalWin, false);
+      showWgResultModal(result.num, colorMap[result.num], result.big, anyWon, totalNet, false, betResults);
     }
   }
 
@@ -5191,60 +5182,13 @@
     if (u[key].length > 100) u[key] = u[key].slice(-100);
   }
 
-  function wgDecideMomentum(pendingBets, u, sectionId) {
-    if (pendingBets.length === 0) return false;
-    var maxBet = 0;
-    pendingBets.forEach(function(b) { if (b.amt > maxBet) maxBet = b.amt; });
-    var totalBets = (u._wgBetHistory || []).length;
-    var justDeposited = u._wgJustDeposited || false;
-    var isFresh = totalBets < 5;
-    if (maxBet <= 50 && totalBets < 10 && justDeposited) u._wgJustDeposited = false;
-
-    var hist = u._wgBetHistory || [];
-    var lastSameAmtLosses = 0;
-    for (var i = hist.length - 1; i >= Math.max(0, hist.length - 10); i--) {
-      var h = hist[i];
-      if (h.section === sectionId && h.amount === maxBet && !h.win) { lastSameAmtLosses++; }
-      else if (h.section === sectionId && h.amount === maxBet && h.win) { break; }
-      else { break; }
-    }
-    if (maxBet >= 50 && lastSameAmtLosses >= 3) return true;
-
-    if (maxBet > 50) return Math.random() < 0.15;
-    if (maxBet > 20) { if (isFresh || justDeposited) return Math.random() < 0.55; return Math.random() < 0.30; }
-    if (isFresh || justDeposited) return Math.random() < 0.92;
-    return Math.random() < 0.68;
-  }
-
-  function wgForceLoss(pendingBets, sectionId, period) {
-    var result = wgDetResult(sectionId, period);
-    var colorMap = { 0:'violet',1:'green',2:'red',3:'green',4:'red',5:'violet',6:'red',7:'green',8:'red',9:'green' };
-    var n = result.num, c = colorMap[n], b = n >= 5 ? 'big' : 'small';
-    var wouldWin = pendingBets.some(function(bet) {
-      if (bet.type === 'color' && bet.val === c) return true;
-      if (bet.type === 'size' && bet.val === b) return true;
-      if (bet.type === 'number' && bet.val === n) return true;
-    });
-    if (!wouldWin) return result;
-    for (var attempt = 0; attempt < 20; attempt++) {
-      var seed2 = (period + attempt) * 2654435761 + sectionId.charCodeAt(0);
-      var r2 = wgSeeded(Math.abs(seed2) + 1);
-      var nn = Math.floor(r2 * 10);
-      var cc = colorMap[nn], bb = nn >= 5 ? 'big' : 'small';
-      var loses = !pendingBets.some(function(bet) {
-        if (bet.type === 'color' && bet.val === cc) return true;
-        if (bet.type === 'size' && bet.val === bb) return true;
-        if (bet.type === 'number' && bet.val === nn) return true;
-      });
-      if (loses) return { num: nn, color: cc, big: bb };
-    }
-    return { num: n, color: c, big: b };
-  }
+  function wgDecideMomentum(pendingBets, u, sectionId) { return true; }
+  function wgForceLoss(pendingBets, sectionId, period) { return wgDetResult(sectionId, period); }
 // ---- Result Modal (with Violet Split display) ----
   var _wgResultTimer = null;
   var _wgResultSec = 0;
   var _wgResultCloseAt = 0;
-  function showWgResultModal(num, color, big, didWin, amt, noBet) {
+  function showWgResultModal(num, color, big, didWin, amt, noBet, betResults) {
     var modal = document.getElementById('wgResultModal');
     if (!modal) return;
     if (_wgResultTimer) { clearInterval(_wgResultTimer); _wgResultTimer = null; }
@@ -5264,17 +5208,47 @@
 
     var outcome = document.getElementById('wgROutcome');
     var amtEl = document.getElementById('wgRAmount');
+    var detailsEl = document.getElementById('wgRBetDetails');
+    detailsEl.innerHTML = '';
+
     if (noBet) {
       var colorMult = { red: '2x', green: '2x', violet: '4.5x' };
       outcome.textContent = colorLabel + ' ' + (colorMult[color] || '2x') + ' Win';
       outcome.className = 'wg-r-outcome';
       outcome.style.color = colorHex[color];
       amtEl.textContent = 'You did not place a bet this round';
-    } else if (didWin) {
-      outcome.textContent = 'YOU WIN!';
-      outcome.className = 'wg-r-outcome win';
+    } else if (betResults && betResults.length > 0) {
+      var net = betResults.reduce(function(s, b) { return s + b.net; }, 0);
+      if (net >= 0) {
+        outcome.textContent = 'YOU WIN!';
+        outcome.className = 'wg-r-outcome win';
+        amtEl.textContent = '+₹' + net.toFixed(2);
+      } else {
+        outcome.textContent = 'YOU LOSE';
+        outcome.className = 'wg-r-outcome lose';
+        amtEl.textContent = '-₹' + Math.abs(net).toFixed(2);
+      }
       outcome.style.color = '';
-      amtEl.textContent = '₹' + amt.toFixed(2) + ' added to Withdraw Wallet';
+
+      var html = '';
+      betResults.forEach(function(br) {
+        var lbl = br.type === 'color' ? br.val.charAt(0).toUpperCase() + br.val.slice(1) :
+                  br.type === 'size' ? br.val.charAt(0).toUpperCase() + br.val.slice(1) :
+                  'Number ' + br.val;
+        var col = br.won ? '#22c55e' : '#ef4444';
+        var sign = br.won ? '+' : '-';
+        var displayAmt = br.won ? Math.abs(br.net) : br.amt;
+        html += '<div style="display:flex;justify-content:space-between;padding:4px 8px;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.08);">';
+        html += '<span style="color:#aab;">' + br.type.charAt(0).toUpperCase() + br.type.slice(1) + ': ' + lbl + ' ₹' + br.amt + '</span>';
+        html += '<span style="color:' + col + ';font-weight:600;">' + sign + '₹' + displayAmt.toFixed(2) + '</span>';
+        html += '</div>';
+      });
+      detailsEl.innerHTML = html;
+      if (betResults.length > 1) {
+        var netCol = net >= 0 ? '#22c55e' : '#ef4444';
+        detailsEl.innerHTML += '<div style="display:flex;justify-content:space-between;padding:6px 8px;font-size:13px;font-weight:700;border-top:2px solid rgba(255,255,255,0.15);margin-top:2px;">' +
+          '<span style="color:#dde;">Total</span><span style="color:' + netCol + ';">' + (net >= 0 ? '+' : '') + '₹' + net.toFixed(2) + '</span></div>';
+      }
     } else {
       outcome.textContent = 'YOU LOSE';
       outcome.className = 'wg-r-outcome lose';
