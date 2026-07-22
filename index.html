@@ -1672,6 +1672,7 @@
         <div class="wg-balance-row">
           <span>💰 ₹<span id="wgBalance">0.00</span></span>
           <span>🎁 ₹<span id="wgReward">0.00</span></span>
+          <span style="color:#facc15;">Total ₹<span id="wgTotal">0.00</span></span>
           <span>🔄 ₹<span id="wgWagered">0</span>/₹<span id="wgWagerTarget">0</span></span>
         </div>
         <!-- Timer -->
@@ -5097,9 +5098,18 @@
     if (!wgBetType || wgBetVal === null) { showToast('Select a bet type first!'); return; }
     var amt = parseFloat(document.getElementById('wgBetAmount').value);
     if (!amt || amt <= 0) { showToast('Enter valid bet amount!'); return; }
-    if ((u.balance || 0) < amt) { showToast('Insufficient balance!'); return; }
+    var totalAvail = (u.balance || 0) + (u.rewardBalance || 0);
+    if (totalAvail < amt) { showToast('Insufficient balance!'); return; }
 
-    u.balance -= amt;
+    var remaining = amt;
+    var fromMain = Math.min(u.balance || 0, remaining);
+    u.balance = (u.balance || 0) - fromMain;
+    remaining -= fromMain;
+    if (remaining > 0) {
+      var fromReward = Math.min(u.rewardBalance || 0, remaining);
+      u.rewardBalance = (u.rewardBalance || 0) - fromReward;
+      remaining -= fromReward;
+    }
     u.wageredAmount = (u.wageredAmount || 0) + amt;
     if (!u._wgBets) u._wgBets = [];
     var t = wgSectionTime(wgSection);
@@ -5345,12 +5355,14 @@
     if (!u) return;
     var bal = document.getElementById('wgBalance');
     var rew = document.getElementById('wgReward');
+    var tot = document.getElementById('wgTotal');
     var wag = document.getElementById('wgWagered');
     var wgt = document.getElementById('wgWagerTarget');
     var wag2 = document.getElementById('wgWagered2');
     var wgt2 = document.getElementById('wgWagerTarget2');
     if (bal) bal.textContent = (u.balance || 0).toFixed(2);
     if (rew) rew.textContent = (u.rewardBalance || 0).toFixed(2);
+    if (tot) tot.textContent = ((u.balance || 0) + (u.rewardBalance || 0)).toFixed(2);
     var wgd = (u.wageredAmount || 0).toFixed(2);
     var tgt = (u.totalDeposit || 0).toFixed(2);
     if (wag) wag.textContent = wgd;
