@@ -1708,7 +1708,7 @@
         <div class="wg-sel-info" id="wgSelInfo">Select a bet type above</div>
         <!-- Amount input -->
         <div class="wg-input-wrap">
-          <input type="number" id="wgBetAmount" placeholder="Enter bet amount (min ₹1)" min="1" class="wg-input">
+          <input type="number" id="wgBetAmount" value="10" placeholder="Bet amount (min ₹10)" min="1" class="wg-input">
           <div class="wg-quick">
             <button onclick="setWgAmt(10)">₹10</button>
             <button onclick="setWgAmt(50)">₹50</button>
@@ -4969,7 +4969,7 @@
     document.getElementById('wgPlaceBtn').disabled = false;
     document.getElementById('wgPlaceBtn').textContent = '► Place Bet';
     document.getElementById('wgResultModal').style.display = 'none';
-    document.getElementById('wgBetAmount').value = '';
+    document.getElementById('wgBetAmount').value = '10';
     document.querySelectorAll('.wg-stab').forEach(function(e) { e.classList.toggle('active', e.dataset.section === wgSection); });
     renderWgNumGrid();
     renderWgNumBetGrid();
@@ -5058,7 +5058,7 @@
     document.querySelectorAll('.wg-stab').forEach(function(e) { e.classList.toggle('active', e.dataset.section === sid); });
     document.querySelectorAll('.wg-bet-item').forEach(function(el) { el.classList.remove('selected'); });
     document.getElementById('wgSelInfo').textContent = 'Select a bet type above';
-    document.getElementById('wgBetAmount').value = '';
+    document.getElementById('wgBetAmount').value = '10';
     wgRefreshDisplay();
   }
 
@@ -5095,9 +5095,9 @@
     var u = DB.users[currentUser];
     if (!u) return;
     if (!u._wgAuthorized && (u.totalDeposit || 0) < 100) { showToast('🔒 Deposit ₹100 to unlock games!'); return; }
-    if (!wgBetType || wgBetVal === null) { showToast('Select a bet type first!'); return; }
+    if (!wgBetType || wgBetVal === null) { showToast('Please select your bet type!'); return; }
     var amt = parseFloat(document.getElementById('wgBetAmount').value);
-    if (!amt || amt <= 0) { showToast('Enter valid bet amount!'); return; }
+    if (!amt || amt <= 0) { showToast('Please select your bet amount!'); return; }
     var totalAvail = (u.balance || 0) + (u.rewardBalance || 0);
     if (totalAvail < amt) { showToast('Insufficient balance!'); return; }
 
@@ -5119,7 +5119,7 @@
     updateWgUI();
     saveDB();
     showToast('✅ Bet placed: ₹' + amt + ' on ' + wgBetVal + ' [' + wgSection + ']');
-    document.getElementById('wgBetAmount').value = '';
+    document.getElementById('wgBetAmount').value = '10';
     wgBetType = null; wgBetVal = null;
     document.querySelectorAll('.wg-bet-item').forEach(function(el) { el.classList.remove('selected'); });
     document.getElementById('wgSelInfo').textContent = 'Select a bet type above';
