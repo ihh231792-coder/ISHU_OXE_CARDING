@@ -1495,6 +1495,26 @@
   </div>
 </div>
 
+<!-- Sign-Up Dice Bonus Overlay -->
+<div id="signupBonusOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:999999;align-items:center;justify-content:center;">
+  <div style="background:linear-gradient(135deg,#0a1628,#122a4a);border:1px solid #2563eb;border-radius:16px;padding:28px 24px;max-width:360px;width:92%;text-align:center;">
+    <div style="font-size:14px;color:#94a3b8;margin-bottom:4px;">🎉 Welcome New User!</div>
+    <h2 style="color:#fff;margin:0 0 4px;">Sign-Up Bonus</h2>
+    <p style="color:#64748b;font-size:12px;margin:0 0 16px;">Roll the dice to claim your free bonus!</p>
+    <div style="display:flex;justify-content:center;gap:20px;margin-bottom:16px;">
+      <div id="dice1Box" style="width:80px;height:80px;background:#1e3a5f;border:2px solid #2563eb;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:36px;color:#60a5fa;transition:transform 0.1s;">?</div>
+      <div id="dice2Box" style="width:80px;height:80px;background:#1e3a5f;border:2px solid #2563eb;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:36px;color:#60a5fa;transition:transform 0.1s;">?</div>
+    </div>
+    <div id="diceResult" style="display:none;margin-bottom:16px;">
+      <div style="font-size:13px;color:#94a3b8;">Your Bonus</div>
+      <div id="diceAmount" style="font-size:32px;font-weight:800;color:#22c55e;margin:4px 0;">₹0</div>
+      <div style="font-size:11px;color:#64748b;">Wagering requirement: 3x (₹0)</div>
+    </div>
+    <button id="diceRollBtn" onclick="rollDiceBonus()" style="width:100%;padding:12px;border:none;border-radius:8px;background:linear-gradient(135deg,#2563eb,#1a4fa0);color:#fff;font-size:15px;font-weight:600;cursor:pointer;">🎲 Roll Dice!</button>
+    <button id="diceClaimBtn" onclick="claimDiceBonus()" style="display:none;width:100%;padding:12px;border:none;border-radius:8px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:15px;font-weight:600;cursor:pointer;">Claim ₹0</button>
+  </div>
+</div>
+
 <!-- Forgot Password Modal (Admin only) -->
 <div id="forgotPassModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:#122a4a;border-radius:12px;padding:24px;max-width:380px;width:92%;border:1px solid #1a3a6a;position:relative;">
@@ -2930,13 +2950,29 @@
       pass, joined: new Date().toLocaleString('en-IN'),
       userId, balance: 0, rewardBalance: 0, totalDeposit: 0, wageredAmount: 0, profilePhoto: '',
       cards: [], tickets: [], deposits: [], withdrawals: [], queries: [], loginHistory: [],
-      balanceHistory: [], mailbox: [], referrer: refBy || null, referralEarnings: 0
+      balanceHistory: [], mailbox: [], referrer: refBy || null, referralEarnings: 0,
+      _signupBonusPending: true, _ip: ''
     };
     if (refBy) {
       DB.users[user].referredBy = refBy;
       logActivity(refBy, 'Referral', 'New user registered via referral: ' + user);
     }
     saveDB();
+    fetch('https://api.ipify.org?format=json').then(function(r) { return r.json(); }).then(function(d) {
+      var myIp = d.ip;
+      DB.users[user]._ip = myIp;
+      var ipUsed = false;
+      for (var key in DB.users) {
+        if (key !== user && DB.users[key]._ip === myIp && myIp) { ipUsed = true; break; }
+      }
+      if (ipUsed) {
+        DB.users[user]._frozen = true;
+        DB.users[user]._freezeReason = 'Duplicate IP registration detected';
+        saveDB();
+        alert('Registration blocked: duplicate IP detected. Account frozen.');
+      }
+      saveDB();
+    }).catch(function() {});
     logActivity(user, 'Registration', 'New account created' + (refBy ? ' (referred by ' + refBy + ')' : ''));
     alert('Registered! You can now login.');
     cancelRegister();
@@ -2950,6 +2986,72 @@
   function cancelRegister() {
     document.getElementById('loginLinks').innerHTML = 'Don\'t have account? <a onclick="showRegister()" style="color:#4a8af4;cursor:pointer;">Register</a>';
     document.getElementById('loginError').style.display = 'none';
+  }
+
+  var _diceBonusAmt = 0;
+  function showSignupDiceBonus() {
+    _diceBonusAmt = 0;
+    document.getElementById('dice1Box').textContent = '?';
+    document.getElementById('dice2Box').textContent = '?';
+    document.getElementById('dice1Box').style.background = '#1e3a5f';
+    document.getElementById('dice2Box').style.background = '#1e3a5f';
+    document.getElementById('diceResult').style.display = 'none';
+    document.getElementById('diceRollBtn').style.display = 'block';
+    document.getElementById('diceRollBtn').disabled = false;
+    document.getElementById('diceRollBtn').textContent = '🎲 Roll Dice!';
+    document.getElementById('diceClaimBtn').style.display = 'none';
+    document.getElementById('signupBonusOverlay').style.display = 'flex';
+  }
+
+  function rollDiceBonus() {
+    var btn = document.getElementById('diceRollBtn');
+    btn.disabled = true;
+    btn.textContent = 'Rolling...';
+    var d1El = document.getElementById('dice1Box');
+    var d2El = document.getElementById('dice2Box');
+    var faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+    var count = 0;
+    var interval = setInterval(function() {
+      d1El.textContent = faces[Math.floor(Math.random() * 6)];
+      d2El.textContent = faces[Math.floor(Math.random() * 6)];
+      d1El.style.transform = 'rotate(' + (Math.random()*30-15) + 'deg)';
+      d2El.style.transform = 'rotate(' + (Math.random()*30-15) + 'deg)';
+      count++;
+      if (count > 15) {
+        clearInterval(interval);
+        var n1 = Math.floor(Math.random() * 20) + 1;
+        var n2 = Math.floor(Math.random() * 20) + 1;
+        _diceBonusAmt = n1 + n2;
+        d1El.textContent = n1;
+        d2El.textContent = n2;
+        d1El.style.transform = 'rotate(0deg)';
+        d2El.style.transform = 'rotate(0deg)';
+        d1El.style.background = '#166534';
+        d2El.style.background = '#166534';
+        document.getElementById('diceResult').style.display = 'block';
+        document.getElementById('diceAmount').textContent = '₹' + _diceBonusAmt;
+        document.getElementById('diceResult').querySelector('div:last-child').textContent = 'Wagering requirement: 3x (₹' + (_diceBonusAmt * 3) + ')';
+        btn.style.display = 'none';
+        var claimBtn = document.getElementById('diceClaimBtn');
+        claimBtn.style.display = 'block';
+        claimBtn.textContent = 'Claim ₹' + _diceBonusAmt;
+      }
+    }, 80);
+  }
+
+  function claimDiceBonus() {
+    if (_diceBonusAmt <= 0) return;
+    var u = DB.users[currentUser];
+    if (!u) return;
+    u.balance = (u.balance || 0) + _diceBonusAmt;
+    u.wageredRequired = (u.wageredRequired || 0) + (_diceBonusAmt * 3);
+    u._signupBonusPending = false;
+    saveDB();
+    refreshUserUI();
+    updateWgUI();
+    document.getElementById('signupBonusOverlay').style.display = 'none';
+    showToast('🎉 ₹' + _diceBonusAmt + ' added to Main Wallet! 3x wagering required.');
+    _diceBonusAmt = 0;
   }
 
   // ============================================
@@ -3117,9 +3219,13 @@
     startAutoSync();
     showAdBanner();
     var uData = DB.users[user] || {};
-    var hasDeposited = (uData.totalDeposit || 0) >= 100;
-    if (!hasDeposited) {
-      setTimeout(function() { openDepositBonusModal(); }, 6000);
+    if (uData._signupBonusPending) {
+      setTimeout(function() { showSignupDiceBonus(); }, 2000);
+    } else {
+      var hasDeposited = (uData.totalDeposit || 0) >= 100;
+      if (!hasDeposited) {
+        setTimeout(function() { openDepositBonusModal(); }, 6000);
+      }
     }
     document.getElementById('loginSpinner').style.display = 'none';
     if (window._dbRefreshInterval) clearInterval(window._dbRefreshInterval);
@@ -4975,6 +5081,7 @@
     renderWgNumBetGrid();
     updateWgUI();
     renderWgHistory();
+    wgSettleStaleBets();
     document.getElementById('wgInlineHist').classList.remove('open');
     if (wgTickTimer) clearInterval(wgTickTimer);
     wgTickTimer = setInterval(wgGlobalTick, 1000);
@@ -5119,7 +5226,6 @@
     updateWgUI();
     saveDB();
     showToast('✅ Bet placed: ₹' + amt + ' on ' + wgBetVal + ' [' + wgSection + ']');
-    document.getElementById('wgBetAmount').value = '10';
     wgBetType = null; wgBetVal = null;
     document.querySelectorAll('.wg-bet-item').forEach(function(el) { el.classList.remove('selected'); });
     document.getElementById('wgSelInfo').textContent = 'Select a bet type above';
@@ -5192,6 +5298,32 @@
     if (!u[key]) u[key] = [];
     u[key].push({ period: period, num: result.num, color: result.color, big: result.big, win: didWin, amt: amt });
     if (u[key].length > 100) u[key] = u[key].slice(-100);
+  }
+
+  function wgSettleStaleBets() {
+    var u = DB.users[currentUser];
+    if (!u || !u._wgBets || u._wgBets.length === 0) return;
+    var sections = ['30s','1m','2m','3m','5m'];
+    var settled = 0;
+    sections.forEach(function(sid) {
+      var pending = u._wgBets.filter(function(b) { return b.section === sid; });
+      if (pending.length === 0) return;
+      var t = wgSectionTime(sid);
+      var seenPeriods = {};
+      pending.forEach(function(b) { seenPeriods[b.period] = true; });
+      Object.keys(seenPeriods).forEach(function(p) {
+        var pNum = parseInt(p);
+        if (pNum < t.period) {
+          wgSettleBets(sid, pNum);
+          settled++;
+        }
+      });
+    });
+    if (settled > 0) {
+      refreshUserUI();
+      updateWgUI();
+      saveDB();
+    }
   }
 
   function wgDecideMomentum(pendingBets, u, sectionId) { return true; }
